@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Game;
+import com.mygdx.loader.CustomAssetManager;
 import com.mygdx.views.*;
 
 public class BomberMan extends Game {
@@ -15,6 +16,8 @@ public class BomberMan extends Game {
 	public final static int GAME = 1;
 	public final static int LEVELS = 2;
 	public final static int ENDGAME = 3;
+
+	public CustomAssetManager assMan = new CustomAssetManager();
 
 	@Override
 	public void create() {
@@ -45,6 +48,6 @@ public class BomberMan extends Game {
 
 	@Override
 	public void dispose(){
-
+		assMan.manager.dispose();
 	}
 }
