@@ -6,7 +6,11 @@ import com.mygdx.game.BomberMan;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		new LwjglApplication(new BomberMan(), config);
+		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
+		cfg.title = "BomberMan";
+		cfg.useGL30 = false;
+		cfg.height = 600;
+		cfg.width = 800;
+		new LwjglApplication(new BomberMan(), cfg);
 	}
 }
