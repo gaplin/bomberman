@@ -2,12 +2,14 @@ package com.mygdx.views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
 public class CustomTextButton extends TextButton {
     private ButtonsCount parent;
     private final int number;
+    Sound click;
     private int posx = Gdx.input.getX(), posy = Gdx.input.getY();
     CustomTextButton(String text, Skin skin, int number, ButtonsCount parent){
         super(text, skin);
@@ -21,12 +23,30 @@ public class CustomTextButton extends TextButton {
         this.parent = parent;
     }
 
+    CustomTextButton(String text, Skin skin, String styleName, int number, ButtonsCount parent, Sound click){
+        this(text, skin, styleName, number, parent);
+        this.click = click;
+    }
+
+    CustomTextButton(String text, Skin skin, int number, ButtonsCount parent, Sound click){
+        this(text, skin, number, parent);
+        this.click = click;
+    }
+
+
+    void setClick(Sound click){
+        this.click = click;
+    }
+
+
     @Override
     public boolean isOver(){
         if(parent == null)
             return false;
         if(super.isOver() &&
                 Gdx.input.getX() != posx && Gdx.input.getY() != posy) {
+            if(parent.pointer != number && click != null)
+                click.play();
             parent.pointer = number;
             posx = Gdx.input.getX();
             posy = Gdx.input.getY();
@@ -44,8 +64,9 @@ public class CustomTextButton extends TextButton {
             return true;
         }
         isPressed = isOver() && Gdx.input.isKeyJustPressed(Input.Keys.ENTER);
-        if(isPressed)
+        if(isPressed) {
             toggle();
+        }
         if(!isPressed && parent.pressed == number)
             parent.pressed = 0;
         return isPressed;

@@ -3,6 +3,7 @@ package com.mygdx.views;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -22,10 +23,14 @@ public class MenuScreen extends ButtonsCount implements Screen {
     private Skin skin;
     private TextureAtlas atlas;
     private TextureAtlas.AtlasRegion background;
+    private Sound buttonSound1;
+    private Sound buttonSound2;
 
     public MenuScreen(BomberMan parent){
         super();
         this.parent = parent;
+        this.buttonSound1 = parent.assMan.manager.get("sounds/buttonSound.wav");
+        this.buttonSound2 = parent.assMan.manager.get("sounds/bombMenu.mp3");
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         parent.assMan.queueAddSkin();
         parent.assMan.manager.finishLoading();
@@ -43,8 +48,8 @@ public class MenuScreen extends ButtonsCount implements Screen {
         table.setBackground(new TiledDrawable(background));
         stage.addActor(table);
 
-        CustomTextButton play = new CustomTextButton("PLAY", skin, "large", 1, this);
-        CustomTextButton exit = new CustomTextButton("EXIT", skin, "large", 2, this);
+        CustomTextButton play = new CustomTextButton("PLAY", skin, "large", 1, this, buttonSound1);
+        CustomTextButton exit = new CustomTextButton("EXIT", skin, "large", 2, this, buttonSound1);
         nButtons = 2;
         //play.setTouchable(Touchable.disabled);
         //exit.setTouchable(Touchable.disabled);
@@ -56,6 +61,7 @@ public class MenuScreen extends ButtonsCount implements Screen {
         play.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                buttonSound2.play(0.01f);
                 parent.changeScreen(BomberMan.LEVELS);
             }
         });
@@ -74,10 +80,14 @@ public class MenuScreen extends ButtonsCount implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN) && pressed == 0)
+        if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN) && pressed == 0) {
             pointer = pointer % nButtons + 1;
-        if(Gdx.input.isKeyJustPressed(Input.Keys.UP) && pressed == 0)
+            buttonSound1.play(0.03f);
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.UP) && pressed == 0) {
             pointer = pointer % nButtons + 1;
+            buttonSound1.play(0.03f);
+        }
 
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1/30f));
         stage.draw();
@@ -107,5 +117,7 @@ public class MenuScreen extends ButtonsCount implements Screen {
     public void dispose() {
         stage.dispose();
         skin.dispose();
+        buttonSound1.dispose();
+        buttonSound2.dispose();
     }
 }

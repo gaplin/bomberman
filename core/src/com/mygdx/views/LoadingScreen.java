@@ -20,6 +20,7 @@ public class LoadingScreen implements Screen {
     private final int Bombs = 16;
 
     public final int IMAGE = 1;
+    public final int SOUNDS = 2;
 
     public float countDown = 2f;
 
@@ -63,7 +64,10 @@ public class LoadingScreen implements Screen {
                 case IMAGE:
                     System.out.println("Loaded Images");
                     break;
-                case 2:
+                case SOUNDS:
+                    System.out.println("Loaded Sounds");
+                    break;
+                case 3:
                     System.out.println("Finished");
                     break;
             }
@@ -82,6 +86,7 @@ public class LoadingScreen implements Screen {
 
     private void loadAssets(){
         parent.assMan.queueAddLoadingImages();
+        parent.assMan.queueAddSounds();
         parent.assMan.manager.finishLoading();
 
         atlas = parent.assMan.manager.get("loading/loading.atlas");

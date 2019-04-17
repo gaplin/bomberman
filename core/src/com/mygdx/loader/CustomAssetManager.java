@@ -2,6 +2,7 @@ package com.mygdx.loader;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.SkinLoader;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
@@ -12,6 +13,10 @@ public class CustomAssetManager {
 
     public final String loadingImages = "loading/loading.atlas";
 
+    public final String buttonSound = "sounds/buttonSound.wav";
+
+    public final String bombMenu = "sounds/bombMenu.mp3";
+
     public void queueAddSkin(){
         SkinLoader.SkinParameter params = new SkinLoader.SkinParameter("flat/flat-earth-ui.atlas");
         manager.load(skin, Skin.class, params);
@@ -20,4 +25,11 @@ public class CustomAssetManager {
     public void queueAddLoadingImages() {
         manager.load(loadingImages, TextureAtlas.class);
     }
+
+    public void queueAddSounds(){
+        manager.load(buttonSound, Sound.class);
+        manager.load(bombMenu, Sound.class);
+    }
+
+
 }
