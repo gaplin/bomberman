@@ -65,10 +65,10 @@ public class CustomTextButton extends TextButton {
         }
         isPressed = isOver() && Gdx.input.isKeyJustPressed(Input.Keys.ENTER);
         if(isPressed) {
-            toggle();
+            setChecked(true);
         }
         if(!isPressed && parent.pressed == number)
-            parent.pressed = 0;
+            parent.pressed = -1;
         return isPressed;
     }
 }

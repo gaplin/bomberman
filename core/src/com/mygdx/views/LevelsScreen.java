@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -22,8 +23,8 @@ public class LevelsScreen extends ButtonsCount implements Screen {
     private Skin skin;
     private TextureAtlas atlas;
     private TextureAtlas.AtlasRegion background;
-    Sound buttonSound1;
-    Sound buttonSound2;
+    private Sound buttonSound1;
+    private Sound buttonSound2;
 
     public LevelsScreen(BomberMan parent){
         super();
@@ -37,7 +38,7 @@ public class LevelsScreen extends ButtonsCount implements Screen {
     }
     @Override
     public void show() {
-        pointer = 1;
+        super.pointer = 0;
         stage.clear();
         Gdx.input.setInputProcessor(stage);
         table = new Table();
@@ -45,32 +46,44 @@ public class LevelsScreen extends ButtonsCount implements Screen {
         table.setBackground(new TiledDrawable(background));
         stage.addActor(table);
 
-        CustomTextButton level_1 = new CustomTextButton("LEVEL 1", skin, "large", 1, this, buttonSound1);
+        CustomTextButton level_1 = new CustomTextButton("LEVEL 1", skin, "large", 0, this, buttonSound1);
+        CustomTextButton test = new CustomTextButton("TEST", skin, "large", 1, this, buttonSound1);
         CustomTextButton back = new CustomTextButton("BACK", skin, "large", 2, this, buttonSound1);
-        //level_1.setTouchable(Touchable.disabled);
-        //back.setTouchable(Touchable.disabled);
-        nButtons = 2;
+        level_1.setTouchable(Touchable.disabled);
+        back.setTouchable(Touchable.disabled);
+        test.setTouchable(Touchable.disabled);
+        nButtons = 3;
 
         table.add(level_1).fillX().uniformX().width(300);
         table.row().pad(50, 0, 50, 0);
-
+        table.add(test).fillX().uniformX();
+        table.row();
         table.add(back).fillX().uniformX();
 
         level_1.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonSound2.play(0.01f);
+                buttonSound2.play(0.03f);
                 parent.changeScreen(BomberMan.GAME);
+            }
+        });
+
+        test.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                buttonSound2.play(0.03f);
+                parent.changeScreen(BomberMan.TEST);
             }
         });
 
         back.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonSound2.play(0.01f);
+                buttonSound2.play(0.03f);
                 parent.changeScreen(BomberMan.MENU);
             }
         });
+
     }
 
     @Override
@@ -78,12 +91,12 @@ public class LevelsScreen extends ButtonsCount implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN) && pressed == 0) {
-            pointer = pointer % nButtons + 1;
+        if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN) && pressed == -1) {
+            pointer = (pointer + 1) % nButtons;
             buttonSound1.play(0.03f);
         }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.UP) && pressed == 0) {
-            pointer = pointer % nButtons + 1;
+        if(Gdx.input.isKeyJustPressed(Input.Keys.UP) && pressed == -1) {
+            pointer = ((pointer - 1) % nButtons + nButtons) % nButtons;
             buttonSound1.play(0.03f);
         }
 

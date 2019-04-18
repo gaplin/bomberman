@@ -1,0 +1,63 @@
+package com.mygdx.factory;
+
+import com.badlogic.gdx.physics.box2d.*;
+
+public class BodyFactory {
+
+    private static BodyFactory thisInstance = null;
+
+    private World world;
+
+    private BodyFactory(World world){
+        this.world = world;
+    }
+
+    public static BodyFactory getInstance(World world){
+        if(thisInstance == null){
+            thisInstance = new BodyFactory(world);
+        }
+        return thisInstance;
+    }
+
+    static public FixtureDef makeFixture(Shape shape){
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = shape;
+        fixtureDef.density = 0.5f;
+        fixtureDef.friction = 0.3f;
+        fixtureDef.restitution = 0.1f;
+        return fixtureDef;
+    }
+
+    public Body makeCirclePolyBody(float posx, float posy, float radius, BodyDef.BodyType bodyType, boolean fixedRotation){
+        BodyDef boxBodyDef = new BodyDef();
+        boxBodyDef.type = bodyType;
+        boxBodyDef.position.x = posx;
+        boxBodyDef.position.y = posy;
+        boxBodyDef.fixedRotation = fixedRotation;
+
+        Body boxBody = world.createBody(boxBodyDef);
+        CircleShape circleShape = new CircleShape();
+        circleShape.setRadius(radius /2);
+        boxBody.createFixture(makeFixture(circleShape));
+        circleShape.dispose();
+        return boxBody;
+    }
+
+
+    public Body makeBoxPolyBody(float posx, float posy, float width, float height, BodyDef.BodyType bodyType, boolean fixedRotation){
+        BodyDef boxBodyDef = new BodyDef();
+        boxBodyDef.type = bodyType;
+        boxBodyDef.position.x = posx;
+        boxBodyDef.position.y = posy;
+        boxBodyDef.fixedRotation = fixedRotation;
+
+        Body boxBody = world.createBody(boxBodyDef);
+        PolygonShape poly = new PolygonShape();
+        poly.setAsBox(width / 2,height / 2);
+        boxBody.createFixture(makeFixture(poly));
+        poly.dispose();
+
+        return boxBody;
+    }
+
+}

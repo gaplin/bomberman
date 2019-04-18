@@ -11,11 +11,13 @@ public class BomberMan extends Game {
 	private LevelsScreen levelsScreen;
 	private LoadingScreen loadingScreen;
 	private MenuScreen menuScreen;
+	private TestScreen testScreen;
 
 	public final static int MENU = 0;
 	public final static int GAME = 1;
 	public final static int LEVELS = 2;
 	public final static int ENDGAME = 3;
+	public final static int TEST = 4;
 
 	public CustomAssetManager assMan = new CustomAssetManager();
 
@@ -42,6 +44,10 @@ public class BomberMan extends Game {
 			case ENDGAME:
 				if(endScreen == null)endScreen = new EndScreen(this);
 				this.setScreen(endScreen);
+				break;
+			case TEST:
+				if(testScreen == null)testScreen = new TestScreen(this);
+				this.setScreen(testScreen);
 				break;
 		}
 	}

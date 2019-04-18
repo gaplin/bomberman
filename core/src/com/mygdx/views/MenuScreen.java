@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -40,7 +41,7 @@ public class MenuScreen extends ButtonsCount implements Screen {
     }
     @Override
     public void show() {
-        pointer = 1;
+        super.pointer = 0;
         stage.clear();
         Gdx.input.setInputProcessor(stage);
         table = new Table();
@@ -48,11 +49,11 @@ public class MenuScreen extends ButtonsCount implements Screen {
         table.setBackground(new TiledDrawable(background));
         stage.addActor(table);
 
-        CustomTextButton play = new CustomTextButton("PLAY", skin, "large", 1, this, buttonSound1);
-        CustomTextButton exit = new CustomTextButton("EXIT", skin, "large", 2, this, buttonSound1);
+        CustomTextButton play = new CustomTextButton("PLAY", skin, "large", 0, this, buttonSound1);
+        CustomTextButton exit = new CustomTextButton("EXIT", skin, "large", 1, this, buttonSound1);
         nButtons = 2;
-        //play.setTouchable(Touchable.disabled);
-        //exit.setTouchable(Touchable.disabled);
+        play.setTouchable(Touchable.disabled);
+        exit.setTouchable(Touchable.disabled);
 
         table.add(play).fillX().uniformX().width(300);
         table.row().pad(50, 0, 50, 0);
@@ -61,7 +62,7 @@ public class MenuScreen extends ButtonsCount implements Screen {
         play.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonSound2.play(0.01f);
+                buttonSound2.play(0.03f);
                 parent.changeScreen(BomberMan.LEVELS);
             }
         });
@@ -80,12 +81,12 @@ public class MenuScreen extends ButtonsCount implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN) && pressed == 0) {
-            pointer = pointer % nButtons + 1;
+        if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN) && pressed == -1) {
+            pointer = (pointer + 1) % nButtons;
             buttonSound1.play(0.03f);
         }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.UP) && pressed == 0) {
-            pointer = pointer % nButtons + 1;
+        if(Gdx.input.isKeyJustPressed(Input.Keys.UP) && pressed == -1) {
+            pointer = ((pointer - 1) % nButtons + nButtons) % nButtons;
             buttonSound1.play(0.03f);
         }
 
