@@ -87,6 +87,7 @@ public class LoadingScreen implements Screen {
     private void loadAssets(){
         parent.assMan.queueAddLoadingImages();
         parent.assMan.queueAddSounds();
+        parent.assMan.queueAddGameImages();
         parent.assMan.manager.finishLoading();
 
         atlas = parent.assMan.manager.get("loading/loading.atlas");

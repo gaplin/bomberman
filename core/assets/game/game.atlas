@@ -1,0 +1,183 @@
+
+game.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+player/back/Bman_b
+  rotate: false
+  xy: 1, 1
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 0
+player/back/Bman_b
+  rotate: false
+  xy: 1, 1
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 4
+player/back/Bman_b
+  rotate: false
+  xy: 67, 1
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 1
+player/back/Bman_b
+  rotate: false
+  xy: 133, 1
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 2
+player/back/Bman_b
+  rotate: false
+  xy: 199, 1
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 3
+player/back/Bman_b
+  rotate: false
+  xy: 265, 1
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 5
+player/back/Bman_b
+  rotate: false
+  xy: 331, 1
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 6
+player/back/Bman_b
+  rotate: false
+  xy: 397, 1
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 7
+
+game2.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+player/front/Bman_f
+  rotate: false
+  xy: 1, 261
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 0
+player/front/Bman_f
+  rotate: false
+  xy: 1, 131
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 1
+player/front/Bman_f
+  rotate: false
+  xy: 67, 261
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 2
+player/front/Bman_f
+  rotate: false
+  xy: 1, 1
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 3
+player/front/Bman_f
+  rotate: false
+  xy: 67, 131
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 4
+player/front/Bman_f
+  rotate: false
+  xy: 133, 261
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 5
+player/front/Bman_f
+  rotate: false
+  xy: 67, 1
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 6
+player/front/Bman_f
+  rotate: false
+  xy: 133, 131
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 7
+
+game3.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+player/side/Bman_s
+  rotate: false
+  xy: 1, 261
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 0
+player/side/Bman_s
+  rotate: false
+  xy: 1, 131
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 1
+player/side/Bman_s
+  rotate: false
+  xy: 67, 261
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 2
+player/side/Bman_s
+  rotate: false
+  xy: 1, 1
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 3
+player/side/Bman_s
+  rotate: false
+  xy: 67, 131
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 4
+player/side/Bman_s
+  rotate: false
+  xy: 133, 261
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 5
+player/side/Bman_s
+  rotate: false
+  xy: 67, 1
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 6
+player/side/Bman_s
+  rotate: false
+  xy: 133, 131
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: 7

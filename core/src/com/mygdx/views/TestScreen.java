@@ -6,16 +6,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.entity.components.*;
-import com.mygdx.entity.systems.PhysicsDebugSystem;
-import com.mygdx.entity.systems.PhysicsSystem;
-import com.mygdx.entity.systems.PlayerControlSystem;
-import com.mygdx.entity.systems.RenderingSystem;
+import com.mygdx.entity.systems.*;
 import com.mygdx.factory.BodyFactory;
 import com.mygdx.game.BomberMan;
 import com.mygdx.listeners.GameContactListener;
@@ -30,7 +28,6 @@ public class TestScreen implements Screen {
     private PooledEngine engine;
     BodyFactory bodyFactory;
     TextureAtlas atlas;
-    TextureAtlas.AtlasRegion bbomb;
 
     public TestScreen(BomberMan parent){
         super();
@@ -50,10 +47,10 @@ public class TestScreen implements Screen {
         engine.addSystem(new PhysicsDebugSystem(world, cam));
         engine.addSystem(new PlayerControlSystem());
         engine.addSystem(new PhysicsSystem(world));
+        engine.addSystem(new AnimationSystem());
 
 
-        atlas = parent.assMan.manager.get("loading/loading.atlas");
-        bbomb = atlas.findRegion("loading-bomb");
+        atlas = parent.assMan.manager.get("game/game.atlas");
 
         createPlayer();
     }
@@ -78,14 +75,23 @@ public class TestScreen implements Screen {
         CollisionComponent colComp = engine.createComponent(CollisionComponent.class);
         TypeComponent type = engine.createComponent(TypeComponent.class);
         StateComponent stateCom = engine.createComponent(StateComponent.class);
+        AnimationComponent animCom = engine.createComponent(AnimationComponent.class);
 
 
-        body.body = bodyFactory.makeCirclePolyBody(10,10,1, BodyDef.BodyType.DynamicBody,true);
+        body.body = bodyFactory.makeCirclePolyBody(10,10,1.8f, BodyDef.BodyType.DynamicBody,true);
         position.position.set(10,10,0);
         type.type = TypeComponent.PLAYER;
         body.body.setUserData(entity);
-        stateCom.set(StateComponent.STATE_NORMAL);
-        texture.region = bbomb;
+        stateCom.set(StateComponent.STATE_MOVING_DOWN);
+        stateCom.isLooping = true;
+        animCom.animations.put(1,
+                new Animation<>(0.05f, atlas.findRegions("player/back/Bman_b")));
+        animCom.animations.put(2,
+                new Animation<>(0.05f, atlas.findRegions("player/side/Bman_s")));
+        animCom.animations.put(3,
+                new Animation<>(0.05f, atlas.findRegions("player/front/Bman_f")));
+        animCom.animations.put(4,
+                new Animation<>(0.05f, atlas.findRegions("player/side/Bman_s")));
 
         entity.add(body);
         entity.add(position);
@@ -94,6 +100,7 @@ public class TestScreen implements Screen {
         entity.add(colComp);
         entity.add(type);
         entity.add(stateCom);
+        entity.add(animCom);
 
         engine.addEntity(entity);
     }

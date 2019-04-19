@@ -17,6 +17,8 @@ public class CustomAssetManager {
 
     public final String bombMenu = "sounds/bombMenu.mp3";
 
+    public final String gameImages = "game/game.atlas";
+
     public void queueAddSkin(){
         SkinLoader.SkinParameter params = new SkinLoader.SkinParameter("flat/flat-earth-ui.atlas");
         manager.load(skin, Skin.class, params);
@@ -24,6 +26,9 @@ public class CustomAssetManager {
 
     public void queueAddLoadingImages() {
         manager.load(loadingImages, TextureAtlas.class);
+    }
+    public void queueAddGameImages(){
+        manager.load(gameImages, TextureAtlas.class);
     }
 
     public void queueAddSounds(){

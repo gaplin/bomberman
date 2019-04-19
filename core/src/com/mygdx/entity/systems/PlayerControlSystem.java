@@ -28,23 +28,29 @@ public class PlayerControlSystem extends IteratingSystem {
         StateComponent state = sm.get(entity);
         PlayerComponent player = pm.get(entity);
 
-        if(body.body.getLinearVelocity().y != 0 || body.body.getLinearVelocity().x != 0)
-            state.set(StateComponent.STATE_MOVING);
+        if(body.body.getLinearVelocity().y == 0 && body.body.getLinearVelocity().x == 0) {
+            state.isMoving = false;
+        }
         else
-            state.set(StateComponent.STATE_NORMAL);
+            state.isMoving = true;
 
 
         if(Gdx.input.isKeyPressed(Input.Keys.UP)){
             body.body.setLinearVelocity(0, player.movementSpeed);
+            state.set(StateComponent.STATE_MOVING_UP);
         }
         else if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
             body.body.setLinearVelocity(-player.movementSpeed, 0);
+            state.set(StateComponent.STATE_MOVING_LEFT);
+
         }
         else if(Gdx.input.isKeyPressed(Input.Keys.DOWN)){
             body.body.setLinearVelocity(0, -player.movementSpeed);
+            state.set(StateComponent.STATE_MOVING_DOWN);
         }
         else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
             body.body.setLinearVelocity(player.movementSpeed, 0);
+            state.set(StateComponent.STATE_MOVING_RIGHT);
         }
         else{
             body.body.setLinearVelocity(0, 0);

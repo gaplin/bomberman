@@ -94,13 +94,13 @@ public class RenderingSystem extends SortedIteratingSystem {
             float height = tex.region.getRegionHeight();
 
             float originX = width / 2f;
-            float originY = height / 2f;
+            float originY = height / 2.8f;
 
             batch.draw(tex.region,
                     t.position.x - originX, t.position.y - originY,
                     originX, originY,
                     width, height,
-                    PixelsToMeters(t.scale.x), PixelsToMeters(t.scale.y),
+                    (tex.mirror ? -1 : 1) * PixelsToMeters(t.scale.x), PixelsToMeters(t.scale.y),
                     t.rotation);
         }
 
