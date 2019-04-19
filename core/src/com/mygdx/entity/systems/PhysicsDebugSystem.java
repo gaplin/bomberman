@@ -3,6 +3,8 @@ package com.mygdx.entity.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
@@ -11,6 +13,7 @@ public class PhysicsDebugSystem extends IteratingSystem {
     private Box2DDebugRenderer debugRenderer;
     private World world;
     private OrthographicCamera cam;
+    private boolean enabled = false;
 
     public PhysicsDebugSystem(World world, OrthographicCamera cam){
         super(Family.all().get());
@@ -27,6 +30,9 @@ public class PhysicsDebugSystem extends IteratingSystem {
     @Override
     public void update(float deltaTime){
         super.update(deltaTime);
-        debugRenderer.render(world, cam.combined);
+        if(Gdx.input.isKeyJustPressed(Input.Keys.K))
+            enabled = !enabled;
+        if(enabled)
+            debugRenderer.render(world, cam.combined);
     }
 }
