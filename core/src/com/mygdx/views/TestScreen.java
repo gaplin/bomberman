@@ -3,6 +3,7 @@ package com.mygdx.views;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -38,6 +39,7 @@ public class TestScreen implements Screen {
         world.setContactListener(new GameContactListener());
         sb = new SpriteBatch();
         bodyFactory = BodyFactory.getInstance(world);
+        atlas = parent.assMan.manager.get("game/game.atlas");
 
         RenderingSystem renderingSystem = new RenderingSystem(sb);
         cam = renderingSystem.getCamera();
@@ -48,18 +50,16 @@ public class TestScreen implements Screen {
 
         engine.addSystem(renderingSystem);
         engine.addSystem(new PhysicsDebugSystem(world, cam));
-        engine.addSystem(new PlayerControlSystem());
+        engine.addSystem(new PlayerControlSystem(bodyFactory, atlas));
         engine.addSystem(new PhysicsSystem(world));
         engine.addSystem(new AnimationSystem());
 
 
-        atlas = parent.assMan.manager.get("game/game.atlas");
-
-        createPlayer();
     }
 
     @Override
     public void show() {
+        createPlayer();
     }
 
     @Override
@@ -67,6 +67,11 @@ public class TestScreen implements Screen {
         Gdx.gl.glClearColor(1f, 0f, 0f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         engine.update(delta);
+        if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !world.isLocked()){
+            parent.changeScreen(BomberMan.LEVELS);
+            engine.removeAllEntities();
+            parent.testScreen = null;
+        }
     }
 
     public void createPlayer(){
@@ -105,6 +110,7 @@ public class TestScreen implements Screen {
         entity.add(stateCom);
         entity.add(animCom);
 
+
         engine.addEntity(entity);
     }
 
@@ -120,16 +126,13 @@ public class TestScreen implements Screen {
 
     @Override
     public void resume() {
-
     }
 
     @Override
     public void hide() {
-
     }
 
     @Override
     public void dispose() {
-
     }
 }

@@ -6,13 +6,14 @@ public class BodyFactory {
 
     private static BodyFactory thisInstance = null;
 
-    private World world;
+    private static World world;
 
-    private BodyFactory(World world){
-        this.world = world;
+    private BodyFactory(World worldd){
+        world = worldd;
     }
 
-    public static BodyFactory getInstance(World world){
+    public static BodyFactory getInstance(World worldd){
+        world = worldd;
         if(thisInstance == null){
             thisInstance = new BodyFactory(world);
         }
@@ -22,9 +23,9 @@ public class BodyFactory {
     static public FixtureDef makeFixture(Shape shape){
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
-        fixtureDef.density = 0.5f;
-        fixtureDef.friction = 0.3f;
-        fixtureDef.restitution = 0.1f;
+        fixtureDef.density = 0.0f;
+        fixtureDef.friction = 0.0f;
+        fixtureDef.restitution = 0.0f;
         return fixtureDef;
     }
 

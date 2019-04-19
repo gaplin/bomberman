@@ -11,7 +11,7 @@ public class BomberMan extends Game {
 	private LevelsScreen levelsScreen;
 	private LoadingScreen loadingScreen;
 	private MenuScreen menuScreen;
-	private TestScreen testScreen;
+	public TestScreen testScreen;
 
 	public final static int MENU = 0;
 	public final static int GAME = 1;

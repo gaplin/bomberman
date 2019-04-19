@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.entity.components.TextureComponent;
 import com.mygdx.entity.components.TransformComponent;
+import com.mygdx.entity.components.TypeComponent;
 
 import java.util.Comparator;
 
@@ -50,12 +51,15 @@ public class RenderingSystem extends SortedIteratingSystem {
 
     private ComponentMapper<TextureComponent> textureM;
     private ComponentMapper<TransformComponent> transformM;
+    private ComponentMapper<TypeComponent> typeM;
 
     public RenderingSystem(SpriteBatch batch){
         super(Family.all(TransformComponent.class, TextureComponent.class).get(), new ZComparator());
+        comparator = new ZComparator();
 
         textureM = ComponentMapper.getFor(TextureComponent.class);
         transformM = ComponentMapper.getFor(TransformComponent.class);
+        typeM = ComponentMapper.getFor(TypeComponent.class);
 
         renderQueue = new Array<>();
 
@@ -89,6 +93,7 @@ public class RenderingSystem extends SortedIteratingSystem {
         for (Entity entity : renderQueue) {
             TextureComponent tex = textureM.get(entity);
             TransformComponent t = transformM.get(entity);
+            TypeComponent type = typeM.get(entity);
 
             if (tex.region == null || t.isHidden) {
                 continue;
@@ -99,7 +104,7 @@ public class RenderingSystem extends SortedIteratingSystem {
             float height = tex.region.getRegionHeight();
 
             float originX = width / 2f;
-            float originY = height / 2.8f;
+            float originY = height / (type.type == TypeComponent.BOMB ? 2f : 2.8f);
 
             batch.draw(tex.region,
                     t.position.x - originX, t.position.y - originY,

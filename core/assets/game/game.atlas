@@ -3,6 +3,32 @@ game.png
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
+bomb/Bomb
+  rotate: false
+  xy: 1, 1
+  size: 48, 48
+  orig: 48, 48
+  offset: 0, 0
+  index: 1
+bomb/Bomb
+  rotate: false
+  xy: 51, 1
+  size: 48, 48
+  orig: 48, 48
+  offset: 0, 0
+  index: 2
+bomb/Bomb
+  rotate: false
+  xy: 101, 1
+  size: 48, 48
+  orig: 48, 48
+  offset: 0, 0
+  index: 3
+
+game2.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
 player/back/Bman_b
   rotate: false
   xy: 1, 1
@@ -60,7 +86,7 @@ player/back/Bman_b
   offset: 0, 0
   index: 7
 
-game2.png
+game3.png
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
@@ -121,7 +147,7 @@ player/front/Bman_f
   offset: 0, 0
   index: 7
 
-game3.png
+game4.png
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
