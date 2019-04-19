@@ -9,13 +9,14 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.entity.components.TextureComponent;
 import com.mygdx.entity.components.TransformComponent;
 
 import java.util.Comparator;
 
 public class RenderingSystem extends SortedIteratingSystem {
-    static final  float PPM = 32.0f; // pixels per meter
+    public static final  float PPM = 32.0f; // pixels per meter
 
     static final float FRUSTUM_WIDTH = Gdx.graphics.getWidth() / PPM;
     static final float FRUSTUM_HEIGHT = Gdx.graphics.getHeight() / PPM;
@@ -23,6 +24,8 @@ public class RenderingSystem extends SortedIteratingSystem {
 
     private static Vector2 meterDimensions = new Vector2();
     private static Vector2 pixelDimensions = new Vector2();
+
+    private FitViewport viewport;
 
     public static final float PIXELS_TO_METRES = 1.0f / PPM;
 
@@ -59,6 +62,7 @@ public class RenderingSystem extends SortedIteratingSystem {
         this.batch = batch;
 
         cam = new OrthographicCamera(FRUSTUM_WIDTH, FRUSTUM_HEIGHT);
+        viewport = new FitViewport(FRUSTUM_WIDTH, FRUSTUM_HEIGHT, cam);
         cam.position.set(FRUSTUM_WIDTH / 2f, FRUSTUM_HEIGHT / 2f, 0);
     }
 
@@ -68,6 +72,8 @@ public class RenderingSystem extends SortedIteratingSystem {
     }
 
     public OrthographicCamera getCamera(){ return cam; }
+
+    public FitViewport getViewport(){ return viewport; }
 
     @Override
     public void update(float deltaTime) {
@@ -85,7 +91,6 @@ public class RenderingSystem extends SortedIteratingSystem {
             TransformComponent t = transformM.get(entity);
 
             if (tex.region == null || t.isHidden) {
-                System.out.println(getClass().getSimpleName() + " blad");
                 continue;
             }
 

@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.entity.components.*;
 import com.mygdx.entity.systems.*;
 import com.mygdx.factory.BodyFactory;
@@ -28,6 +29,7 @@ public class TestScreen implements Screen {
     private PooledEngine engine;
     BodyFactory bodyFactory;
     TextureAtlas atlas;
+    FitViewport viewport;
 
     public TestScreen(BomberMan parent){
         super();
@@ -39,6 +41,7 @@ public class TestScreen implements Screen {
 
         RenderingSystem renderingSystem = new RenderingSystem(sb);
         cam = renderingSystem.getCamera();
+        viewport = renderingSystem.getViewport();
         sb.setProjectionMatrix(cam.combined);
 
         engine = new PooledEngine();
@@ -61,7 +64,7 @@ public class TestScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0f, 0f, 0f, 1);
+        Gdx.gl.glClearColor(1f, 0f, 0f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         engine.update(delta);
     }
@@ -107,7 +110,7 @@ public class TestScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        cam.normalizeUp();
+        viewport.update(width, height);
     }
 
     @Override
