@@ -9,6 +9,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
@@ -44,6 +45,9 @@ public class PlayerControlSystem extends IteratingSystem {
         state.isMoving = body.body.getLinearVelocity().y != 0 || body.body.getLinearVelocity().x != 0;
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
+            if(checkForCollision(body.body.getWorldCenter(), 0.01f)){
+                return;
+            }
             PooledEngine engine = (PooledEngine) getEngine();
             Entity ent = engine.createEntity();
             BodyComponent bd = engine.createComponent(BodyComponent.class);
@@ -56,6 +60,8 @@ public class PlayerControlSystem extends IteratingSystem {
             BombComponent bomb = engine.createComponent(BombComponent.class);
 
             bomb.forSomeone = true;
+
+
 
             bd.body = bodyFactory.makeCirclePolyBody(transform.position.x, transform.position.y, 1.5f, BodyDef.BodyType.DynamicBody, true);
             bd.body.setUserData(ent);
@@ -100,5 +106,32 @@ public class PlayerControlSystem extends IteratingSystem {
             body.body.setLinearVelocity(0, 0);
         }
 
+    }
+
+    private boolean checkForCollision(Vector2 wh, float r){
+        r /= 2;
+        for(Entity entity : getEngine().getEntities()){
+            PlayerComponent pl = entity.getComponent(PlayerComponent.class);
+            if(pl == null){
+                BodyComponent body = entity.getComponent(BodyComponent.class);
+                if(body != null){
+                    float x = wh.x;
+                    float y = wh.y;
+                    float x2 = body.body.getWorldCenter().x;
+                    float y2 = body.body.getWorldCenter().y;
+                    float r2;
+                    if(entity.getComponent(BombComponent.class) != null)
+                        r2 = 1.5f / 2f;
+                    else
+                        r2 = 1.8f / 2f;
+                    float AB = (x2 - x) * (x2 - x) + (y2 - y) * (y2 - y);
+                    float dist = (r - r2) * (r - r2);
+                    float sum = (r + r2) * (r + r2);
+                    if(AB <= dist || AB < sum)
+                        return true;
+                }
+            }
+        }
+        return false;
     }
 }
