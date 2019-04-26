@@ -3,9 +3,16 @@ loading.png
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-BackgroundTile
+logo
   rotate: false
   xy: 1, 51
+  size: 509, 62
+  orig: 1366, 768
+  offset: 301, 566
+  index: -1
+BackgroundTile
+  rotate: false
+  xy: 512, 49
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
