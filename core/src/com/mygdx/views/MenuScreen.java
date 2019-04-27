@@ -34,7 +34,7 @@ public class MenuScreen extends ButtonsCount implements Screen {
         super();
         this.parent = parent;
         this.buttonSound1 = parent.assMan.manager.get("sounds/buttonSound.wav");
-        this.buttonSound2 = parent.assMan.manager.get("sounds/bombMenu.mp3");
+        this.buttonSound2 = parent.assMan.manager.get("sounds/bombSound.mp3");
         sb = new SpriteBatch();
         sb.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
@@ -68,7 +68,7 @@ public class MenuScreen extends ButtonsCount implements Screen {
         play.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonSound2.play(0.03f);
+                buttonSound2.play(BomberMan.MENU_VOLUME);
                 parent.changeScreen(BomberMan.LEVELS);
             }
         });
@@ -90,11 +90,11 @@ public class MenuScreen extends ButtonsCount implements Screen {
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN) && pressed == -1) {
             pointer = (pointer + 1) % nButtons;
-            buttonSound1.play(0.03f);
+            buttonSound1.play(BomberMan.MENU_VOLUME);
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.UP) && pressed == -1) {
             pointer = ((pointer - 1) % nButtons + nButtons) % nButtons;
-            buttonSound1.play(0.03f);
+            buttonSound1.play(BomberMan.MENU_VOLUME);
         }
 
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1/30f));

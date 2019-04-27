@@ -53,6 +53,9 @@ public class TestScreen implements Screen {
         engine.addSystem(new PlayerControlSystem(bodyFactory, atlas));
         engine.addSystem(new PhysicsSystem(world));
         engine.addSystem(new AnimationSystem());
+        engine.addSystem(new BombSystem(atlas, bodyFactory,
+                parent.assMan.manager.get("sounds/bombSound.mp3")));
+        engine.addSystem(new FlameSystem());
 
 
     }
@@ -86,7 +89,7 @@ public class TestScreen implements Screen {
         AnimationComponent animCom = engine.createComponent(AnimationComponent.class);
 
 
-        body.body = bodyFactory.makeCirclePolyBody(10,10,1.8f, BodyDef.BodyType.DynamicBody,true);
+        body.body = bodyFactory.makeCirclePolyBody(10,10,BomberMan.PLAYER_RADIUS, BodyDef.BodyType.DynamicBody,true);
         position.position.set(10,10,0);
         type.type = TypeComponent.PLAYER;
         body.body.setUserData(entity);
@@ -100,6 +103,9 @@ public class TestScreen implements Screen {
                 new Animation<>(0.05f, atlas.findRegions("player/front/Bman_f")));
         animCom.animations.put(4,
                 new Animation<>(0.05f, atlas.findRegions("player/side/Bman_s")));
+
+        player.bombPower = BomberMan.STARTING_BOMB_POWER;
+        player.movementSpeed = BomberMan.STARTING_MOVEMENT_SPEED;
 
         entity.add(body);
         entity.add(position);

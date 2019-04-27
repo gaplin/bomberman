@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
+import com.mygdx.game.BomberMan;
 
 public class PlayerControlSystem extends IteratingSystem {
     ComponentMapper<PlayerComponent> pm;
@@ -48,41 +49,9 @@ public class PlayerControlSystem extends IteratingSystem {
             if(checkForCollision(body.body.getWorldCenter(), 0.01f)){
                 return;
             }
-            PooledEngine engine = (PooledEngine) getEngine();
-            Entity ent = engine.createEntity();
-            BodyComponent bd = engine.createComponent(BodyComponent.class);
-            TransformComponent position = engine.createComponent(TransformComponent.class);
-            TextureComponent texture = engine.createComponent(TextureComponent.class);
-            CollisionComponent colComp = engine.createComponent(CollisionComponent.class);
-            TypeComponent type = engine.createComponent(TypeComponent.class);
-            StateComponent stateCom = engine.createComponent(StateComponent.class);
-            AnimationComponent animCom = engine.createComponent(AnimationComponent.class);
-            BombComponent bomb = engine.createComponent(BombComponent.class);
 
-            bomb.forSomeone = true;
+            createBomb(transform.position.x, transform.position.y, player);
 
-
-
-            bd.body = bodyFactory.makeCirclePolyBody(transform.position.x, transform.position.y, 1.5f, BodyDef.BodyType.DynamicBody, true);
-            bd.body.setUserData(ent);
-            position.position.set(transform.position.x, transform.position.y, 0);
-            type.type = TypeComponent.BOMB;
-            stateCom.set(StateComponent.STATE_NORMAL);
-            stateCom.isMoving = true;
-            animCom.animations.put(0,
-                    new Animation<>(0.5f, atlas.findRegions("bomb/Bomb")));
-            player.LastBombs.add(ent);
-
-            ent.add(bd);
-            ent.add(position);
-            ent.add(texture);
-            ent.add(colComp);
-            ent.add(type);
-            ent.add(stateCom);
-            ent.add(animCom);
-            ent.add(bomb);
-
-            getEngine().addEntity(ent);
         }
 
         if(Gdx.input.isKeyPressed(Input.Keys.UP)){
@@ -108,6 +77,54 @@ public class PlayerControlSystem extends IteratingSystem {
 
     }
 
+    private void createBomb(float posX, float posY, PlayerComponent player){
+        PooledEngine engine = (PooledEngine) getEngine();
+
+        Entity ent = engine.createEntity();
+        BodyComponent bodyCom = engine.createComponent(BodyComponent.class);
+        TransformComponent positionCom = engine.createComponent(TransformComponent.class);
+        TextureComponent textureCom = engine.createComponent(TextureComponent.class);
+        CollisionComponent colComp = engine.createComponent(CollisionComponent.class);
+        TypeComponent typeCom = engine.createComponent(TypeComponent.class);
+        StateComponent stateCom = engine.createComponent(StateComponent.class);
+        AnimationComponent animCom = engine.createComponent(AnimationComponent.class);
+        BombComponent bombCom = engine.createComponent(BombComponent.class);
+
+        bombCom.forSomeone = true;
+
+        bombCom.range = player.bombPower;
+
+
+
+        bodyCom.body = bodyFactory.makeCirclePolyBody(posX, posY, BomberMan.BOMB_RADIUS, BodyDef.BodyType.DynamicBody, true);
+        bodyCom.body.setUserData(ent);
+
+        positionCom.position.set(posX, posY, 1);
+
+
+        typeCom.type = TypeComponent.BOMB;
+
+        stateCom.set(StateComponent.STATE_NORMAL);
+        stateCom.isMoving = true;
+        stateCom.time = 0.0f;
+        stateCom.isLooping = false;
+
+        animCom.animations.put(0,
+                new Animation<>(1.0f, atlas.findRegions("bomb/Bomb")));
+        player.LastBombs.add(ent);
+
+        ent.add(bodyCom);
+        ent.add(positionCom);
+        ent.add(textureCom);
+        ent.add(colComp);
+        ent.add(typeCom);
+        ent.add(stateCom);
+        ent.add(animCom);
+        ent.add(bombCom);
+
+        engine.addEntity(ent);
+    }
+
     private boolean checkForCollision(Vector2 wh, float r){
         r /= 2;
         for(Entity entity : getEngine().getEntities()){
@@ -121,9 +138,9 @@ public class PlayerControlSystem extends IteratingSystem {
                     float y2 = body.body.getWorldCenter().y;
                     float r2;
                     if(entity.getComponent(BombComponent.class) != null)
-                        r2 = 1.5f / 2f;
+                        r2 = BomberMan.BOMB_RADIUS / 2f;
                     else
-                        r2 = 1.8f / 2f;
+                        r2 = BomberMan.PLAYER_RADIUS / 2f;
                     float AB = (x2 - x) * (x2 - x) + (y2 - y) * (y2 - y);
                     float dist = (r - r2) * (r - r2);
                     float sum = (r + r2) * (r + r2);

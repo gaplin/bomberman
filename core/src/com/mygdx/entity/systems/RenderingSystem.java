@@ -99,7 +99,6 @@ public class RenderingSystem extends SortedIteratingSystem {
                 continue;
             }
 
-
             float width = tex.region.getRegionWidth();
             float height = tex.region.getRegionHeight();
 

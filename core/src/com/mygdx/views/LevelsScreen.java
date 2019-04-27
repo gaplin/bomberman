@@ -30,7 +30,7 @@ public class LevelsScreen extends ButtonsCount implements Screen {
         super();
         this.parent = parent;
         buttonSound1 = parent.assMan.manager.get("sounds/buttonSound.wav");
-        buttonSound2 = parent.assMan.manager.get("sounds/bombMenu.mp3");
+        buttonSound2 = parent.assMan.manager.get("sounds/bombSound.mp3");
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         skin = parent.assMan.manager.get("flat/flat-earth-ui.json");
         atlas = parent.assMan.manager.get("loading/loading.atlas");
@@ -63,7 +63,7 @@ public class LevelsScreen extends ButtonsCount implements Screen {
         level_1.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonSound2.play(0.03f);
+                buttonSound2.play(BomberMan.MENU_VOLUME);
                 parent.changeScreen(BomberMan.GAME);
             }
         });
@@ -71,7 +71,7 @@ public class LevelsScreen extends ButtonsCount implements Screen {
         test.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonSound2.play(0.03f);
+                buttonSound2.play(BomberMan.MENU_VOLUME);
                 parent.changeScreen(BomberMan.TEST);
             }
         });
@@ -79,7 +79,7 @@ public class LevelsScreen extends ButtonsCount implements Screen {
         back.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonSound2.play(0.03f);
+                buttonSound2.play(BomberMan.MENU_VOLUME);
                 parent.changeScreen(BomberMan.MENU);
             }
         });
@@ -93,11 +93,11 @@ public class LevelsScreen extends ButtonsCount implements Screen {
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN) && pressed == -1) {
             pointer = (pointer + 1) % nButtons;
-            buttonSound1.play(0.03f);
+            buttonSound1.play(BomberMan.MENU_VOLUME);
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.UP) && pressed == -1) {
             pointer = ((pointer - 1) % nButtons + nButtons) % nButtons;
-            buttonSound1.play(0.03f);
+            buttonSound1.play(BomberMan.MENU_VOLUME);
         }
 
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1/30f));

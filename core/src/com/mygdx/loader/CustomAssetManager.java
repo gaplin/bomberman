@@ -15,7 +15,7 @@ public class CustomAssetManager {
 
     public final String buttonSound = "sounds/buttonSound.wav";
 
-    public final String bombMenu = "sounds/bombMenu.mp3";
+    public final String bombMenu = "sounds/bombSound.mp3";
 
     public final String gameImages = "game/game.atlas";
 

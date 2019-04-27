@@ -19,6 +19,16 @@ public class BomberMan extends Game {
 	public final static int ENDGAME = 3;
 	public final static int TEST = 4;
 
+	public final static float STARTING_MOVEMENT_SPEED = 10f;
+	public final static int STARTING_BOMB_POWER = 2;
+	public final static float PLAYER_RADIUS = 1.8f;
+	public final static float BOMB_RADIUS = 1.5f;
+
+	public final static float MENU_VOLUME = 0.03f;
+
+	public final static float GAME_VOLUME = 0.2f;
+
+
 	public CustomAssetManager assMan = new CustomAssetManager();
 
 	@Override
