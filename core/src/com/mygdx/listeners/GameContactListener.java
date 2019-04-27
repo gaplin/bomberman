@@ -41,9 +41,9 @@ public class GameContactListener implements ContactListener {
             CollisionComponent colb = colEnt.getComponent(CollisionComponent.class);
 
             if(col != null){
-                col.collisionEntity = colEnt;
+                col.collisionEntity.addLast(colEnt);
             }else if(colb != null){
-                colb.collisionEntity = ent;
+                colb.collisionEntity.addLast(ent);
             }
         }
     }
@@ -54,14 +54,6 @@ public class GameContactListener implements ContactListener {
             PlayerComponent player = ent.getComponent(PlayerComponent.class);
             if(player != null)
                 player.LastBombs.remove(colEnt);
-
-            CollisionComponent col = ent.getComponent(CollisionComponent.class);
-            CollisionComponent colb = colEnt.getComponent(CollisionComponent.class);
-
-            if(col != null)
-                col.collisionEntity = null;
-            if(colb != null)
-                colb.collisionEntity = null;
         }
     }
 

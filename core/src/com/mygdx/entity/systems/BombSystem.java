@@ -76,7 +76,7 @@ public class BombSystem extends IteratingSystem {
         AnimationComponent animCom = engine.createComponent(AnimationComponent.class);
         FlameComponent flameCom = engine.createComponent(FlameComponent.class);
 
-        bodyCom.body = bodyFactory.makeCirclePolyBody(posX, posY, BomberMan.BOMB_RADIUS, BodyDef.BodyType.StaticBody, true);
+        bodyCom.body = bodyFactory.makeCirclePolyBody(posX, posY, BomberMan.BOMB_RADIUS, BodyDef.BodyType.DynamicBody, true);
         for(Fixture fix : bodyCom.body.getFixtureList())
             fix.setSensor(true);
 

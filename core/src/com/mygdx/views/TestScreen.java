@@ -56,6 +56,7 @@ public class TestScreen implements Screen {
         engine.addSystem(new BombSystem(atlas, bodyFactory,
                 parent.assMan.manager.get("sounds/bombSound.mp3")));
         engine.addSystem(new FlameSystem());
+        engine.addSystem(new CollisionSystem());
 
 
     }
