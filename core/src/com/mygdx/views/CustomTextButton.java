@@ -5,10 +5,12 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.mygdx.game.BomberMan;
 
 public class CustomTextButton extends TextButton {
     private ButtonsCount parent;
     private final int number;
+    private boolean pressable = true;
     Sound click;
     private int posx = Gdx.input.getX(), posy = Gdx.input.getY();
     CustomTextButton(String text, Skin skin, int number, ButtonsCount parent){
@@ -34,7 +36,10 @@ public class CustomTextButton extends TextButton {
     }
 
 
-    void setClick(Sound click){
+    public void setPressable(boolean pressable){
+        this.pressable = pressable;
+    }
+    public void setClick(Sound click){
         this.click = click;
     }
 
@@ -46,7 +51,7 @@ public class CustomTextButton extends TextButton {
         if(super.isOver() &&
                 Gdx.input.getX() != posx && Gdx.input.getY() != posy) {
             if(parent.pointer != number && click != null)
-                click.play();
+                click.play(BomberMan.MENU_VOLUME);
             parent.pointer = number;
             posx = Gdx.input.getX();
             posy = Gdx.input.getY();
@@ -56,7 +61,7 @@ public class CustomTextButton extends TextButton {
 
     @Override
     public boolean isPressed(){
-        if(parent == null)
+        if(parent == null || !pressable)
             return false;
         boolean isPressed = super.isPressed();
         if(isPressed) {

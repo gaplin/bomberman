@@ -12,21 +12,23 @@ public class BomberMan extends Game {
 	private LoadingScreen loadingScreen;
 	private MenuScreen menuScreen;
 	public TestScreen testScreen;
+	private PrefernecesScreen prefernecesScreen;
 
 	public final static int MENU = 0;
 	public final static int GAME = 1;
 	public final static int LEVELS = 2;
 	public final static int ENDGAME = 3;
 	public final static int TEST = 4;
+	public final static int PREFERENCES = 5;
 
 	public final static float STARTING_MOVEMENT_SPEED = 10f;
 	public final static int STARTING_BOMB_POWER = 2;
 	public final static float PLAYER_RADIUS = 1.8f;
 	public final static float BOMB_RADIUS = 1.5f;
 
-	public final static float MENU_VOLUME = 0.03f;
+	public static float MENU_VOLUME = 0.1f;
 
-	public final static float GAME_VOLUME = 0.2f;
+	public static float GAME_VOLUME = 0.2f;
 
 
 	public CustomAssetManager assMan = new CustomAssetManager();
@@ -58,6 +60,10 @@ public class BomberMan extends Game {
 			case TEST:
 				if(testScreen == null)testScreen = new TestScreen(this);
 				this.setScreen(testScreen);
+				break;
+			case PREFERENCES:
+				if(prefernecesScreen == null)prefernecesScreen = new PrefernecesScreen(this);
+				this.setScreen(prefernecesScreen);
 				break;
 		}
 	}

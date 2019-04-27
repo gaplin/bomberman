@@ -5,12 +5,12 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -29,14 +29,11 @@ public class MenuScreen extends ButtonsCount implements Screen {
     private TextureAtlas.AtlasRegion background, title;
     private Sound buttonSound1;
     private Sound buttonSound2;
-    private SpriteBatch sb;
     public MenuScreen(BomberMan parent){
         super();
         this.parent = parent;
         this.buttonSound1 = parent.assMan.manager.get("sounds/buttonSound.wav");
         this.buttonSound2 = parent.assMan.manager.get("sounds/bombSound.mp3");
-        sb = new SpriteBatch();
-        sb.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         parent.assMan.queueAddSkin();
         parent.assMan.manager.finishLoading();
@@ -56,20 +53,37 @@ public class MenuScreen extends ButtonsCount implements Screen {
         stage.addActor(table);
 
         CustomTextButton play = new CustomTextButton("PLAY", skin, "large", 0, this, buttonSound1);
-        CustomTextButton exit = new CustomTextButton("EXIT", skin, "large", 1, this, buttonSound1);
-        nButtons = 2;
+        CustomTextButton preferences = new CustomTextButton("PREFERENCES", skin, "large", 1, this, buttonSound1);
+        CustomTextButton exit = new CustomTextButton("EXIT", skin, "large", 2, this, buttonSound1);
+
+        nButtons = 3;
         play.setTouchable(Touchable.disabled);
         exit.setTouchable(Touchable.disabled);
+        preferences.setTouchable(Touchable.disabled);
 
-        table.add(play).fillX().uniformX().width(300);
-        table.row().pad(50, 0, 50, 0);
-        table.add(exit).fillX().uniformX();
+        ImageButton logo = new ImageButton(new TiledDrawable(title));
+
+        table.add(logo);
+        table.row().pad(50, 0, 0, 0);
+        table.add(play).fillX().uniformX().width(400);
+        table.row().pad(50, 0, 0, 0);
+        table.add(preferences).fillX().uniformX().width(400);
+        table.row().pad(50, 0, 0, 0);
+        table.add(exit).fillX().uniformX().width(400);
 
         play.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 buttonSound2.play(BomberMan.MENU_VOLUME);
                 parent.changeScreen(BomberMan.LEVELS);
+            }
+        });
+
+        preferences.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                buttonSound2.play(BomberMan.MENU_VOLUME);
+                parent.changeScreen(BomberMan.PREFERENCES);
             }
         });
 
@@ -100,10 +114,6 @@ public class MenuScreen extends ButtonsCount implements Screen {
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1/30f));
         stage.draw();
 
-        sb.begin();
-        //sb.draw(title, Gdx.graphics.getWidth() / 4.7f, Gdx.graphics.getHeight() / 1.3f);
-        sb.draw(title, 163.2f, 470f);
-        sb.end();
     }
 
     @Override
