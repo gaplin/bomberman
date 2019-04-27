@@ -1,18 +1,16 @@
 package com.mygdx.entity.systems;
 
-import com.badlogic.ashley.core.ComponentMapper;
-import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.systems.SortedIteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.tiled.*;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.mygdx.entity.components.TextureComponent;
-import com.mygdx.entity.components.TransformComponent;
-import com.mygdx.entity.components.TypeComponent;
+import com.mygdx.entity.components.*;
 
 import java.util.Comparator;
 
@@ -53,6 +51,9 @@ public class RenderingSystem extends SortedIteratingSystem {
     private ComponentMapper<TransformComponent> transformM;
     private ComponentMapper<TypeComponent> typeM;
 
+    private static TiledMap map;
+    private TiledMapRenderer renderer;
+
     public RenderingSystem(SpriteBatch batch){
         super(Family.all(TransformComponent.class, TextureComponent.class).get(), new ZComparator());
         comparator = new ZComparator();
@@ -68,6 +69,10 @@ public class RenderingSystem extends SortedIteratingSystem {
         cam = new OrthographicCamera(FRUSTUM_WIDTH, FRUSTUM_HEIGHT);
         viewport = new FitViewport(FRUSTUM_WIDTH, FRUSTUM_HEIGHT, cam);
         cam.position.set(FRUSTUM_WIDTH / 2f, FRUSTUM_HEIGHT / 2f, 0);
+
+        map = new TmxMapLoader().load("map/map.tmx");
+        renderer = new OrthogonalTiledMapRenderer(map, 1f / 32f );
+
     }
 
     @Override
@@ -86,6 +91,9 @@ public class RenderingSystem extends SortedIteratingSystem {
         renderQueue.sort(comparator);
 
         cam.update();
+        renderer.setView(cam);
+        renderer.render();
+
         batch.setProjectionMatrix(cam.combined);
         batch.enableBlending();
         batch.begin();
@@ -115,5 +123,9 @@ public class RenderingSystem extends SortedIteratingSystem {
 
         batch.end();
         renderQueue.clear();
+    }
+
+    public static TiledMap getMap(){
+        return map;
     }
 }

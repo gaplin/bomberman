@@ -7,9 +7,15 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
@@ -21,10 +27,11 @@ import com.mygdx.game.BomberMan;
 import com.mygdx.listeners.GameContactListener;
 
 
+
 public class TestScreen implements Screen {
 
     private BomberMan parent;
-    private World world;
+    public static World world;
     private OrthographicCamera cam;
     private SpriteBatch sb;
     private PooledEngine engine;
@@ -53,17 +60,13 @@ public class TestScreen implements Screen {
         engine.addSystem(new PlayerControlSystem(bodyFactory, atlas));
         engine.addSystem(new PhysicsSystem(world));
         engine.addSystem(new AnimationSystem());
-        engine.addSystem(new BombSystem(atlas, bodyFactory,
-                parent.assMan.manager.get("sounds/bombSound.mp3")));
-        engine.addSystem(new FlameSystem());
-        engine.addSystem(new CollisionSystem());
-
 
     }
 
     @Override
     public void show() {
         createPlayer();
+        createMap();
     }
 
     @Override
@@ -90,8 +93,8 @@ public class TestScreen implements Screen {
         AnimationComponent animCom = engine.createComponent(AnimationComponent.class);
 
 
-        body.body = bodyFactory.makeCirclePolyBody(10,10,BomberMan.PLAYER_RADIUS, BodyDef.BodyType.DynamicBody,true);
-        position.position.set(10,10,0);
+        body.body = bodyFactory.makePlayer(4,4 , 1.4f, BodyDef.BodyType.DynamicBody, true);
+        position.position.set(4,4,0);
         type.type = TypeComponent.PLAYER;
         body.body.setUserData(entity);
         stateCom.set(StateComponent.STATE_MOVING_DOWN);
@@ -105,9 +108,6 @@ public class TestScreen implements Screen {
         animCom.animations.put(4,
                 new Animation<>(0.05f, atlas.findRegions("player/side/Bman_s")));
 
-        player.bombPower = BomberMan.STARTING_BOMB_POWER;
-        player.movementSpeed = BomberMan.STARTING_MOVEMENT_SPEED;
-
         entity.add(body);
         entity.add(position);
         entity.add(texture);
@@ -119,6 +119,37 @@ public class TestScreen implements Screen {
 
 
         engine.addEntity(entity);
+    }
+
+    private void createMap(){
+        TiledMap map = RenderingSystem.getMap();
+        MapObjects obj = map.getLayers().get("wall").getObjects();
+        Texture text = new Texture("map/SolidBlock.png");
+        TextureRegion texreg = new TextureRegion();
+        texreg.setTexture(text);
+        for(MapObject o : obj){
+            TiledMapTileMapObject tile = (TiledMapTileMapObject) o;
+            Entity ent = engine.createEntity();
+            BodyComponent body = engine.createComponent(BodyComponent.class);
+            CollisionComponent col = engine.createComponent(CollisionComponent.class);
+            TypeComponent type = engine.createComponent(TypeComponent.class);
+            TextureComponent texture = engine.createComponent(TextureComponent.class);
+            TransformComponent tranComp = engine.createComponent(TransformComponent.class);
+
+            texture.region = texreg;
+            body.body = bodyFactory.makeBoxPolyBody(tile.getX() / 32 + 0.45f, tile.getY() / 32 + 0.2f, 0.9f, 0.9f, BodyDef.BodyType.StaticBody, false);
+            texture.region.setRegionX(35);
+            texture.region.setRegionY(35);
+            type.type = TypeComponent.SCENERY;
+
+            ent.add(body);
+            ent.add(col);
+            ent.add(type);
+            ent.add(texture);
+            ent.add(tranComp);
+
+            engine.addEntity(ent);
+        }
     }
 
     @Override

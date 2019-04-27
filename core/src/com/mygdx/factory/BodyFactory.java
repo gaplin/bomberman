@@ -1,6 +1,8 @@
 package com.mygdx.factory;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+
 
 public class BodyFactory {
 
@@ -59,6 +61,33 @@ public class BodyFactory {
         poly.dispose();
 
         return boxBody;
+    }
+
+    public Body makePlayer(float posx, float posy, float radius, BodyDef.BodyType bodyType, boolean fixedRotation){
+        BodyDef bd = new BodyDef();
+        bd.type = bodyType;
+        bd.position.set(posx, posy);
+        bd.fixedRotation = fixedRotation;
+
+        Body bdBody = world.createBody(bd);
+
+        CircleShape circle1 = new CircleShape();
+        circle1.setRadius(radius);
+        Vector2 offset1 = new Vector2(0,  - 0.10f *radius);
+        circle1.setPosition(offset1);
+
+        CircleShape circle2 = new CircleShape();
+        circle2.setRadius(radius);
+        Vector2 offset2 = new Vector2(0, - 0.2f * radius);
+        circle2.setPosition(offset2);
+
+        CircleShape circle3 = new CircleShape();
+        circle3.setRadius(radius);
+
+        bdBody.createFixture(circle1, 1.0f);
+        bdBody.createFixture(circle2, 1.0f);
+        bdBody.createFixture(circle3, 1.0f);
+        return bdBody;
     }
 
 }
