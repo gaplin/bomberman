@@ -15,10 +15,16 @@ public class LoadingBar extends Actor {
         this.setVisible(false);
     }
 
+    public LoadingBar(TextureAtlas.AtlasRegion ar, float width, float height){
+        this(ar);
+        this.setWidth(width);
+        this.setHeight(height);
+    }
+
     @Override
     public void draw(Batch batch, float parentAlpha) {
         super.draw(batch, parentAlpha);
-        batch.draw(image, getX(),getY(), 30, 30);
+        batch.draw(image, getX(),getY(), getWidth(), getHeight() + 5);
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     }
 
