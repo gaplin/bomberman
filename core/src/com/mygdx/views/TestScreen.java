@@ -97,7 +97,7 @@ public class TestScreen implements Screen {
         AnimationComponent animCom = engine.createComponent(AnimationComponent.class);
 
 
-        body.body = bodyFactory.makePlayer(4,4 , 1.4f, BodyDef.BodyType.DynamicBody, true);
+        body.body = bodyFactory.makePlayer(4,4 , BomberMan.PLAYER_RADIUS, BodyDef.BodyType.DynamicBody, true);
         position.position.set(4,4,0);
         type.type = TypeComponent.PLAYER;
         body.body.setUserData(entity);

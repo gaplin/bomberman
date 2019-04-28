@@ -21,10 +21,19 @@ public class BomberMan extends Game {
 	public final static int TEST = 4;
 	public final static int PREFERENCES = 5;
 
+	public static final float GAME_SCALE = 1f;
+
+	public static final float PLAYER_SCALE = 1f;
+	public static final float BOMB_SCALE = 1f;
+	public static final float SCENERY_SCALE = 1f;
+
 	public final static float STARTING_MOVEMENT_SPEED = 10f;
+
 	public final static int STARTING_BOMB_POWER = 1;
-	public final static float PLAYER_RADIUS = 1.8f;
-	public final static float BOMB_RADIUS = 1.5f;
+	public final static float PLAYER_RADIUS = 1.4f * GAME_SCALE * PLAYER_SCALE;
+	public final static float BOMB_RADIUS = 1.5f * GAME_SCALE * BOMB_SCALE;
+	public final static float TILE_WIDTH = 0.9f * GAME_SCALE * SCENERY_SCALE;
+	public final static float TILE_HEIGHT = 0.9f * GAME_SCALE * SCENERY_SCALE;
 
 	public static float MENU_VOLUME = 0.1f;
 

@@ -47,7 +47,7 @@ public class PlayerControlSystem extends IteratingSystem {
         state.isMoving = body.body.getLinearVelocity().y != 0 || body.body.getLinearVelocity().x != 0;
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
-            if(checkForCollision(body.body.getWorldCenter(), 0.01f)){
+            if(checkForCollision(body.body.getWorldCenter(), BomberMan.BOMB_RADIUS / 8f)){
                 return;
             }
             createBomb(transform.position.x, transform.position.y, player);
@@ -125,7 +125,7 @@ public class PlayerControlSystem extends IteratingSystem {
     }
 
     private boolean checkForCollision(Vector2 wh, float r){
-        r /= 2;
+        r /= 2f;
         for(Entity entity : getEngine().getEntities()){
             PlayerComponent pl = entity.getComponent(PlayerComponent.class);
             if(pl == null){
@@ -136,7 +136,8 @@ public class PlayerControlSystem extends IteratingSystem {
                     float x2 = body.body.getWorldCenter().x;
                     float y2 = body.body.getWorldCenter().y;
                     float r2;
-                    if(entity.getComponent(BombComponent.class) != null)
+                    if(entity.getComponent(BombComponent.class) != null ||
+                    entity.getComponent(FlameComponent.class) != null)
                         r2 = BomberMan.BOMB_RADIUS / 2f;
                     else
                         r2 = BomberMan.PLAYER_RADIUS / 2f;
