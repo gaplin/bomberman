@@ -5,7 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.mygdx.entity.components.*;
-import com.mygdx.views.TestScreen;
+import com.mygdx.views.GameScreen;
 
 public class CollisionSystem extends IteratingSystem {
 
@@ -60,7 +60,7 @@ public class CollisionSystem extends IteratingSystem {
         if(tile != null && tile.type == BlockComponent.DESTROYABLE){
             BodyComponent body = bd.get(entity);
             body.body.destroyFixture(body.body.getFixtureList().first());
-            TestScreen.world.destroyBody(body.body);
+            GameScreen.world.destroyBody(body.body);
             getEngine().removeEntity(entity);
         }
 

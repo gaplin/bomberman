@@ -7,24 +7,31 @@ import com.mygdx.views.*;
 public class BomberMan extends Game {
 
 	private EndScreen endScreen;
-	private GameScreen gameScreen;
+	public GameScreen gameScreen;
 	private LevelsScreen levelsScreen;
 	private LoadingScreen loadingScreen;
 	private MenuScreen menuScreen;
-	public TestScreen testScreen;
 	private PrefernecesScreen prefernecesScreen;
 
 	public final static int MENU = 0;
 	public final static int GAME = 1;
 	public final static int LEVELS = 2;
 	public final static int ENDGAME = 3;
-	public final static int TEST = 4;
-	public final static int PREFERENCES = 5;
+	public final static int PREFERENCES = 4;
+
+	public static final float GAME_SCALE = 1f;
+
+	public static final float PLAYER_SCALE = 1f * GAME_SCALE;
+	public static final float BOMB_SCALE = 1f * GAME_SCALE;
+	public static final float SCENERY_SCALE = 1f * GAME_SCALE;
 
 	public final static float STARTING_MOVEMENT_SPEED = 10f;
+
 	public final static int STARTING_BOMB_POWER = 1;
-	public final static float PLAYER_RADIUS = 1.8f;
-	public final static float BOMB_RADIUS = 1.5f;
+	public final static float PLAYER_RADIUS = 1.4f * PLAYER_SCALE;
+	public final static float BOMB_RADIUS = 1.5f * BOMB_SCALE;
+	public final static float TILE_WIDTH = 0.9f * SCENERY_SCALE;
+	public final static float TILE_HEIGHT = 0.9f * SCENERY_SCALE;
 
 	public static float MENU_VOLUME = 0.1f;
 
@@ -56,10 +63,6 @@ public class BomberMan extends Game {
 			case ENDGAME:
 				if(endScreen == null)endScreen = new EndScreen(this);
 				this.setScreen(endScreen);
-				break;
-			case TEST:
-				if(testScreen == null)testScreen = new TestScreen(this);
-				this.setScreen(testScreen);
 				break;
 			case PREFERENCES:
 				if(prefernecesScreen == null)prefernecesScreen = new PrefernecesScreen(this);

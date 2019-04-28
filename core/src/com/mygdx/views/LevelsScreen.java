@@ -49,20 +49,16 @@ public class LevelsScreen extends ButtonsCount implements Screen {
         stage.addActor(table);
 
         CustomTextButton level_1 = new CustomTextButton("LEVEL 1", skin, "large", 0, this, buttonSound1);
-        CustomTextButton test = new CustomTextButton("TEST", skin, "large", 1, this, buttonSound1);
-        CustomTextButton back = new CustomTextButton("BACK", skin, "large", 2, this, buttonSound1);
+        CustomTextButton back = new CustomTextButton("BACK", skin, "large", 1, this, buttonSound1);
         level_1.setTouchable(Touchable.disabled);
         back.setTouchable(Touchable.disabled);
-        test.setTouchable(Touchable.disabled);
-        nButtons = 3;
+        nButtons = 2;
 
         title = new Label("CHOOSE LEVEL", skin, "title", "white");
 
         table.add(title);
         table.row().pad(50, 0, 0, 0);
         table.add(level_1).fillX().uniformX().width(300);
-        table.row().pad(50, 0, 0, 0);
-        table.add(test).fillX().uniformX().width(300);
         table.row().pad(50, 0, 0, 0);
         table.add(back).fillX().uniformX().width(300);
 
@@ -71,14 +67,6 @@ public class LevelsScreen extends ButtonsCount implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 buttonSound2.play(BomberMan.MENU_VOLUME);
                 parent.changeScreen(BomberMan.GAME);
-            }
-        });
-
-        test.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                buttonSound2.play(BomberMan.MENU_VOLUME);
-                parent.changeScreen(BomberMan.TEST);
             }
         });
 
