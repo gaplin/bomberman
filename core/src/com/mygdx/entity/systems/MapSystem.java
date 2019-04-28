@@ -44,7 +44,7 @@ public class MapSystem extends IteratingSystem {
 
     private void createMap() {
         MapObjects objs = map.getLayers().get("wall").getObjects();
-        Texture text = new Texture("core/assets/map/SolidBlock.png");
+        Texture text = new Texture("map/SolidBlock.png");
         TextureRegion texreg = new TextureRegion();
         texreg.setTexture(text);
         placeBlocks(objs, texreg, BlockComponent.WALL);
@@ -52,7 +52,7 @@ public class MapSystem extends IteratingSystem {
 
     private void createBlocks(){
         MapObjects objs = map.getLayers().get("destroyable").getObjects();
-        Texture text = new Texture("core/assets/map/ExplodableBlock.png");
+        Texture text = new Texture("map/ExplodableBlock.png");
         TextureRegion texreg = new TextureRegion();
         texreg.setTexture(text);
         placeBlocks(objs, texreg, BlockComponent.DESTROYABLE);

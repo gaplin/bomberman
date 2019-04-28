@@ -32,13 +32,13 @@ public class MenuScreen extends ButtonsCount implements Screen {
     public MenuScreen(BomberMan parent){
         super();
         this.parent = parent;
-        this.buttonSound1 = parent.assMan.manager.get("core/assets/sounds/buttonSound.wav");
-        this.buttonSound2 = parent.assMan.manager.get("core/assets/sounds/bombSound.mp3");
+        this.buttonSound1 = parent.assMan.manager.get("sounds/buttonSound.wav");
+        this.buttonSound2 = parent.assMan.manager.get("sounds/bombSound.mp3");
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         parent.assMan.queueAddSkin();
         parent.assMan.manager.finishLoading();
-        skin = parent.assMan.manager.get("core/assets/flat/flat-earth-ui.json");
-        atlas= parent.assMan.manager.get("core/assets/loading/loading.atlas");
+        skin = parent.assMan.manager.get("flat/flat-earth-ui.json");
+        atlas= parent.assMan.manager.get("loading/loading.atlas");
         background = atlas.findRegion("BackgroundTile");
         title = atlas.findRegion("logo");
     }
