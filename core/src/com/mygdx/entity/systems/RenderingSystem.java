@@ -1,16 +1,22 @@
 package com.mygdx.entity.systems;
 
-import com.badlogic.ashley.core.*;
+import com.badlogic.ashley.core.ComponentMapper;
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.SortedIteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.tiled.*;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.mygdx.entity.components.*;
+import com.mygdx.entity.components.TextureComponent;
+import com.mygdx.entity.components.TransformComponent;
+import com.mygdx.entity.components.TypeComponent;
 
 import java.util.Comparator;
 
@@ -111,7 +117,7 @@ public class RenderingSystem extends SortedIteratingSystem {
             float height = tex.region.getRegionHeight();
 
             float originX = width / 2f;
-            float originY = height / (type.type == TypeComponent.BOMB ? 2f : 2.8f);
+            float originY = height / (type.type == TypeComponent.PLAYER ? 2.8f : 2f);
 
             batch.draw(tex.region,
                     t.position.x - originX, t.position.y - originY,
