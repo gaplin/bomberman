@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.entity.components.TextureComponent;
 import com.mygdx.entity.components.TransformComponent;
 import com.mygdx.entity.components.TypeComponent;
+import com.mygdx.game.BomberMan;
 
 import java.util.Comparator;
 
@@ -115,6 +116,25 @@ public class RenderingSystem extends SortedIteratingSystem {
 
             float width = tex.region.getRegionWidth();
             float height = tex.region.getRegionHeight();
+
+            switch(type.type){
+                case TypeComponent.PLAYER:
+                    width *= BomberMan.PLAYER_SCALE;
+                    height *= BomberMan.PLAYER_SCALE;
+                    break;
+                case TypeComponent.BOMB:
+                    width *= BomberMan.BOMB_SCALE;
+                    height *= BomberMan.BOMB_SCALE;
+                    break;
+                case TypeComponent.FLAME:
+                    width *= BomberMan.BOMB_SCALE;
+                    height *= BomberMan.BOMB_SCALE;
+                    break;
+                case TypeComponent.SCENERY:
+                    width *= BomberMan.SCENERY_SCALE;
+                    height *= BomberMan.SCENERY_SCALE;
+                    break;
+            }
 
             float originX = width / 2f;
             float originY = height / (type.type == TypeComponent.PLAYER ? 2.8f : 2f);
