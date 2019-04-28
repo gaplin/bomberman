@@ -82,7 +82,7 @@ public class MapSystem extends IteratingSystem {
 
             type.type = TypeComponent.SCENERY;
 
-            tranComp.position.set(tile.getX() / 32 + 0.45f, tile.getY() / 32 + 0.2f, 0);
+            tranComp.position.set(tile.getX() / 32 + 0.45f, tile.getY() / 32 + 0.2f, -1);
 
 
             ent.add(body);

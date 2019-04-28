@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.Fixture;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
 import com.mygdx.game.BomberMan;
@@ -56,34 +55,36 @@ public class BombSystem extends IteratingSystem {
 
             explosionSound.play(BomberMan.GAME_VOLUME);
 
+            FlameSystem flames = getEngine().getSystem(FlameSystem.class);
+
             try {
-                createFlame(pos.x, pos.y);
+                flames.createFlame(pos.x, pos.y);
             } catch(Exception ignored){}
 
             for(int i = 1; i <= bomb.range; i++){
                 try {
-                    createFlame(pos.x - (BomberMan.BOMB_RADIUS) * i, pos.y);
+                    flames.createFlame(pos.x - (BomberMan.BOMB_RADIUS) * i, pos.y);
                 } catch(Exception e) {
                     break;
                 }
             }
             for(int i = 1; i <= bomb.range; i++) {
                 try {
-                    createFlame(pos.x + (BomberMan.BOMB_RADIUS) * i, pos.y);
+                    flames.createFlame(pos.x + (BomberMan.BOMB_RADIUS) * i, pos.y);
                 } catch (Exception e) {
                     break;
                 }
             }
             for(int i = 1; i <= bomb.range; i++){
                 try {
-                    createFlame(pos.x, pos.y - (BomberMan.BOMB_RADIUS) * i);
+                    flames.createFlame(pos.x, pos.y - (BomberMan.BOMB_RADIUS) * i);
                 } catch(Exception e){
                     break;
                 }
             }
             for(int i = 1; i <= bomb.range; i++){
                 try {
-                    createFlame(pos.x, pos.y + (BomberMan.BOMB_RADIUS) * i);
+                    flames.createFlame(pos.x, pos.y + (BomberMan.BOMB_RADIUS) * i);
                 } catch(Exception e){
                     break;
                 }
@@ -92,14 +93,10 @@ public class BombSystem extends IteratingSystem {
 
     }
 
-    public void createFlame(float posX, float posY) throws Exception{
-        if(!MapSystem.checkBlock(posX, posY, "wall"))
-            throw new Exception();
-
+    public void createBomb(float posX, float posY, PlayerComponent player){
         PooledEngine engine = (PooledEngine) getEngine();
 
         Entity ent = engine.createEntity();
-
         BodyComponent bodyCom = engine.createComponent(BodyComponent.class);
         TransformComponent positionCom = engine.createComponent(TransformComponent.class);
         TextureComponent textureCom = engine.createComponent(TextureComponent.class);
@@ -107,25 +104,30 @@ public class BombSystem extends IteratingSystem {
         TypeComponent typeCom = engine.createComponent(TypeComponent.class);
         StateComponent stateCom = engine.createComponent(StateComponent.class);
         AnimationComponent animCom = engine.createComponent(AnimationComponent.class);
-        FlameComponent flameCom = engine.createComponent(FlameComponent.class);
+        BombComponent bombCom = engine.createComponent(BombComponent.class);
+
+        bombCom.forSomeone = true;
+
+        bombCom.range = player.bombPower;
+
+
 
         bodyCom.body = bodyFactory.makeCirclePolyBody(posX, posY, BomberMan.BOMB_RADIUS, BodyDef.BodyType.DynamicBody, true);
-        for(Fixture fix : bodyCom.body.getFixtureList())
-            fix.setSensor(true);
-
         bodyCom.body.setUserData(ent);
 
-        positionCom.position.set(posX, posY, -1);
+        positionCom.position.set(posX, posY, 1);
 
-        typeCom.type = TypeComponent.FLAME;
+
+        typeCom.type = TypeComponent.BOMB;
 
         stateCom.set(StateComponent.STATE_NORMAL);
         stateCom.isMoving = true;
-        stateCom.isLooping = true;
         stateCom.time = 0.0f;
+        stateCom.isLooping = false;
 
         animCom.animations.put(0,
-                new Animation<>(0.15f, atlas.findRegions("flame/flame")));
+                new Animation<>(1.0f, atlas.findRegions("bomb/Bomb")));
+        player.LastBombs.add(ent);
 
         ent.add(bodyCom);
         ent.add(positionCom);
@@ -134,9 +136,8 @@ public class BombSystem extends IteratingSystem {
         ent.add(typeCom);
         ent.add(stateCom);
         ent.add(animCom);
-        ent.add(flameCom);
+        ent.add(bombCom);
 
         engine.addEntity(ent);
     }
-
 }
