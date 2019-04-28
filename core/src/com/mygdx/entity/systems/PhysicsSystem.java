@@ -60,6 +60,7 @@ public class PhysicsSystem extends IteratingSystem {
                     bodyComp.toStatic = false;
                 }
             }
+            bodiesQueue.clear();
         }
 
     }

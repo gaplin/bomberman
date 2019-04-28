@@ -60,6 +60,10 @@ public class TestScreen implements Screen {
         engine.addSystem(new PlayerControlSystem(bodyFactory, atlas));
         engine.addSystem(new PhysicsSystem(world));
         engine.addSystem(new AnimationSystem());
+        engine.addSystem(new BombSystem(atlas, bodyFactory,
+                parent.assMan.manager.get("sounds/bombSound.mp3")));
+        engine.addSystem(new FlameSystem());
+        engine.addSystem(new CollisionSystem());
 
     }
 
@@ -107,6 +111,9 @@ public class TestScreen implements Screen {
                 new Animation<>(0.05f, atlas.findRegions("player/front/Bman_f")));
         animCom.animations.put(4,
                 new Animation<>(0.05f, atlas.findRegions("player/side/Bman_s")));
+
+        player.bombPower = BomberMan.STARTING_BOMB_POWER;
+        player.movementSpeed = BomberMan.STARTING_MOVEMENT_SPEED;
 
         entity.add(body);
         entity.add(position);

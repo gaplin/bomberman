@@ -50,7 +50,10 @@ public class BombSystem extends IteratingSystem {
             while(!bombBody.body.getFixtureList().isEmpty()){
                 bombBody.body.destroyFixture(bombBody.body.getFixtureList().first());
             }
+
             entity.removeAll();
+            getEngine().removeEntity(entity);
+
             explosionSound.play(BomberMan.GAME_VOLUME);
             createFlame(pos.x, pos.y);
             for(int i = 1; i <= bomb.range; i++){

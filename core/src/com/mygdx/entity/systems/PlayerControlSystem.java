@@ -50,42 +50,7 @@ public class PlayerControlSystem extends IteratingSystem {
             if(checkForCollision(body.body.getWorldCenter(), 0.01f)){
                 return;
             }
-            PooledEngine engine = (PooledEngine) getEngine();
-            Entity ent = engine.createEntity();
-            BodyComponent bd = engine.createComponent(BodyComponent.class);
-            TransformComponent position = engine.createComponent(TransformComponent.class);
-            TextureComponent texture = engine.createComponent(TextureComponent.class);
-            CollisionComponent colComp = engine.createComponent(CollisionComponent.class);
-            TypeComponent type = engine.createComponent(TypeComponent.class);
-            StateComponent stateCom = engine.createComponent(StateComponent.class);
-            AnimationComponent animCom = engine.createComponent(AnimationComponent.class);
-            BombComponent bomb = engine.createComponent(BombComponent.class);
-
-            bomb.forSomeone = true;
-
-
-            bd.body = bodyFactory.makeCirclePolyBody(transform.position.x, transform.position.y, 1.5f, BodyDef.BodyType.DynamicBody, true);
-            bd.body.setUserData(ent);
-            position.position.set(transform.position.x, transform.position.y, 0);
-            type.type = TypeComponent.BOMB;
-            stateCom.set(StateComponent.STATE_NORMAL);
-            stateCom.isMoving = true;
-            animCom.animations.put(0,
-                    new Animation<>(0.5f, atlas.findRegions("bomb/Bomb")));
-            player.LastBombs.add(ent);
-
             createBomb(transform.position.x, transform.position.y, player);
-
-            ent.add(bd);
-            ent.add(position);
-            ent.add(texture);
-            ent.add(colComp);
-            ent.add(type);
-            ent.add(stateCom);
-            ent.add(animCom);
-            ent.add(bomb);
-
-            getEngine().addEntity(ent);
         }
 
         if(Gdx.input.isKeyPressed(Input.Keys.UP)){

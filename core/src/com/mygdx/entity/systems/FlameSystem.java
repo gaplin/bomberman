@@ -33,6 +33,7 @@ public class FlameSystem extends IteratingSystem {
             while(!bodyCom.body.getFixtureList().isEmpty())
                 bodyCom.body.destroyFixture(bodyCom.body.getFixtureList().first());
             entity.removeAll();
+            getEngine().removeEntity(entity);
         }
     }
 }
