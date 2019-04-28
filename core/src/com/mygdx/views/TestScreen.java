@@ -30,11 +30,11 @@ import com.mygdx.listeners.GameContactListener;
 
 public class TestScreen implements Screen {
 
-    private BomberMan parent;
+    private static BomberMan parent;
     public static World world;
     private OrthographicCamera cam;
     private SpriteBatch sb;
-    private PooledEngine engine;
+    private static PooledEngine engine;
     BodyFactory bodyFactory;
     TextureAtlas atlas;
     FitViewport viewport;
@@ -148,5 +148,12 @@ public class TestScreen implements Screen {
 
     @Override
     public void dispose() {
+    }
+
+
+    public static void endGame(){
+        engine.removeAllEntities();
+        parent.testScreen = null;
+        parent.changeScreen(BomberMan.ENDGAME);
     }
 }

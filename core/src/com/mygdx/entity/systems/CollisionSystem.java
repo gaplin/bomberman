@@ -64,6 +64,11 @@ public class CollisionSystem extends IteratingSystem {
             getEngine().removeEntity(entity);
         }
 
+        PlayerComponent player = pc.get(entity);
+        if(player != null){
+            TestScreen.endGame();
+        }
+
     }
 
     private void flameBombCollision(Entity flame, Entity bomb){
