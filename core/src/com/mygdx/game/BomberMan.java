@@ -22,7 +22,7 @@ public class BomberMan extends Game {
 	public final static int PREFERENCES = 5;
 
 	public final static float STARTING_MOVEMENT_SPEED = 10f;
-	public final static int STARTING_BOMB_POWER = 2;
+	public final static int STARTING_BOMB_POWER = 1;
 	public final static float PLAYER_RADIUS = 1.8f;
 	public final static float BOMB_RADIUS = 1.5f;
 

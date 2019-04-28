@@ -3,10 +3,7 @@ package com.mygdx.listeners;
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.physics.box2d.*;
-import com.mygdx.entity.components.BodyComponent;
-import com.mygdx.entity.components.CollisionComponent;
-import com.mygdx.entity.components.PlayerComponent;
-import com.mygdx.entity.components.TypeComponent;
+import com.mygdx.entity.components.*;
 
 public class GameContactListener implements ContactListener {
     private ComponentMapper<TypeComponent> typeComponentComponentMapper;
@@ -76,6 +73,9 @@ public class GameContactListener implements ContactListener {
 
     public boolean beforeContact(Entity ent, Fixture fb){
         if(fb.getBody().getUserData() instanceof Entity){
+            //sprawdz czy ent nie jest blokiem
+            if(ent.getComponent(BlockComponent.class) != null)
+                return true;
             Entity colEnt = (Entity) fb.getBody().getUserData();
 
             BodyComponent bd;

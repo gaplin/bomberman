@@ -90,7 +90,7 @@ public class LoadingScreen implements Screen {
         parent.assMan.queueAddGameImages();
         parent.assMan.manager.finishLoading();
 
-        atlas = parent.assMan.manager.get("loading/loading.atlas");
+        atlas = parent.assMan.manager.get("core/assets/loading/loading.atlas");
         background = atlas.findRegion("BackgroundTile");
         loadingBomb = atlas.findRegion("loading-bomb");
     }

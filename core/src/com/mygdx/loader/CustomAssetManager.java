@@ -9,18 +9,18 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 public class CustomAssetManager {
     public final AssetManager manager = new AssetManager();
 
-    public final String skin = "flat/flat-earth-ui.json";
+    public final String skin = "core/assets/flat/flat-earth-ui.json";
 
-    public final String loadingImages = "loading/loading.atlas";
+    public final String loadingImages = "core/assets/loading/loading.atlas";
 
-    public final String buttonSound = "sounds/buttonSound.wav";
+    public final String buttonSound = "core/assets/sounds/buttonSound.wav";
 
-    public final String bombMenu = "sounds/bombSound.mp3";
+    public final String bombMenu = "core/assets/sounds/bombSound.mp3";
 
-    public final String gameImages = "game/game.atlas";
+    public final String gameImages = "core/assets/game/game.atlas";
 
     public void queueAddSkin(){
-        SkinLoader.SkinParameter params = new SkinLoader.SkinParameter("flat/flat-earth-ui.atlas");
+        SkinLoader.SkinParameter params = new SkinLoader.SkinParameter("core/assets/flat/flat-earth-ui.atlas");
         manager.load(skin, Skin.class, params);
     }
 

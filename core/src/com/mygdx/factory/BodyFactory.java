@@ -60,7 +60,6 @@ public class BodyFactory {
         poly.setAsBox(width / 2,height / 2);
         boxBody.createFixture(makeFixture(poly));
         poly.dispose();
-
         return boxBody;
     }
 

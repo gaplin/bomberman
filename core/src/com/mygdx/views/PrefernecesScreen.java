@@ -43,13 +43,13 @@ public class PrefernecesScreen extends ButtonsCount implements Screen {
     public PrefernecesScreen(BomberMan parent){
         super();
         this.parent = parent;
-        this.buttonSound1 = parent.assMan.manager.get("sounds/buttonSound.wav");
-        this.buttonSound2 = parent.assMan.manager.get("sounds/bombSound.mp3");
+        this.buttonSound1 = parent.assMan.manager.get("core/assets/sounds/buttonSound.wav");
+        this.buttonSound2 = parent.assMan.manager.get("core/assets/sounds/bombSound.mp3");
         sb = new SpriteBatch();
         sb.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-        skin = parent.assMan.manager.get("flat/flat-earth-ui.json");
-        atlas = parent.assMan.manager.get("loading/loading.atlas");
+        skin = parent.assMan.manager.get("core/assets/flat/flat-earth-ui.json");
+        atlas = parent.assMan.manager.get("core/assets/loading/loading.atlas");
         background = atlas.findRegion("BackgroundTile");
         loadingBomb = atlas.findRegion("loading-bomb");
     }

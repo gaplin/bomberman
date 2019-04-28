@@ -33,6 +33,7 @@ public class MapSystem extends IteratingSystem {
         engine = eng;
         map = RenderingSystem.getMap();
         createMap();
+        createBlocks();
     }
 
     @Override
@@ -43,7 +44,7 @@ public class MapSystem extends IteratingSystem {
 
     private void createMap() {
         MapObjects objs = map.getLayers().get("wall").getObjects();
-        Texture text = new Texture("map/SolidBlock.png");
+        Texture text = new Texture("core/assets/map/SolidBlock.png");
         TextureRegion texreg = new TextureRegion();
         texreg.setTexture(text);
         placeBlocks(objs, texreg, BlockComponent.WALL);
@@ -51,7 +52,7 @@ public class MapSystem extends IteratingSystem {
 
     private void createBlocks(){
         MapObjects objs = map.getLayers().get("destroyable").getObjects();
-        Texture text = new Texture("map/ExplodableBlock.png");
+        Texture text = new Texture("core/assets/map/ExplodableBlock.png");
         TextureRegion texreg = new TextureRegion();
         texreg.setTexture(text);
         placeBlocks(objs, texreg, BlockComponent.DESTROYABLE);
@@ -60,6 +61,7 @@ public class MapSystem extends IteratingSystem {
     private void placeBlocks(MapObjects objs, TextureRegion texreg, int blockType){
         for (MapObject o : objs) {
             TiledMapTileMapObject tile = (TiledMapTileMapObject) o;
+
             Entity ent = engine.createEntity();
             BodyComponent body = engine.createComponent(BodyComponent.class);
             CollisionComponent col = engine.createComponent(CollisionComponent.class);
@@ -67,27 +69,37 @@ public class MapSystem extends IteratingSystem {
             TextureComponent texture = engine.createComponent(TextureComponent.class);
             TransformComponent tranComp = engine.createComponent(TransformComponent.class);
             BlockComponent mapComp = engine.createComponent(BlockComponent.class);
+            StateComponent stateComp = engine.createComponent(StateComponent.class);
 
             mapComp.type = blockType;
-            texture.region = texreg;
+
             body.body = bodyFactory.makeBoxPolyBody(tile.getX() / 32 + 0.45f, tile.getY() / 32 + 0.2f, 0.9f, 0.9f, BodyDef.BodyType.StaticBody, false);
+            body.body.setUserData(ent);
+
+            texture.region = texreg;
             texture.region.setRegionX(35);
             texture.region.setRegionY(35);
+
             type.type = TypeComponent.SCENERY;
+
+            tranComp.position.set(tile.getX() / 32 + 0.45f, tile.getY() / 32 + 0.2f, 0);
+
 
             ent.add(body);
             ent.add(col);
             ent.add(type);
             ent.add(texture);
             ent.add(tranComp);
+            ent.add(mapComp);
+            ent.add(stateComp);
 
             engine.addEntity(ent);
         }
     }
 
 
-    public static boolean checkBlock(float posx,float posy){
-        MapObjects objects = map.getLayers().get("wall").getObjects();
+    public static boolean checkBlock(float posx,float posy, String name){
+        MapObjects objects = map.getLayers().get(name).getObjects();
         float width = 0.9f;
         float height = 0.9f;
 

@@ -76,7 +76,7 @@ public class RenderingSystem extends SortedIteratingSystem {
         viewport = new FitViewport(FRUSTUM_WIDTH, FRUSTUM_HEIGHT, cam);
         cam.position.set(FRUSTUM_WIDTH / 2f, FRUSTUM_HEIGHT / 2f, 0);
 
-        map = new TmxMapLoader().load("map/map.tmx");
+        map = new TmxMapLoader().load("core/assets/map/map.tmx");
         renderer = new OrthogonalTiledMapRenderer(map, 1f / 32f );
 
     }

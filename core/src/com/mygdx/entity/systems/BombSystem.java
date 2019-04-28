@@ -93,7 +93,7 @@ public class BombSystem extends IteratingSystem {
     }
 
     public void createFlame(float posX, float posY) throws Exception{
-        if(!MapSystem.checkBlock(posX, posY))
+        if(!MapSystem.checkBlock(posX, posY, "wall"))
             throw new Exception();
 
         PooledEngine engine = (PooledEngine) getEngine();

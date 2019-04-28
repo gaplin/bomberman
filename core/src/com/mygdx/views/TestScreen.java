@@ -46,7 +46,7 @@ public class TestScreen implements Screen {
         world.setContactListener(new GameContactListener());
         sb = new SpriteBatch();
         bodyFactory = BodyFactory.getInstance(world);
-        atlas = parent.assMan.manager.get("game/game.atlas");
+        atlas = parent.assMan.manager.get("core/assets/game/game.atlas");
 
         RenderingSystem renderingSystem = new RenderingSystem(sb);
         cam = renderingSystem.getCamera();
@@ -61,7 +61,7 @@ public class TestScreen implements Screen {
         engine.addSystem(new PhysicsSystem(world));
         engine.addSystem(new AnimationSystem());
         engine.addSystem(new BombSystem(atlas, bodyFactory,
-                parent.assMan.manager.get("sounds/bombSound.mp3")));
+                parent.assMan.manager.get("core/assets/sounds/bombSound.mp3")));
         engine.addSystem(new FlameSystem());
         engine.addSystem(new CollisionSystem());
         engine.addSystem(new MapSystem(bodyFactory, engine));
