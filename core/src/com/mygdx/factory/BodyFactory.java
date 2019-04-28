@@ -43,6 +43,7 @@ public class BodyFactory {
         circleShape.setRadius(radius /2);
         boxBody.createFixture(makeFixture(circleShape));
         circleShape.dispose();
+
         return boxBody;
     }
 

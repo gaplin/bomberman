@@ -55,17 +55,47 @@ public class BombSystem extends IteratingSystem {
             getEngine().removeEntity(entity);
 
             explosionSound.play(BomberMan.GAME_VOLUME);
-            createFlame(pos.x, pos.y);
+
+            try {
+                createFlame(pos.x, pos.y);
+            } catch(Exception ignored){}
+
             for(int i = 1; i <= bomb.range; i++){
-                createFlame(pos.x - (BomberMan.BOMB_RADIUS) * i, pos.y);
-                createFlame(pos.x + (BomberMan.BOMB_RADIUS) * i, pos.y);
-                createFlame(pos.x, pos.y - (BomberMan.BOMB_RADIUS) * i);
-                createFlame(pos.x, pos.y + (BomberMan.BOMB_RADIUS) * i);
+                try {
+                    createFlame(pos.x - (BomberMan.BOMB_RADIUS) * i, pos.y);
+                } catch(Exception e) {
+                    break;
+                }
+            }
+            for(int i = 1; i <= bomb.range; i++) {
+                try {
+                    createFlame(pos.x + (BomberMan.BOMB_RADIUS) * i, pos.y);
+                } catch (Exception e) {
+                    break;
+                }
+            }
+            for(int i = 1; i <= bomb.range; i++){
+                try {
+                    createFlame(pos.x, pos.y - (BomberMan.BOMB_RADIUS) * i);
+                } catch(Exception e){
+                    break;
+                }
+            }
+            for(int i = 1; i <= bomb.range; i++){
+                try {
+                    createFlame(pos.x, pos.y + (BomberMan.BOMB_RADIUS) * i);
+                } catch(Exception e){
+                    break;
+                }
             }
         }
+
     }
 
-    public void createFlame(float posX, float posY){
+    public void createFlame(float posX, float posY) throws Exception{
+        if(!MapSystem.checkBlock(posX, posY))
+            throw new Exception();
+
         PooledEngine engine = (PooledEngine) getEngine();
 
         Entity ent = engine.createEntity();

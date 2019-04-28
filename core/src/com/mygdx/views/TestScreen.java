@@ -64,13 +64,13 @@ public class TestScreen implements Screen {
                 parent.assMan.manager.get("sounds/bombSound.mp3")));
         engine.addSystem(new FlameSystem());
         engine.addSystem(new CollisionSystem());
+        engine.addSystem(new MapSystem(bodyFactory, engine));
 
     }
 
     @Override
     public void show() {
         createPlayer();
-        createMap();
     }
 
     @Override
@@ -126,37 +126,6 @@ public class TestScreen implements Screen {
 
 
         engine.addEntity(entity);
-    }
-
-    private void createMap(){
-        TiledMap map = RenderingSystem.getMap();
-        MapObjects obj = map.getLayers().get("wall").getObjects();
-        Texture text = new Texture("map/SolidBlock.png");
-        TextureRegion texreg = new TextureRegion();
-        texreg.setTexture(text);
-        for(MapObject o : obj){
-            TiledMapTileMapObject tile = (TiledMapTileMapObject) o;
-            Entity ent = engine.createEntity();
-            BodyComponent body = engine.createComponent(BodyComponent.class);
-            CollisionComponent col = engine.createComponent(CollisionComponent.class);
-            TypeComponent type = engine.createComponent(TypeComponent.class);
-            TextureComponent texture = engine.createComponent(TextureComponent.class);
-            TransformComponent tranComp = engine.createComponent(TransformComponent.class);
-
-            texture.region = texreg;
-            body.body = bodyFactory.makeBoxPolyBody(tile.getX() / 32 + 0.45f, tile.getY() / 32 + 0.2f, 0.9f, 0.9f, BodyDef.BodyType.StaticBody, false);
-            texture.region.setRegionX(35);
-            texture.region.setRegionY(35);
-            type.type = TypeComponent.SCENERY;
-
-            ent.add(body);
-            ent.add(col);
-            ent.add(type);
-            ent.add(texture);
-            ent.add(tranComp);
-
-            engine.addEntity(ent);
-        }
     }
 
     @Override
