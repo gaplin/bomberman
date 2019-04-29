@@ -4,11 +4,8 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
-import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
 import com.mygdx.entity.components.*;
 import com.mygdx.views.GameScreen;
-import com.mygdx.views.TestScreen;
 
 public class CollisionSystem extends IteratingSystem {
 
