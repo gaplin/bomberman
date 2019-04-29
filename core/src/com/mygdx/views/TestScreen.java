@@ -7,15 +7,9 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.MapObjects;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
@@ -57,12 +51,12 @@ public class TestScreen implements Screen {
 
         engine.addSystem(renderingSystem);
         engine.addSystem(new PhysicsDebugSystem(world, cam));
-        engine.addSystem(new PlayerControlSystem(bodyFactory, atlas));
+        engine.addSystem(new PlayerSystem(bodyFactory, atlas, engine));
         engine.addSystem(new PhysicsSystem(world));
         engine.addSystem(new AnimationSystem());
         engine.addSystem(new BombSystem(atlas, bodyFactory,
                 parent.assMan.manager.get("sounds/bombSound.mp3")));
-        engine.addSystem(new FlameSystem());
+        engine.addSystem(new FlameSystem(atlas, bodyFactory));
         engine.addSystem(new CollisionSystem());
         engine.addSystem(new MapSystem(bodyFactory, engine));
 
@@ -81,7 +75,6 @@ public class TestScreen implements Screen {
         if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !world.isLocked()){
             parent.changeScreen(BomberMan.LEVELS);
             engine.removeAllEntities();
-            parent.testScreen = null;
         }
     }
 
@@ -148,12 +141,5 @@ public class TestScreen implements Screen {
 
     @Override
     public void dispose() {
-    }
-
-
-    public static void endGame(){
-        engine.removeAllEntities();
-        parent.testScreen = null;
-        parent.changeScreen(BomberMan.ENDGAME);
     }
 }

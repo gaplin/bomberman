@@ -20,11 +20,11 @@ import com.mygdx.listeners.GameContactListener;
 
 public class GameScreen implements Screen {
 
-    private BomberMan parent;
+    private static BomberMan parent;
     public static World world;
     private OrthographicCamera cam;
     private SpriteBatch sb;
-    private PooledEngine engine;
+    private static PooledEngine engine;
     BodyFactory bodyFactory;
     TextureAtlas atlas;
     FitViewport viewport;
@@ -67,7 +67,7 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(1f, 0f, 0f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         engine.update(delta);
-        if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !world.isLocked()){
+        if((Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !world.isLocked())){
             parent.changeScreen(BomberMan.LEVELS);
             engine.removeAllEntities();
             parent.gameScreen = null;
@@ -94,5 +94,14 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
+
+    }
+
+
+    // Temporary solution, changed engine and parent to static for this
+    public static void endGame(){
+        parent.changeScreen(BomberMan.ENDGAME);
+        engine.removeAllEntities();
+        parent.gameScreen = null;
     }
 }

@@ -17,13 +17,15 @@ import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.game.BomberMan;
 
+
+
 public class EndScreen extends ButtonsCount implements Screen {
     private BomberMan parent;
     private Stage stage;
+    private Table table;
     private Skin skin;
     private TextureAtlas atlas;
     private TextureAtlas.AtlasRegion background;
-    private Table table;
     private Sound buttonSound1;
     private Sound buttonSound2;
     private Label title;
@@ -61,13 +63,12 @@ public class EndScreen extends ButtonsCount implements Screen {
         table.add(newGame).fillX().uniformX().width(300);
         table.row().pad(50, 0, 0, 0);
         table.add(menu).fillX().uniformX().width(300);
-        table.row().pad(50, 0, 0, 0);
 
         newGame.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 buttonSound2.play(BomberMan.MENU_VOLUME);
-                parent.changeScreen(BomberMan.TEST);
+                parent.changeScreen(BomberMan.GAME);
             }
         });
 
@@ -79,14 +80,12 @@ public class EndScreen extends ButtonsCount implements Screen {
             }
         });
 
-
     }
 
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN) && pressed == -1) {
             pointer = (pointer + 1) % nButtons;
@@ -99,7 +98,6 @@ public class EndScreen extends ButtonsCount implements Screen {
 
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1/30f));
         stage.draw();
-
     }
 
     @Override
