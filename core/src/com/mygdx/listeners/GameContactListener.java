@@ -1,125 +1,61 @@
 package com.mygdx.listeners;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.physics.box2d.*;
-import com.mygdx.entity.components.*;
+import com.mygdx.entity.Mappers;
+import com.mygdx.entity.components.BlockComponent;
+import com.mygdx.entity.components.BombComponent;
+import com.mygdx.entity.components.StateComponent;
+import com.mygdx.game.BomberMan;
+import com.mygdx.views.GameScreen;
 
 public class GameContactListener implements ContactListener {
-    private ComponentMapper<TypeComponent> typeComponentComponentMapper;
 
     public GameContactListener(){
         super();
-        typeComponentComponentMapper = ComponentMapper.getFor(TypeComponent.class);
     }
 
     @Override
     public void beginContact(Contact contact) {
-        Fixture fa = contact.getFixtureA();
-        Fixture fb = contact.getFixtureB();
-
-        if(fa.getBody().getUserData() instanceof Entity){
-            Entity ent = (Entity)fa.getBody().getUserData();
-            entityCollision(ent, fb);
-            return;
+        Fixture fA = contact.getFixtureA();
+        Fixture fB = contact.getFixtureB();
+        if(fA.getFilterData().categoryBits == BomberMan.FLAME_BIT){
+            flameContact((Entity)fA.getBody().getUserData(), fB);
         }
-        else if(fb.getBody().getUserData() instanceof Entity){
-            Entity ent = (Entity)fb.getBody().getUserData();
-            entityCollision(ent, fa);
-            return;
+        if(fB.getFilterData().categoryBits == BomberMan.FLAME_BIT){
+            flameContact((Entity)fB.getBody().getUserData(), fA);
         }
     }
 
-    private void entityCollision(Entity ent, Fixture fb) {
-        if(fb.getBody().getUserData() instanceof Entity){
-            Entity colEnt = (Entity) fb.getBody().getUserData();
+    private void flameContact(Entity flame, Fixture second){
+        if(!(second.getBody().getUserData() instanceof Entity))
+            return;
 
-            CollisionComponent col = ent.getComponent(CollisionComponent.class);
-            CollisionComponent colb = colEnt.getComponent(CollisionComponent.class);
-
-            if(col != null){
-                col.collisionEntity.addLast(colEnt);
-            }else if(colb != null){
-                colb.collisionEntity.addLast(ent);
-            }
-        }
-    }
-
-    private void entityStopCollision(Entity ent, Fixture fb){
-        if(fb.getBody().getUserData() instanceof Entity){
-            Entity colEnt = (Entity) fb.getBody().getUserData();
-            PlayerComponent player = ent.getComponent(PlayerComponent.class);
-            if(player != null)
-                player.LastBombs.remove(colEnt);
+        Entity entity = (Entity)second.getBody().getUserData();
+        switch(second.getFilterData().categoryBits){
+            case BomberMan.DESTRUCTIBLE_BIT:
+                BlockComponent block = Mappers.blockMapper.get(entity);
+                block.toDestroy = true;
+                break;
+            case BomberMan.BOMB_BIT:
+                BombComponent bomb = Mappers.bombMapper.get(entity);
+                StateComponent state = Mappers.stateMapper.get(entity);
+                state.time = bomb.detonationTime;
+                break;
+            case BomberMan.PLAYER_BIT:
+                GameScreen.endGame();
+                break;
         }
     }
 
     @Override
     public void endContact(Contact contact) {
-        Fixture fa = contact.getFixtureA();
-        Fixture fb = contact.getFixtureB();
-
-        if(fa.getBody().getUserData() instanceof Entity){
-            Entity ent = (Entity)fa.getBody().getUserData();
-            entityStopCollision(ent, fb);
-            return;
-        }
-        else if(fb.getBody().getUserData() instanceof Entity){
-            Entity ent = (Entity)fb.getBody().getUserData();
-            entityStopCollision(ent, fa);
-            return;
-        }
     }
 
-    public boolean beforeContact(Entity ent, Fixture fb){
-        if(fb.getBody().getUserData() instanceof Entity){
-            //sprawdz czy ent nie jest blokiem
-            if(ent.getComponent(BlockComponent.class) != null)
-                return true;
-            Entity colEnt = (Entity) fb.getBody().getUserData();
 
-            BodyComponent bd;
-
-            PlayerComponent player = ent.getComponent(PlayerComponent.class);
-            if(player != null) {
-                bd = colEnt.getComponent(BodyComponent.class);
-            }
-            else{
-                player = colEnt.getComponent(PlayerComponent.class);
-                bd = ent.getComponent(BodyComponent.class);
-            }
-
-            if(player == null || bd == null)
-                return true;
-
-            if(player.LastBombs.contains(colEnt)) {
-                bd.toStatic = true;
-                return false;
-            }
-            if(player.canMoveBombs){
-                bd.toDynamic = true;
-            }
-            else{
-                bd.toStatic = true;
-            }
-        }
-        return true;
-    }
 
     @Override
     public void preSolve(Contact contact, Manifold oldManifold) {
-        Fixture fa = contact.getFixtureA();
-        Fixture fb = contact.getFixtureB();
-
-        if(fa.getBody().getUserData() instanceof Entity){
-            Entity ent = (Entity)fa.getBody().getUserData();
-            contact.setEnabled(beforeContact(ent, fb));
-        }
-        else if(fb.getBody().getUserData() instanceof Entity){
-            Entity ent = (Entity)fb.getBody().getUserData();
-            contact.setEnabled(beforeContact(ent, fa));
-        }
-
     }
 
     @Override

@@ -53,7 +53,7 @@ public class GameScreen implements Screen {
         engine.addSystem(new BombSystem(atlas, bodyFactory,
                 parent.assMan.manager.get("sounds/bombSound.mp3")));
         engine.addSystem(new FlameSystem(atlas, bodyFactory));
-        engine.addSystem(new CollisionSystem());
+        engine.addSystem(new GarbageSystem());
         engine.addSystem(new MapSystem(bodyFactory, engine));
 
     }

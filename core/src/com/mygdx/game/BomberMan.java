@@ -19,6 +19,13 @@ public class BomberMan extends Game {
 	public final static int ENDGAME = 3;
 	public final static int PREFERENCES = 4;
 
+	public static final short PLAYER_BIT = 1;
+	public static final short BOMB_BIT = 1 << 1;
+	public static final short DESTRUCTIBLE_BIT = 1 << 2;
+	public static final short INDESTRUCTIBLE_BIT = 1 << 3;
+	public static final short FLAME_BIT = 1 << 4;
+
+
 	public static final float GAME_SCALE = 1f;
 
 	public static final float PLAYER_SCALE = 1f * GAME_SCALE;

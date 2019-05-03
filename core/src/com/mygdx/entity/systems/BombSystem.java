@@ -1,6 +1,5 @@
 package com.mygdx.entity.systems;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
@@ -9,7 +8,11 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.RayCastCallback;
+import com.badlogic.gdx.physics.box2d.World;
+import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
 import com.mygdx.game.BomberMan;
@@ -17,9 +20,6 @@ import com.mygdx.game.BomberMan;
 
 public class BombSystem extends IteratingSystem {
 
-    private ComponentMapper<BombComponent> bm;
-    private ComponentMapper<StateComponent> sc;
-    private ComponentMapper<BodyComponent> bc;
 
     private BodyFactory bodyFactory;
 
@@ -27,12 +27,10 @@ public class BombSystem extends IteratingSystem {
 
     private Sound explosionSound;
 
+    private boolean moving = true;
+
     public BombSystem(TextureAtlas atlas, BodyFactory bodyFactory, Sound explosionSound){
         super(Family.all(BombComponent.class, StateComponent.class).get());
-
-        bm = ComponentMapper.getFor(BombComponent.class);
-        sc = ComponentMapper.getFor(StateComponent.class);
-        bc = ComponentMapper.getFor(BodyComponent.class);
 
         this.bodyFactory = bodyFactory;
         this.atlas = atlas;
@@ -41,16 +39,26 @@ public class BombSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        StateComponent bombState = sc.get(entity);
-        BombComponent bomb = bm.get(entity);
-        if(bombState.time >= bomb.detonationTime) {
-            BodyComponent bombBody = bc.get(entity);
-            Vector2 pos = bombBody.body.getWorldCenter();
-            while(!bombBody.body.getFixtureList().isEmpty()){
-                bombBody.body.destroyFixture(bombBody.body.getFixtureList().first());
-            }
+        BodyComponent bombBody = Mappers.bodyMapper.get(entity);
 
-            entity.removeAll();
+        Body body = bombBody.body;
+        Vector2 speed = body.getLinearVelocity();
+        if(speed.x < 0.0f && horizontalHit(entity, -1)){
+            body.setLinearVelocity(0.0f, 0.0f);
+        } else if(speed.x > 0.0f && horizontalHit(entity, 1)){
+            body.setLinearVelocity(0.0f, 0.0f);
+        } else if(speed.y < 0.0f && verticalHit(entity, -1)){
+            body.setLinearVelocity(0.0f, 0.0f);
+        } else if(speed.y > 0.0f && verticalHit(entity, 1)){
+            body.setLinearVelocity(0.0f, 0.0f);
+        }
+
+        StateComponent bombState = Mappers.stateMapper.get(entity);
+        BombComponent bomb = Mappers.bombMapper.get(entity);
+        if(bombState.time >= bomb.detonationTime) {
+            Vector2 pos = bombBody.body.getWorldCenter();
+
+            bombBody.body.getWorld().destroyBody(bombBody.body);
             getEngine().removeEntity(entity);
 
             explosionSound.play(BomberMan.GAME_VOLUME);
@@ -93,6 +101,64 @@ public class BombSystem extends IteratingSystem {
 
     }
 
+
+
+    private boolean canMove(Entity entity, Vector2 from, Vector2 to){
+        BodyComponent bodyComp = Mappers.bodyMapper.get(entity);
+        Body body = bodyComp.body;
+        World world = body.getWorld();
+        moving = true;
+        RayCastCallback rayCastCallback = new RayCastCallback() {
+            @Override
+            public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
+                if(fixture.getBody() == body)
+                    return 1;
+                if(fixture.getFilterData().categoryBits == BomberMan.PLAYER_BIT ||
+                 fixture.getFilterData().categoryBits == BomberMan.INDESTRUCTIBLE_BIT ||
+                 fixture.getFilterData().categoryBits == BomberMan.DESTRUCTIBLE_BIT ||
+                fixture.getFilterData().categoryBits == BomberMan.BOMB_BIT
+                ){
+                    moving = false;
+                    return 0;
+                }
+                return 0;
+            }
+        };
+        world.rayCast(rayCastCallback, from, to);
+        return moving;
+    }
+
+    public boolean verticalHit(Entity entity, float mod){
+        BodyComponent bodyCom = Mappers.bodyMapper.get(entity);
+        Body body = bodyCom.body;
+        float distance = BomberMan.BOMB_RADIUS / 2f * mod;
+        float radius = BomberMan.BOMB_RADIUS / 2f;
+        float posX = body.getPosition().x;
+        float posY = body.getPosition().y;
+        Vector2 newPosition = new Vector2(posX, posY + distance);
+        return !canMove(entity, body.getPosition(), newPosition) ||
+                !canMove(entity, new Vector2(posX + radius, posY),
+                        new Vector2(posX + radius, newPosition.y)) ||
+                !canMove(entity, new Vector2(posX - radius, posY),
+                        new Vector2(posX - radius, newPosition.y));
+    }
+
+    public boolean horizontalHit(Entity entity, float mod){
+        BodyComponent bodyCom = Mappers.bodyMapper.get(entity);
+        Body body = bodyCom.body;
+        float distance = BomberMan.BOMB_RADIUS / 2f * mod;
+        float radius = BomberMan.BOMB_RADIUS / 2f;
+        float posX = body.getPosition().x;
+        float posY = body.getPosition().y;
+        Vector2 newPosition = new Vector2(posX + distance, posY);
+        return !canMove(entity, body.getPosition(), newPosition) ||
+                !canMove(entity, new Vector2(posX, posY + radius),
+                        new Vector2(newPosition.x, posY + radius)) ||
+                !canMove(entity, new Vector2(posX, posY - radius),
+                        new Vector2(newPosition.x, posY - radius));
+    }
+
+
     public void createBomb(float posX, float posY, PlayerComponent player){
         PooledEngine engine = (PooledEngine) getEngine();
 
@@ -100,7 +166,6 @@ public class BombSystem extends IteratingSystem {
         BodyComponent bodyCom = engine.createComponent(BodyComponent.class);
         TransformComponent positionCom = engine.createComponent(TransformComponent.class);
         TextureComponent textureCom = engine.createComponent(TextureComponent.class);
-        CollisionComponent colComp = engine.createComponent(CollisionComponent.class);
         TypeComponent typeCom = engine.createComponent(TypeComponent.class);
         StateComponent stateCom = engine.createComponent(StateComponent.class);
         AnimationComponent animCom = engine.createComponent(AnimationComponent.class);
@@ -112,7 +177,7 @@ public class BombSystem extends IteratingSystem {
 
 
 
-        bodyCom.body = bodyFactory.makeCirclePolyBody(posX, posY, BomberMan.BOMB_RADIUS, BodyDef.BodyType.DynamicBody, true);
+        bodyCom.body = bodyFactory.makeBomb(posX, posY);
         bodyCom.body.setUserData(ent);
 
         positionCom.position.set(posX, posY, 1);
@@ -127,12 +192,10 @@ public class BombSystem extends IteratingSystem {
 
         animCom.animations.put(0,
                 new Animation<>(1.0f, atlas.findRegions("bomb/Bomb")));
-        player.LastBombs.add(ent);
 
         ent.add(bodyCom);
         ent.add(positionCom);
         ent.add(textureCom);
-        ent.add(colComp);
         ent.add(typeCom);
         ent.add(stateCom);
         ent.add(animCom);

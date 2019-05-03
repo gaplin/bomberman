@@ -1,6 +1,5 @@
 package com.mygdx.entity.systems;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
@@ -11,14 +10,13 @@ import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
-import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
 import com.mygdx.game.BomberMan;
 
 public class MapSystem extends IteratingSystem {
 
-    private ComponentMapper<BlockComponent> mc;
 
     private static TiledMap map;
     private BodyFactory bodyFactory;
@@ -27,7 +25,6 @@ public class MapSystem extends IteratingSystem {
     public MapSystem(BodyFactory bf, PooledEngine eng) {
         super(Family.all(BlockComponent.class).get());
 
-        mc = ComponentMapper.getFor(BlockComponent.class);
 
         bodyFactory = bf;
         engine = eng;
@@ -38,7 +35,7 @@ public class MapSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        BlockComponent block = mc.get(entity);
+        BlockComponent block = Mappers.blockMapper.get(entity);
 
     }
 
@@ -64,7 +61,6 @@ public class MapSystem extends IteratingSystem {
 
             Entity ent = engine.createEntity();
             BodyComponent body = engine.createComponent(BodyComponent.class);
-            CollisionComponent col = engine.createComponent(CollisionComponent.class);
             TypeComponent type = engine.createComponent(TypeComponent.class);
             TextureComponent texture = engine.createComponent(TextureComponent.class);
             TransformComponent tranComp = engine.createComponent(TransformComponent.class);
@@ -73,7 +69,12 @@ public class MapSystem extends IteratingSystem {
 
             mapComp.type = blockType;
 
-            body.body = bodyFactory.makeBoxPolyBody(tile.getX() / 32 + 0.45f, tile.getY() / 32 + 0.2f, BomberMan.TILE_WIDTH, BomberMan.TILE_HEIGHT, BodyDef.BodyType.StaticBody, false);
+            if(blockType == BlockComponent.DESTROYABLE){
+                body.body = bodyFactory.makeDestroyableBlock(tile.getX() / 32 + 0.45f, tile.getY() / 32 + 0.2f);
+            }
+            else{
+                body.body = bodyFactory.makeWall(tile.getX() / 32 + 0.45f, tile.getY() / 32 + 0.2f);
+            }
             body.body.setUserData(ent);
 
             texture.region = texreg;
@@ -86,7 +87,6 @@ public class MapSystem extends IteratingSystem {
 
 
             ent.add(body);
-            ent.add(col);
             ent.add(type);
             ent.add(texture);
             ent.add(tranComp);

@@ -1,6 +1,5 @@
 package com.mygdx.entity.systems;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
@@ -10,21 +9,22 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.RayCastCallback;
+import com.badlogic.gdx.physics.box2d.World;
+import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
 import com.mygdx.game.BomberMan;
 
 
 public class PlayerSystem extends IteratingSystem {
-    private ComponentMapper<PlayerComponent> pm;
-    private ComponentMapper<BodyComponent> bodm;
-    private ComponentMapper<StateComponent> sm;
-    private ComponentMapper<TransformComponent> tm;
     private TextureAtlas atlas;
 
     private BodyFactory bodyFactory;
     private PooledEngine engine;
+    private boolean move = false;
 
     public PlayerSystem(BodyFactory bodyFactory, TextureAtlas atlas, PooledEngine engine){
         super(Family.all(PlayerComponent.class).get());
@@ -32,46 +32,42 @@ public class PlayerSystem extends IteratingSystem {
         this.atlas = atlas;
         this.engine = engine;
 
-        createPlayer(4.0f, 4.0f);
-
-        pm = ComponentMapper.getFor(PlayerComponent.class);
-        bodm = ComponentMapper.getFor(BodyComponent.class);
-        sm = ComponentMapper.getFor(StateComponent.class);
-        tm = ComponentMapper.getFor(TransformComponent.class);
+        createPlayer(1.0f, 1.0f);
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        BodyComponent body = bodm.get(entity);
-        StateComponent state = sm.get(entity);
-        PlayerComponent player = pm.get(entity);
-        TransformComponent transform = tm.get(entity);
+        BodyComponent body = Mappers.bodyMapper.get(entity);
+        StateComponent state = Mappers.stateMapper.get(entity);
+        PlayerComponent player = Mappers.playerMapper.get(entity);
+        TransformComponent transform = Mappers.transformMapper.get(entity);
+        Vector2 playerPos = new Vector2(transform.position.x, transform.position.y);
         if(player == null)
             return;
 
         state.isMoving = body.body.getLinearVelocity().y != 0 || body.body.getLinearVelocity().x != 0;
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
-            if(checkForCollision(body.body.getWorldCenter(), BomberMan.BOMB_RADIUS / 8f)){
+            if(checkForCollision(new Vector2(transform.position.x, transform.position.y), BomberMan.BOMB_RADIUS / 2f)){
                 return;
             }
             getEngine().getSystem(BombSystem.class).createBomb(transform.position.x, transform.position.y, player);
         }
 
-        if(Gdx.input.isKeyPressed(Input.Keys.UP)){
+        if(Gdx.input.isKeyPressed(Input.Keys.UP) && !verticalHit(entity, 1)){
             body.body.setLinearVelocity(0, player.movementSpeed);
             state.set(StateComponent.STATE_MOVING_UP);
         }
-        else if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+        else if(Gdx.input.isKeyPressed(Input.Keys.LEFT) && !horizontalHit(entity, -1)){
             body.body.setLinearVelocity(-player.movementSpeed, 0);
             state.set(StateComponent.STATE_MOVING_LEFT);
 
         }
-        else if(Gdx.input.isKeyPressed(Input.Keys.DOWN)){
+        else if(Gdx.input.isKeyPressed(Input.Keys.DOWN) && !verticalHit(entity, -1)){
             body.body.setLinearVelocity(0, -player.movementSpeed);
             state.set(StateComponent.STATE_MOVING_DOWN);
         }
-        else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+        else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) && !horizontalHit(entity, 1)){
             body.body.setLinearVelocity(player.movementSpeed, 0);
             state.set(StateComponent.STATE_MOVING_RIGHT);
         }
@@ -82,19 +78,81 @@ public class PlayerSystem extends IteratingSystem {
     }
 
 
+
+    private boolean canMove(Entity player, Vector2 from, Vector2 to, Vector2 bombSpeed){
+        PlayerComponent playerComp = Mappers.playerMapper.get(player);
+        BodyComponent bd = Mappers.bodyMapper.get(player);
+        Body body = bd.body;
+        World world = body.getWorld();
+        move = true;
+        RayCastCallback rayCastCallback = new RayCastCallback() {
+            @Override
+            public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
+                if(fixture.getBody() == body)
+                    return 1;
+                if(fixture.getFilterData().categoryBits == BomberMan.BOMB_BIT){
+                    move = false;
+                    if(playerComp.canMoveBombs){
+                        BombSystem bombSystem = getEngine().getSystem(BombSystem.class);
+                        Entity bomb = (Entity)fixture.getBody().getUserData();
+                        if(bombSpeed.x < 0 && bombSystem.horizontalHit(bomb, -1)){
+                            return 0;
+                        }
+                        else if(bombSpeed.x > 0 && bombSystem.horizontalHit(bomb, 1)){
+                            return 0;
+                        }
+                        else if(bombSpeed.y < 0 && bombSystem.verticalHit(bomb, -1)){
+                            return 0;
+                        }
+                        else if(bombSpeed.y > 0 && bombSystem.verticalHit(bomb, 1)){
+                            return 0;
+                        }
+                        fixture.getBody().setLinearVelocity(bombSpeed);
+                    }
+                    return 0;
+                }
+                return 1;
+            }
+        };
+        world.rayCast(rayCastCallback, from, to);
+        return move;
+    }
+
+
+    public boolean verticalHit(Entity entity, float mod){
+        PlayerComponent player = Mappers.playerMapper.get(entity);
+        TransformComponent transform = Mappers.transformMapper.get(entity);
+        float distance = BomberMan.PLAYER_RADIUS * mod;
+        float posX = transform.position.x;
+        float posY = transform.position.y;
+        Vector2 newPosition = new Vector2(posX, posY + distance);
+        Vector2 bombSpeed = new Vector2(0.0f, (player.movementSpeed + 2.0f) * mod);
+        return !canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed);
+    }
+
+    public boolean horizontalHit(Entity entity, float mod){
+        PlayerComponent player = Mappers.playerMapper.get(entity);
+        TransformComponent transform = Mappers.transformMapper.get(entity);
+        float distance = BomberMan.PLAYER_RADIUS * mod;
+        float posX = transform.position.x;
+        float posY = transform.position.y;
+        Vector2 newPosition = new Vector2(posX + distance, posY);
+        Vector2 bombSpeed = new Vector2((player.movementSpeed + 2.0f) * mod, 0.0f);
+        return !canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed);
+    }
+
     public void createPlayer(float posX, float posY){
         Entity entity = engine.createEntity();
         BodyComponent body = engine.createComponent(BodyComponent.class);
         TransformComponent position = engine.createComponent(TransformComponent.class);
         TextureComponent texture = engine.createComponent(TextureComponent.class);
         PlayerComponent player = engine.createComponent(PlayerComponent.class);
-        CollisionComponent colComp = engine.createComponent(CollisionComponent.class);
         TypeComponent type = engine.createComponent(TypeComponent.class);
         StateComponent stateCom = engine.createComponent(StateComponent.class);
         AnimationComponent animCom = engine.createComponent(AnimationComponent.class);
 
 
-        body.body = bodyFactory.makePlayer(posX, posY, BomberMan.PLAYER_RADIUS, BodyDef.BodyType.DynamicBody, true);
+        body.body = bodyFactory.makePlayer(posX, posY);
         position.position.set(posX,posY,0);
         type.type = TypeComponent.PLAYER;
         body.body.setUserData(entity);
@@ -111,12 +169,12 @@ public class PlayerSystem extends IteratingSystem {
 
         player.bombPower = BomberMan.STARTING_BOMB_POWER;
         player.movementSpeed = BomberMan.STARTING_MOVEMENT_SPEED;
+        player.canMoveBombs = true;
 
         entity.add(body);
         entity.add(position);
         entity.add(texture);
         entity.add(player);
-        entity.add(colComp);
         entity.add(type);
         entity.add(stateCom);
         entity.add(animCom);
@@ -128,17 +186,17 @@ public class PlayerSystem extends IteratingSystem {
     private boolean checkForCollision(Vector2 wh, float r){
         r /= 2f;
         for(Entity entity : getEngine().getEntities()){
-            PlayerComponent pl = entity.getComponent(PlayerComponent.class);
+            PlayerComponent pl = Mappers.playerMapper.get(entity);
             if(pl == null){
-                BodyComponent body = entity.getComponent(BodyComponent.class);
-                if(body != null){
+                BodyComponent body = Mappers.bodyMapper.get(entity);
+                if(body != null && Mappers.bombMapper.get(entity) != null){
                     float x = wh.x;
                     float y = wh.y;
                     float x2 = body.body.getWorldCenter().x;
                     float y2 = body.body.getWorldCenter().y;
                     float r2;
-                    if(entity.getComponent(BombComponent.class) != null ||
-                    entity.getComponent(FlameComponent.class) != null)
+                    if(Mappers.bodyMapper.get(entity) != null ||
+                    Mappers.flameMapper.get(entity) != null)
                         r2 = BomberMan.BOMB_RADIUS / 2f;
                     else
                         r2 = BomberMan.PLAYER_RADIUS / 2f;

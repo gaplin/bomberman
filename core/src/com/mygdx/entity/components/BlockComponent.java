@@ -6,5 +6,6 @@ public class BlockComponent implements Component {
     public static final int WALL = 0;
     public static final int DESTROYABLE = 1;
 
+    public boolean toDestroy = false;
     public int type = 0;
 }
