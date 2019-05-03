@@ -1,6 +1,5 @@
 package com.mygdx.entity.systems;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.SortedIteratingSystem;
@@ -14,6 +13,7 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.TextureComponent;
 import com.mygdx.entity.components.TransformComponent;
 import com.mygdx.entity.components.TypeComponent;
@@ -54,9 +54,6 @@ public class RenderingSystem extends SortedIteratingSystem {
     private Comparator<Entity> comparator;
     private OrthographicCamera cam;
 
-    private ComponentMapper<TextureComponent> textureM;
-    private ComponentMapper<TransformComponent> transformM;
-    private ComponentMapper<TypeComponent> typeM;
 
     private static TiledMap map;
     private TiledMapRenderer renderer;
@@ -65,9 +62,6 @@ public class RenderingSystem extends SortedIteratingSystem {
         super(Family.all(TransformComponent.class, TextureComponent.class).get(), new ZComparator());
         comparator = new ZComparator();
 
-        textureM = ComponentMapper.getFor(TextureComponent.class);
-        transformM = ComponentMapper.getFor(TransformComponent.class);
-        typeM = ComponentMapper.getFor(TypeComponent.class);
 
         renderQueue = new Array<>();
 
@@ -106,9 +100,9 @@ public class RenderingSystem extends SortedIteratingSystem {
         batch.begin();
 
         for (Entity entity : renderQueue) {
-            TextureComponent tex = textureM.get(entity);
-            TransformComponent t = transformM.get(entity);
-            TypeComponent type = typeM.get(entity);
+            TextureComponent tex = Mappers.textureMapper.get(entity);
+            TransformComponent t = Mappers.transformMapper.get(entity);
+            TypeComponent type = Mappers.typeMapper.get(entity);
 
             if (tex.region == null || t.isHidden) {
                 continue;
@@ -116,6 +110,7 @@ public class RenderingSystem extends SortedIteratingSystem {
 
             float width = tex.region.getRegionWidth();
             float height = tex.region.getRegionHeight();
+
 
             switch(type.type){
                 case TypeComponent.PLAYER:

@@ -1,7 +1,11 @@
 package com.mygdx.factory;
 
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.physics.box2d.*;
+import com.mygdx.entity.components.BombComponent;
+import com.mygdx.entity.components.PlayerComponent;
+import com.mygdx.game.BomberMan;
+
 
 
 public class BodyFactory {
@@ -25,69 +29,111 @@ public class BodyFactory {
     static public FixtureDef makeFixture(Shape shape){
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
-        fixtureDef.density = 0.0f;
+        fixtureDef.density = 1.0f;
         fixtureDef.friction = 0.0f;
         fixtureDef.restitution = 0.0f;
         return fixtureDef;
     }
 
-    public Body makeCirclePolyBody(float posx, float posy, float radius, BodyDef.BodyType bodyType, boolean fixedRotation){
+    static public FixtureDef makeFixture(){
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.density = 1.0f;
+        fixtureDef.friction = 0.0f;
+        fixtureDef.restitution = 0.0f;
+        return fixtureDef;
+    }
+
+
+    public BodyDef makeBodyDef(float posX, float posY, BodyDef.BodyType type){
         BodyDef boxBodyDef = new BodyDef();
-        boxBodyDef.type = bodyType;
-        boxBodyDef.position.x = posx;
-        boxBodyDef.position.y = posy;
-        boxBodyDef.fixedRotation = fixedRotation;
+        boxBodyDef.type = type;
+        boxBodyDef.position.x = posX;
+        boxBodyDef.position.y = posY;
+        boxBodyDef.fixedRotation = true;
+        return boxBodyDef;
+    }
+
+    public Body makeDestroyableBlock(float posX, float posY){
+        BodyDef boxBodyDef = makeBodyDef(posX, posY, BodyDef.BodyType.StaticBody);
+
+        FixtureDef fd = makeFixture();
+        fd.filter.categoryBits = BomberMan.DESTRUCTIBLE_BIT;
+        fd.filter.maskBits = BomberMan.PLAYER_BIT | BomberMan.BOMB_BIT | BomberMan.FLAME_BIT;
+
+        Body boxBody = world.createBody(boxBodyDef);
+        PolygonShape poly = new PolygonShape();
+        poly.setAsBox(BomberMan.TILE_WIDTH / 2f,BomberMan.TILE_HEIGHT / 2f);
+        fd.shape = poly;
+        boxBody.createFixture(fd);
+        poly.dispose();
+        return boxBody;
+    }
+
+    public Body makeWall(float posX, float posY){
+        BodyDef boxBodyDef = makeBodyDef(posX, posY, BodyDef.BodyType.StaticBody);
+
+        FixtureDef fd = makeFixture();
+        fd.filter.categoryBits = BomberMan.INDESTRUCTIBLE_BIT;
+        fd.filter.maskBits = BomberMan.PLAYER_BIT | BomberMan.BOMB_BIT;
+
+        Body boxBody = world.createBody(boxBodyDef);
+        PolygonShape poly = new PolygonShape();
+        poly.setAsBox(BomberMan.TILE_WIDTH / 2f,BomberMan.TILE_HEIGHT / 2f);
+        fd.shape = poly;
+        boxBody.createFixture(fd);
+        poly.dispose();
+        return boxBody;
+    }
+
+    public Body makePlayer(float posX, float posY){
+        com.mygdx.BodyEditor.BodyEditorLoader loader = new com.mygdx.BodyEditor.BodyEditorLoader(Gdx.files.internal("bodies/Bomberman.json"));
+
+        BodyDef bdBody = makeBodyDef(posX, posY, BodyDef.BodyType.DynamicBody);
+
+        FixtureDef fd = makeFixture();
+        fd.filter.categoryBits = BomberMan.PLAYER_BIT;
+        fd.filter.maskBits = PlayerComponent.defaultMaskBits;
+
+        Body playerModel = world.createBody(bdBody);
+
+        loader.attachFixture(playerModel, "bman", fd, 2.0f * BomberMan.PLAYER_SCALE);
+
+        return playerModel;
+    }
+
+    public Body makeBomb(float posX, float posY){
+        BodyDef boxBodyDef = makeBodyDef(posX, posY, BodyDef.BodyType.DynamicBody);
+
+        FixtureDef fd = makeFixture();
+        fd.filter.categoryBits = BomberMan.BOMB_BIT;
+        fd.filter.maskBits = BombComponent.defaultMaskBits;
+
 
         Body boxBody = world.createBody(boxBodyDef);
         CircleShape circleShape = new CircleShape();
-        circleShape.setRadius(radius /2);
-        boxBody.createFixture(makeFixture(circleShape));
+        circleShape.setRadius(BomberMan.BOMB_RADIUS / 2f);
+        fd.shape = circleShape;
+        boxBody.createFixture(fd);
+        boxBody.getFixtureList().first().setSensor(true);
         circleShape.dispose();
 
         return boxBody;
     }
 
+    public Body makeFlame(float posX, float posY){
+        BodyDef bodyDef = makeBodyDef(posX, posY, BodyDef.BodyType.DynamicBody);
+        FixtureDef fd = makeFixture();
+        fd.filter.categoryBits = BomberMan.FLAME_BIT;
+        fd.filter.maskBits = BomberMan.PLAYER_BIT | BomberMan.DESTRUCTIBLE_BIT | BomberMan.BOMB_BIT;
 
-    public Body makeBoxPolyBody(float posx, float posy, float width, float height, BodyDef.BodyType bodyType, boolean fixedRotation){
-        BodyDef boxBodyDef = new BodyDef();
-        boxBodyDef.type = bodyType;
-        boxBodyDef.position.x = posx;
-        boxBodyDef.position.y = posy;
-        boxBodyDef.fixedRotation = fixedRotation;
+        Body boxBody = world.createBody(bodyDef);
+        CircleShape circleShape = new CircleShape();
+        circleShape.setRadius(BomberMan.BOMB_RADIUS / 2f);
+        fd.shape = circleShape;
+        boxBody.createFixture(fd);
+        circleShape.dispose();
 
-        Body boxBody = world.createBody(boxBodyDef);
-        PolygonShape poly = new PolygonShape();
-        poly.setAsBox(width / 2,height / 2);
-        boxBody.createFixture(makeFixture(poly));
-        poly.dispose();
         return boxBody;
-    }
-
-    public Body makePlayer(float posx, float posy, float radius, BodyDef.BodyType bodyType, boolean fixedRotation){
-        BodyDef bd = new BodyDef();
-        bd.type = bodyType;
-        bd.position.set(posx, posy);
-        bd.fixedRotation = fixedRotation;
-
-        Body bdBody = world.createBody(bd);
-
-        CircleShape circle1 = new CircleShape();
-        circle1.setRadius(radius);
-        Vector2 offset1 = new Vector2(0,  - 0.10f *radius);
-        circle1.setPosition(offset1);
-
-        CircleShape circle2 = new CircleShape();
-        circle2.setRadius(radius);
-        Vector2 offset2 = new Vector2(0, - 0.2f * radius);
-        circle2.setPosition(offset2);
-
-        CircleShape circle3 = new CircleShape();
-        circle3.setRadius(radius);
-
-        bdBody.createFixture(circle1, 1.0f);
-        bdBody.createFixture(circle2, 1.0f);
-        bdBody.createFixture(circle3, 1.0f);
-        return bdBody;
     }
 
 }

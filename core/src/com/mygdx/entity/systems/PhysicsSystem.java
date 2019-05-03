@@ -1,15 +1,16 @@
 package com.mygdx.entity.systems;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.BodyComponent;
 import com.mygdx.entity.components.TransformComponent;
+import com.mygdx.entity.components.TypeComponent;
+import com.mygdx.game.BomberMan;
 
 public class PhysicsSystem extends IteratingSystem {
 
@@ -18,9 +19,6 @@ public class PhysicsSystem extends IteratingSystem {
 
     private World world;
     private Array<Entity> bodiesQueue;
-
-    private ComponentMapper<BodyComponent> bm = ComponentMapper.getFor(BodyComponent.class);
-    private ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
 
     public PhysicsSystem(World world){
         super(Family.all(BodyComponent.class, TransformComponent.class).get());
@@ -44,20 +42,17 @@ public class PhysicsSystem extends IteratingSystem {
 
 
             for (Entity entity : bodiesQueue) {
-                TransformComponent tfm = tm.get(entity);
-                BodyComponent bodyComp = bm.get(entity);
+                TransformComponent tfm = Mappers.transformMapper.get(entity);
+                BodyComponent bodyComp = Mappers.bodyMapper.get(entity);
                 if(bodyComp == null || tfm == null )
                     continue;
+                TypeComponent type = Mappers.typeMapper.get(entity);
                 Vector2 position = bodyComp.body.getPosition();
                 tfm.position.x = position.x;
                 tfm.position.y = position.y;
-                if(bodyComp.toDynamic){
-                    bodyComp.body.setType(BodyDef.BodyType.DynamicBody);
-                    bodyComp.toDynamic = false;
-                }
-                else if(bodyComp.toStatic){
-                    bodyComp.body.setType(BodyDef.BodyType.StaticBody);
-                    bodyComp.toStatic = false;
+                if(type.type == TypeComponent.PLAYER){
+                    tfm.position.x += 1f * BomberMan.PLAYER_SCALE;
+                    tfm.position.y += 1.45f * BomberMan.PLAYER_SCALE;
                 }
             }
             bodiesQueue.clear();

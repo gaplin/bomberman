@@ -1,24 +1,19 @@
 package com.mygdx.entity.systems;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
+import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
-import com.mygdx.game.BomberMan;
 
 
 public class FlameSystem extends IteratingSystem {
 
-    ComponentMapper<StateComponent> sc;
-    ComponentMapper<FlameComponent> fc;
-    ComponentMapper<BodyComponent> bc;
 
     BodyFactory bodyFactory;
     TextureAtlas atlas;
@@ -27,22 +22,16 @@ public class FlameSystem extends IteratingSystem {
         super(Family.all(FlameComponent.class).get());
         this.atlas = atlas;
         this.bodyFactory = bodyFactory;
-
-        sc = ComponentMapper.getFor(StateComponent.class);
-        fc = ComponentMapper.getFor(FlameComponent.class);
-        bc = ComponentMapper.getFor(BodyComponent.class);
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        FlameComponent flameCom = fc.get(entity);
-        StateComponent stateCom = sc.get(entity);
+        FlameComponent flameCom = Mappers.flameMapper.get(entity);
+        StateComponent stateCom = Mappers.stateMapper.get(entity);
 
         if(flameCom.duration <= stateCom.time){
-            BodyComponent bodyCom = bc.get(entity);
-            while(!bodyCom.body.getFixtureList().isEmpty())
-                bodyCom.body.destroyFixture(bodyCom.body.getFixtureList().first());
-            entity.removeAll();
+            BodyComponent bodyCom = Mappers.bodyMapper.get(entity);
+            bodyCom.body.getWorld().destroyBody(bodyCom.body);
             getEngine().removeEntity(entity);
         }
     }
@@ -58,13 +47,12 @@ public class FlameSystem extends IteratingSystem {
         BodyComponent bodyCom = engine.createComponent(BodyComponent.class);
         TransformComponent positionCom = engine.createComponent(TransformComponent.class);
         TextureComponent textureCom = engine.createComponent(TextureComponent.class);
-        CollisionComponent colComp = engine.createComponent(CollisionComponent.class);
         TypeComponent typeCom = engine.createComponent(TypeComponent.class);
         StateComponent stateCom = engine.createComponent(StateComponent.class);
         AnimationComponent animCom = engine.createComponent(AnimationComponent.class);
         FlameComponent flameCom = engine.createComponent(FlameComponent.class);
 
-        bodyCom.body = bodyFactory.makeCirclePolyBody(posX, posY, BomberMan.BOMB_RADIUS, BodyDef.BodyType.DynamicBody, true);
+        bodyCom.body = bodyFactory.makeFlame(posX, posY);
         for(Fixture fix : bodyCom.body.getFixtureList())
             fix.setSensor(true);
 
@@ -85,7 +73,6 @@ public class FlameSystem extends IteratingSystem {
         ent.add(bodyCom);
         ent.add(positionCom);
         ent.add(textureCom);
-        ent.add(colComp);
         ent.add(typeCom);
         ent.add(stateCom);
         ent.add(animCom);
