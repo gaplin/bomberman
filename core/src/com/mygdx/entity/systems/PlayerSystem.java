@@ -8,15 +8,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.RayCastCallback;
-import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
 import com.mygdx.game.BomberMan;
+import com.mygdx.views.GameScreen;
 
 
 public class PlayerSystem extends IteratingSystem {
@@ -37,13 +36,42 @@ public class PlayerSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
+
+        TextureComponent texture = Mappers.textureMapper.get(entity);
         BodyComponent body = Mappers.bodyMapper.get(entity);
         StateComponent state = Mappers.stateMapper.get(entity);
         PlayerComponent player = Mappers.playerMapper.get(entity);
         TransformComponent transform = Mappers.transformMapper.get(entity);
-        Vector2 playerPos = new Vector2(transform.position.x, transform.position.y);
-        if(player == null)
-            return;
+
+
+        if(player.gotHit){
+            player.gotHit = false;
+            player.HP--;
+            if(player.HP == 0){
+                GameScreen.endGame();
+            }
+            Filter filter = new Filter();
+            filter.categoryBits = BomberMan.PLAYER_BIT;
+            filter.maskBits = PlayerComponent.hitMaskBits;
+            for(Fixture fix : body.body.getFixtureList()){
+                fix.setFilterData(filter);
+            }
+        }
+
+        if(player.hitCountDown > 0.0f){
+            texture.color.set(1, 1, 1, 0.05f + Math.abs(MathUtils.sin(player.hitCountDown * 6)));
+            player.hitCountDown -= deltaTime;
+            if(player.hitCountDown <= 0.0f){
+                Filter filter = new Filter();
+                filter.categoryBits = BomberMan.PLAYER_BIT;
+                filter.maskBits = PlayerComponent.defaultMaskBits;
+                for(Fixture fix : body.body.getFixtureList()){
+                    fix.setFilterData(filter);
+                }
+                texture.color.set(1, 1, 1, 1);
+            }
+        }
+
 
         state.isMoving = body.body.getLinearVelocity().y != 0 || body.body.getLinearVelocity().x != 0;
 
@@ -73,6 +101,21 @@ public class PlayerSystem extends IteratingSystem {
         }
         else{
             body.body.setLinearVelocity(0, 0);
+        }
+
+        if(BomberMan.CHEATS && Gdx.input.isKeyJustPressed(Input.Keys.C)){
+            player.cheat = !player.cheat;
+            Filter filter = new Filter();
+            if(player.cheat) {
+                filter.maskBits = PlayerComponent.cheatMaskBits;
+            }
+            else{
+                filter.maskBits = PlayerComponent.defaultMaskBits;
+            }
+            filter.categoryBits = BomberMan.PLAYER_BIT;
+            for(Fixture fix : body.body.getFixtureList()){
+                fix.setFilterData(filter);
+            }
         }
 
     }
@@ -122,6 +165,8 @@ public class PlayerSystem extends IteratingSystem {
     public boolean verticalHit(Entity entity, float mod){
         PlayerComponent player = Mappers.playerMapper.get(entity);
         TransformComponent transform = Mappers.transformMapper.get(entity);
+        if(player.cheat)
+            return false;
         float distance = BomberMan.PLAYER_RADIUS * mod;
         float posX = transform.position.x;
         float posY = transform.position.y;
@@ -133,6 +178,8 @@ public class PlayerSystem extends IteratingSystem {
     public boolean horizontalHit(Entity entity, float mod){
         PlayerComponent player = Mappers.playerMapper.get(entity);
         TransformComponent transform = Mappers.transformMapper.get(entity);
+        if(player.cheat)
+            return false;
         float distance = BomberMan.PLAYER_RADIUS * mod;
         float posX = transform.position.x;
         float posY = transform.position.y;

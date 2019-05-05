@@ -4,6 +4,8 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -55,6 +57,11 @@ public class BombSystem extends IteratingSystem {
 
         StateComponent bombState = Mappers.stateMapper.get(entity);
         BombComponent bomb = Mappers.bombMapper.get(entity);
+
+        if(BomberMan.CHEATS && Gdx.input.isKeyPressed(Input.Keys.L)){
+            bombState.time = 999999f;
+        }
+
         if(bombState.time >= bomb.detonationTime) {
             Vector2 pos = bombBody.body.getWorldCenter();
 
