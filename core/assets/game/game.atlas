@@ -247,3 +247,36 @@ player/side/Bman_s
   orig: 64, 128
   offset: 0, 0
   index: 7
+
+game6.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+powerups/BombPowerup
+  rotate: false
+  xy: 1, 19
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+powerups/FlamePowerup
+  rotate: false
+  xy: 35, 19
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+powerups/SpeedPowerup
+  rotate: false
+  xy: 69, 19
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+powerups/KickPowerup
+  rotate: false
+  xy: 1, 1
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1

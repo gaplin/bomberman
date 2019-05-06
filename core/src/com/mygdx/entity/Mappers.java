@@ -33,4 +33,7 @@ public class Mappers {
 
     public static final ComponentMapper<TypeComponent> typeMapper =
             ComponentMapper.getFor(TypeComponent.class);
+
+    public static final ComponentMapper<PowerUpComponent> powerUpMapper =
+            ComponentMapper.getFor(PowerUpComponent.class);
 }

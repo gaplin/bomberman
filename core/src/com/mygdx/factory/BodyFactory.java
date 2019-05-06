@@ -136,4 +136,18 @@ public class BodyFactory {
         return boxBody;
     }
 
+    public Body makePowerUp(float posX, float posY){
+        BodyDef bodyDef = makeBodyDef(posX, posY, BodyDef.BodyType.DynamicBody);
+        FixtureDef fd = makeFixture();
+        fd.filter.categoryBits = BomberMan.POWER_UP_BIT;
+        fd.filter.maskBits = BomberMan.PLAYER_BIT;
+
+        Body boxBody = world.createBody(bodyDef);
+        PolygonShape poly = new PolygonShape();
+        poly.setAsBox(BomberMan.TILE_WIDTH / 2f,BomberMan.TILE_HEIGHT / 2f);
+        fd.shape = poly;
+        boxBody.createFixture(fd);
+        poly.dispose();
+        return boxBody;
+    }
 }

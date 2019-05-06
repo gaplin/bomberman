@@ -193,6 +193,7 @@ public class BombSystem extends IteratingSystem {
         bodyCom.body.setUserData(ent);
 
         positionCom.position.set(posX, posY, 1);
+        positionCom.scale.set(1.0f, 1.0f);
 
 
         typeCom.type = TypeComponent.BOMB;
@@ -201,6 +202,8 @@ public class BombSystem extends IteratingSystem {
         stateCom.isMoving = true;
         stateCom.time = 0.0f;
         stateCom.isLooping = false;
+
+        textureCom.color.set(1, 1, 1, 1);
 
         animCom.animations.put(0,
                 new Animation<>(1.0f, atlas.findRegions("bomb/Bomb")));
