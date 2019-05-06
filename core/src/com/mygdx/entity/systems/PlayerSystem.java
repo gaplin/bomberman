@@ -15,7 +15,6 @@ import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
 import com.mygdx.game.BomberMan;
-import com.mygdx.views.GameScreen;
 
 
 public class PlayerSystem extends IteratingSystem {
@@ -31,9 +30,13 @@ public class PlayerSystem extends IteratingSystem {
         this.atlas = atlas;
         this.engine = engine;
 
+        BomberMan.PLAYER_COUNT = 0;
+
         createPlayer(1.0f, 1.0f);
-      /*  createPlayer(10.0f, 1.0f,
-                Input.Keys.W, Input.Keys.S, Input.Keys.A, Input.Keys.D, Input.Keys.F);*/
+        /*
+        createPlayer(22.0f, 1.0f,
+                Input.Keys.W, Input.Keys.S, Input.Keys.A, Input.Keys.D, Input.Keys.F);
+                */
     }
 
     @Override
@@ -45,6 +48,9 @@ public class PlayerSystem extends IteratingSystem {
         PlayerComponent player = Mappers.playerMapper.get(entity);
         TransformComponent transform = Mappers.transformMapper.get(entity);
         StatsComponent playerStats = Mappers.statsMapper.get(entity);
+        if(playerStats.dead) {
+            return;
+        }
 
 
         if(player.gotHit){
@@ -52,7 +58,8 @@ public class PlayerSystem extends IteratingSystem {
             playerStats.afterHit = true;
             playerStats.HP--;
             if(playerStats.HP == 0){
-                GameScreen.endGame();
+                playerStats.markedToDeath = true;
+                return;
             }
             Filter filter = new Filter();
             filter.categoryBits = BomberMan.PLAYER_BIT;
@@ -242,6 +249,9 @@ public class PlayerSystem extends IteratingSystem {
 
 
         engine.addEntity(entity);
+
+        BomberMan.PLAYER_COUNT++;
+
         return entity;
     }
 
@@ -250,7 +260,7 @@ public class PlayerSystem extends IteratingSystem {
         PlayerComponent player = Mappers.playerMapper.get(entity);
         TextureComponent texture = Mappers.textureMapper.get(entity);
         player.setControls(UP, DOWN, LEFT, RIGHT, PLACE_BOMB);
-        texture.color.set(1, 0, 0.5f, 1);
+        texture.color.set(1, 0.188f, 0.917f, 1);
     }
 
     private boolean checkForCollision(Vector2 wh, float r){
