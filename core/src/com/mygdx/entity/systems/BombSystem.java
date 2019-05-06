@@ -68,6 +68,11 @@ public class BombSystem extends IteratingSystem {
             bombBody.body.getWorld().destroyBody(bombBody.body);
             getEngine().removeEntity(entity);
 
+            PlayerComponent player = bomb.owner;
+            if(player != null){
+                player.bombs++;
+            }
+
             explosionSound.play(BomberMan.GAME_VOLUME);
 
             FlameSystem flames = getEngine().getSystem(FlameSystem.class);
@@ -178,9 +183,9 @@ public class BombSystem extends IteratingSystem {
         AnimationComponent animCom = engine.createComponent(AnimationComponent.class);
         BombComponent bombCom = engine.createComponent(BombComponent.class);
 
-        bombCom.forSomeone = true;
 
         bombCom.range = player.bombPower;
+        bombCom.owner = player;
 
 
 

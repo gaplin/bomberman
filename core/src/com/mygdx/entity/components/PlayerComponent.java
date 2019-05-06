@@ -13,8 +13,9 @@ public class PlayerComponent implements Component {
     public float movementSpeed;
     public int bombPower;
     public int HP = 3;
+    public int bombs = 1;
 
-    public boolean canMoveBombs = true;
+    public boolean canMoveBombs = false;
 
     public float hitCountDown = 0.0f;
 

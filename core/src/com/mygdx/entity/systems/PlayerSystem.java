@@ -75,11 +75,12 @@ public class PlayerSystem extends IteratingSystem {
 
         state.isMoving = body.body.getLinearVelocity().y != 0 || body.body.getLinearVelocity().x != 0;
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
+        if(player.bombs > 0 && Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
             if(checkForCollision(new Vector2(transform.position.x, transform.position.y), BomberMan.BOMB_RADIUS / 2f)){
                 return;
             }
             getEngine().getSystem(BombSystem.class).createBomb(transform.position.x, transform.position.y, player);
+            player.bombs--;
         }
 
         if(Gdx.input.isKeyPressed(Input.Keys.UP) && !verticalHit(entity, 1)){
@@ -205,6 +206,7 @@ public class PlayerSystem extends IteratingSystem {
         body.body.setUserData(entity);
         stateCom.set(StateComponent.STATE_MOVING_DOWN);
         stateCom.isLooping = true;
+
         animCom.animations.put(1,
                 new Animation<>(0.05f, atlas.findRegions("player/back/Bman_b")));
         animCom.animations.put(2,
@@ -216,7 +218,6 @@ public class PlayerSystem extends IteratingSystem {
 
         player.bombPower = BomberMan.STARTING_BOMB_POWER;
         player.movementSpeed = BomberMan.STARTING_MOVEMENT_SPEED;
-        player.canMoveBombs = true;
 
         entity.add(body);
         entity.add(position);
