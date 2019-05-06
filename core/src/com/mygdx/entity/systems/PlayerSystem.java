@@ -42,12 +42,13 @@ public class PlayerSystem extends IteratingSystem {
         StateComponent state = Mappers.stateMapper.get(entity);
         PlayerComponent player = Mappers.playerMapper.get(entity);
         TransformComponent transform = Mappers.transformMapper.get(entity);
+        StatsComponent playerStats = Mappers.statsMapper.get(entity);
 
 
         if(player.gotHit){
             player.gotHit = false;
-            player.HP--;
-            if(player.HP == 0){
+            playerStats.HP--;
+            if(playerStats.HP == 0){
                 GameScreen.endGame();
             }
             Filter filter = new Filter();
@@ -75,29 +76,29 @@ public class PlayerSystem extends IteratingSystem {
 
         state.isMoving = body.body.getLinearVelocity().y != 0 || body.body.getLinearVelocity().x != 0;
 
-        if(player.bombs > 0 && Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
+        if(playerStats.bombs > 0 && Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
             if(checkForCollision(new Vector2(transform.position.x, transform.position.y), BomberMan.BOMB_RADIUS / 2f)){
                 return;
             }
-            getEngine().getSystem(BombSystem.class).createBomb(transform.position.x, transform.position.y, player);
-            player.bombs--;
+            getEngine().getSystem(BombSystem.class).createBomb(transform.position.x, transform.position.y, entity);
+            playerStats.bombs--;
         }
 
         if(Gdx.input.isKeyPressed(Input.Keys.UP) && !verticalHit(entity, 1)){
-            body.body.setLinearVelocity(0, player.movementSpeed);
+            body.body.setLinearVelocity(0, playerStats.movementSpeed);
             state.set(StateComponent.STATE_MOVING_UP);
         }
         else if(Gdx.input.isKeyPressed(Input.Keys.LEFT) && !horizontalHit(entity, -1)){
-            body.body.setLinearVelocity(-player.movementSpeed, 0);
+            body.body.setLinearVelocity(-playerStats.movementSpeed, 0);
             state.set(StateComponent.STATE_MOVING_LEFT);
 
         }
         else if(Gdx.input.isKeyPressed(Input.Keys.DOWN) && !verticalHit(entity, -1)){
-            body.body.setLinearVelocity(0, -player.movementSpeed);
+            body.body.setLinearVelocity(0, -playerStats.movementSpeed);
             state.set(StateComponent.STATE_MOVING_DOWN);
         }
         else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) && !horizontalHit(entity, 1)){
-            body.body.setLinearVelocity(player.movementSpeed, 0);
+            body.body.setLinearVelocity(playerStats.movementSpeed, 0);
             state.set(StateComponent.STATE_MOVING_RIGHT);
         }
         else{
@@ -124,7 +125,7 @@ public class PlayerSystem extends IteratingSystem {
 
 
     private boolean canMove(Entity player, Vector2 from, Vector2 to, Vector2 bombSpeed){
-        PlayerComponent playerComp = Mappers.playerMapper.get(player);
+        StatsComponent playerStats = Mappers.statsMapper.get(player);
         BodyComponent bd = Mappers.bodyMapper.get(player);
         Body body = bd.body;
         World world = body.getWorld();
@@ -136,7 +137,7 @@ public class PlayerSystem extends IteratingSystem {
                     return 1;
                 if(fixture.getFilterData().categoryBits == BomberMan.BOMB_BIT){
                     move = false;
-                    if(playerComp.canMoveBombs){
+                    if(playerStats.canMoveBombs){
                         BombSystem bombSystem = getEngine().getSystem(BombSystem.class);
                         Entity bomb = (Entity)fixture.getBody().getUserData();
                         if(bombSpeed.x < 0 && bombSystem.horizontalHit(bomb, -1)){
@@ -165,6 +166,7 @@ public class PlayerSystem extends IteratingSystem {
 
     public boolean verticalHit(Entity entity, float mod){
         PlayerComponent player = Mappers.playerMapper.get(entity);
+        StatsComponent playerStats = Mappers.statsMapper.get(entity);
         TransformComponent transform = Mappers.transformMapper.get(entity);
         if(player.cheat)
             return false;
@@ -172,11 +174,12 @@ public class PlayerSystem extends IteratingSystem {
         float posX = transform.position.x;
         float posY = transform.position.y;
         Vector2 newPosition = new Vector2(posX, posY + distance);
-        Vector2 bombSpeed = new Vector2(0.0f, (player.movementSpeed + 2.0f) * mod);
+        Vector2 bombSpeed = new Vector2(0.0f, (playerStats.movementSpeed + 2.0f) * mod);
         return !canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed);
     }
 
     public boolean horizontalHit(Entity entity, float mod){
+        StatsComponent playerStats = Mappers.statsMapper.get(entity);
         PlayerComponent player = Mappers.playerMapper.get(entity);
         TransformComponent transform = Mappers.transformMapper.get(entity);
         if(player.cheat)
@@ -185,7 +188,7 @@ public class PlayerSystem extends IteratingSystem {
         float posX = transform.position.x;
         float posY = transform.position.y;
         Vector2 newPosition = new Vector2(posX + distance, posY);
-        Vector2 bombSpeed = new Vector2((player.movementSpeed + 2.0f) * mod, 0.0f);
+        Vector2 bombSpeed = new Vector2((playerStats.movementSpeed + 2.0f) * mod, 0.0f);
         return !canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed);
     }
 
@@ -198,6 +201,7 @@ public class PlayerSystem extends IteratingSystem {
         TypeComponent type = engine.createComponent(TypeComponent.class);
         StateComponent stateCom = engine.createComponent(StateComponent.class);
         AnimationComponent animCom = engine.createComponent(AnimationComponent.class);
+        StatsComponent playerStats = engine.createComponent(StatsComponent.class);
 
 
         body.body = bodyFactory.makePlayer(posX, posY);
@@ -223,6 +227,7 @@ public class PlayerSystem extends IteratingSystem {
         entity.add(type);
         entity.add(stateCom);
         entity.add(animCom);
+        entity.add(playerStats);
 
 
         engine.addEntity(entity);

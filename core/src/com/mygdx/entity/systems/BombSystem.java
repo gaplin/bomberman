@@ -68,9 +68,10 @@ public class BombSystem extends IteratingSystem {
             bombBody.body.getWorld().destroyBody(bombBody.body);
             getEngine().removeEntity(entity);
 
-            PlayerComponent player = bomb.owner;
+            Entity player = bomb.owner;
             if(player != null){
-                player.bombs++;
+                StatsComponent stats = Mappers.statsMapper.get(player);
+                stats.bombs++;
             }
 
             explosionSound.play(BomberMan.GAME_VOLUME);
@@ -171,7 +172,7 @@ public class BombSystem extends IteratingSystem {
     }
 
 
-    public void createBomb(float posX, float posY, PlayerComponent player){
+    public void createBomb(float posX, float posY, Entity player){
         PooledEngine engine = (PooledEngine) getEngine();
 
         Entity ent = engine.createEntity();
@@ -183,8 +184,9 @@ public class BombSystem extends IteratingSystem {
         AnimationComponent animCom = engine.createComponent(AnimationComponent.class);
         BombComponent bombCom = engine.createComponent(BombComponent.class);
 
+        StatsComponent playerStats = Mappers.statsMapper.get(player);
 
-        bombCom.range = player.bombPower;
+        bombCom.range = playerStats.bombPower;
         bombCom.owner = player;
 
 

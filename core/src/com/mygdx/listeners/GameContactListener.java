@@ -65,24 +65,24 @@ public class GameContactListener implements ContactListener {
         Entity ent = (Entity) second.getBody().getUserData();
 
         PowerUpComponent upgrade = Mappers.powerUpMapper.get(powerUp);
-        PlayerComponent player = Mappers.playerMapper.get(ent);
+        StatsComponent stats = Mappers.statsMapper.get(ent);
         if(upgrade.time <= 0.0f)
             return;
 
 
         switch(upgrade.type){
             case PowerUpComponent.bombPowerUp:
-                player.bombs++;
+                stats.bombs++;
                 break;
             case PowerUpComponent.speedPowerUp:
-                if(player.movementSpeed < 15.0f)
-                    player.movementSpeed += 1.0f;
+                if(stats.movementSpeed < 15.0f)
+                    stats.movementSpeed += 1.0f;
                 break;
             case PowerUpComponent.damagePowerUp:
-                player.bombPower++;
+                stats.bombPower++;
                 break;
             case PowerUpComponent.kickPowerUp:
-                player.canMoveBombs = true;
+                stats.canMoveBombs = true;
                 break;
         }
 
