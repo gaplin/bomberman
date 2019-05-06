@@ -6,11 +6,16 @@ import com.mygdx.game.BomberMan;
 
 public class StatsComponent implements Component, Pool.Poolable {
 
-    public float movementSpeed = BomberMan.STARTING_MOVEMENT_SPEED;
-    public int bombPower = BomberMan.STARTING_BOMB_POWER;
-    public int HP = 3;
-    public int bombs = 1;
-    public boolean canMoveBombs = false;
+    public StatsComponent(){
+        reset();
+    }
+
+    public float movementSpeed;
+    public int bombPower;
+    public int HP;
+    public int bombs;
+    public boolean canMoveBombs;
+    public boolean afterHit;
 
     @Override
     public void reset() {
@@ -18,6 +23,7 @@ public class StatsComponent implements Component, Pool.Poolable {
         bombPower = BomberMan.STARTING_BOMB_POWER;
         HP = 3;
         bombs = 1;
-        canMoveBombs = false;
+        canMoveBombs = true;
+        afterHit = false;
     }
 }

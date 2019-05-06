@@ -34,7 +34,7 @@ public class PowerUpSystem extends IteratingSystem {
         }
         if(powerUp.time <= 3.0f){
             TextureComponent texture = Mappers.textureMapper.get(entity);
-            texture.color.set(1, 1, 1, Math.abs(MathUtils.sin(powerUp.time * 6)));
+            texture.color.a = Math.abs(MathUtils.sin(powerUp.time * 6));
         }
     }
 
