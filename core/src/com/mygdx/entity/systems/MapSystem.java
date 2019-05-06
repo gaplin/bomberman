@@ -80,12 +80,10 @@ public class MapSystem extends IteratingSystem {
             texture.region = texreg;
             texture.region.setRegionX(35);
             texture.region.setRegionY(35);
-            texture.color.set(1, 1, 1, 1);
 
             type.type = TypeComponent.SCENERY;
 
             tranComp.position.set(tile.getX() / 32 + 0.45f, tile.getY() / 32 + 0.2f, -1);
-            tranComp.scale.set(1.0f, 1.0f);
 
 
             ent.add(body);

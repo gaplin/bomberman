@@ -59,16 +59,13 @@ public class FlameSystem extends IteratingSystem {
         bodyCom.body.setUserData(ent);
 
         positionCom.position.set(posX, posY, -2);
-        positionCom.scale.set(1.0f, 1.0f);
 
         typeCom.type = TypeComponent.FLAME;
 
-        textureCom.color.set(1, 1, 1, 1);
 
         stateCom.set(StateComponent.STATE_NORMAL);
         stateCom.isMoving = true;
         stateCom.isLooping = true;
-        stateCom.time = 0.0f;
 
         animCom.animations.put(0,
                 new Animation<>(0.15f, atlas.findRegions("flame/flame")));

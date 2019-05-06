@@ -53,17 +53,10 @@ public class PowerUpSystem extends IteratingSystem {
         type.type = TypeComponent.OTHER;
 
         powerUp.type = upType;
-        powerUp.time = 10.0f;
 
-        transform.position.x = posX;
-        transform.position.y = posY;
-        transform.position.z = -2;
-        transform.scale.set(1.0f, 1.0f);
+        transform.position.set(posX, posY, -2);
 
         state.set(StateComponent.STATE_NORMAL);
-        state.isLooping = false;
-        state.isMoving = false;
-        state.time = 0.0f;
 
         switch(upType){
             case PowerUpComponent.bombPowerUp:

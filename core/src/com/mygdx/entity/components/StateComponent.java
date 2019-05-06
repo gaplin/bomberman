@@ -1,8 +1,9 @@
 package com.mygdx.entity.components;
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.gdx.utils.Pool;
 
-public class StateComponent implements Component {
+public class StateComponent implements Component, Pool.Poolable {
     public static final int STATE_NORMAL = 0;
     public static final int STATE_MOVING_UP = 1;
     public static final int STATE_MOVING_LEFT = 2;
@@ -23,5 +24,13 @@ public class StateComponent implements Component {
 
     public int get(){
         return state;
+    }
+
+    @Override
+    public void reset() {
+        time = 0.0f;
+        state = 3;
+        isLooping = false;
+        isMoving = false;
     }
 }
