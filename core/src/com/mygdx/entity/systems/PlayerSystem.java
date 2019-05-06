@@ -87,7 +87,7 @@ public class PlayerSystem extends IteratingSystem {
 
         state.isMoving = body.body.getLinearVelocity().y != 0 || body.body.getLinearVelocity().x != 0;
 
-        if(playerStats.bombs > 0 && Gdx.input.isKeyJustPressed(player.PLACE_BOMB)){
+        if((playerStats.bombs > 0 || player.cheat) && Gdx.input.isKeyJustPressed(player.PLACE_BOMB)){
             if(checkForCollision(new Vector2(transform.position.x, transform.position.y), BomberMan.BOMB_RADIUS / 2f)){
                 return;
             }
