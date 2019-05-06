@@ -33,8 +33,8 @@ public class BomberMan extends Game {
 	public static final float SCENERY_SCALE = 1f * GAME_SCALE;
 
 	public final static float STARTING_MOVEMENT_SPEED = 10f;
-
 	public final static int STARTING_BOMB_POWER = 1;
+
 	public final static float PLAYER_RADIUS = 1.4f * PLAYER_SCALE;
 	public final static float BOMB_RADIUS = 1.5f * BOMB_SCALE;
 	public final static float TILE_WIDTH = 0.9f * SCENERY_SCALE;
@@ -44,6 +44,8 @@ public class BomberMan extends Game {
 
 	public static float GAME_VOLUME = 0.2f;
 
+
+	public static final boolean CHEATS = false;
 
 	public CustomAssetManager assMan = new CustomAssetManager();
 

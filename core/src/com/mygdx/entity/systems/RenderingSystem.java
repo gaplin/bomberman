@@ -111,6 +111,8 @@ public class RenderingSystem extends SortedIteratingSystem {
             float width = tex.region.getRegionWidth();
             float height = tex.region.getRegionHeight();
 
+            batch.setColor(tex.color);
+
 
             switch(type.type){
                 case TypeComponent.PLAYER:

@@ -5,9 +5,9 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.BlockComponent;
 import com.mygdx.entity.components.BombComponent;
+import com.mygdx.entity.components.PlayerComponent;
 import com.mygdx.entity.components.StateComponent;
 import com.mygdx.game.BomberMan;
-import com.mygdx.views.GameScreen;
 
 public class GameContactListener implements ContactListener {
 
@@ -43,7 +43,11 @@ public class GameContactListener implements ContactListener {
                 state.time = bomb.detonationTime;
                 break;
             case BomberMan.PLAYER_BIT:
-                GameScreen.endGame();
+                PlayerComponent player = Mappers.playerMapper.get(entity);
+                if(!player.gotHit) {
+                    player.resetCountDown();
+                    player.gotHit = true;
+                }
                 break;
         }
     }

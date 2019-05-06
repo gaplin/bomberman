@@ -69,7 +69,6 @@ public class GameScreen implements Screen {
         engine.update(delta);
         if((Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !world.isLocked())){
             parent.changeScreen(BomberMan.LEVELS);
-            engine.removeAllEntities();
             parent.gameScreen = null;
         }
     }
@@ -101,7 +100,6 @@ public class GameScreen implements Screen {
     // Temporary solution, changed engine and parent to static for this
     public static void endGame(){
         parent.changeScreen(BomberMan.ENDGAME);
-        engine.removeAllEntities();
         parent.gameScreen = null;
     }
 }
