@@ -3,10 +3,7 @@ package com.mygdx.listeners;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.entity.Mappers;
-import com.mygdx.entity.components.BlockComponent;
-import com.mygdx.entity.components.BombComponent;
-import com.mygdx.entity.components.PlayerComponent;
-import com.mygdx.entity.components.StateComponent;
+import com.mygdx.entity.components.*;
 import com.mygdx.game.BomberMan;
 
 public class GameContactListener implements ContactListener {
@@ -19,11 +16,19 @@ public class GameContactListener implements ContactListener {
     public void beginContact(Contact contact) {
         Fixture fA = contact.getFixtureA();
         Fixture fB = contact.getFixtureB();
+        //FLAME
         if(fA.getFilterData().categoryBits == BomberMan.FLAME_BIT){
             flameContact((Entity)fA.getBody().getUserData(), fB);
         }
         if(fB.getFilterData().categoryBits == BomberMan.FLAME_BIT){
             flameContact((Entity)fB.getBody().getUserData(), fA);
+        }
+        //POWERUP
+        if(fA.getFilterData().categoryBits == BomberMan.POWER_UP_BIT){
+            powerUpContact((Entity)fA.getBody().getUserData(), fB);
+        }
+        if(fB.getFilterData().categoryBits == BomberMan.POWER_UP_BIT){
+            powerUpContact((Entity)fB.getBody().getUserData(), fA);
         }
     }
 
@@ -50,6 +55,38 @@ public class GameContactListener implements ContactListener {
                 }
                 break;
         }
+    }
+
+    private void powerUpContact(Entity powerUp, Fixture second){
+        if(!(second.getBody().getUserData() instanceof Entity))
+        return;
+
+
+        Entity ent = (Entity) second.getBody().getUserData();
+
+        PowerUpComponent upgrade = Mappers.powerUpMapper.get(powerUp);
+        PlayerComponent player = Mappers.playerMapper.get(ent);
+        if(upgrade.time <= 0.0f)
+            return;
+
+
+        switch(upgrade.type){
+            case PowerUpComponent.bombPowerUp:
+                player.bombs++;
+                break;
+            case PowerUpComponent.speedPowerUp:
+                if(player.movementSpeed < 15.0f)
+                    player.movementSpeed += 1.0f;
+                break;
+            case PowerUpComponent.damagePowerUp:
+                player.bombPower++;
+                break;
+            case PowerUpComponent.kickPowerUp:
+                player.canMoveBombs = true;
+                break;
+        }
+
+        upgrade.time = 0.0f;
     }
 
     @Override

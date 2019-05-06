@@ -24,6 +24,7 @@ public class BomberMan extends Game {
 	public static final short DESTRUCTIBLE_BIT = 1 << 2;
 	public static final short INDESTRUCTIBLE_BIT = 1 << 3;
 	public static final short FLAME_BIT = 1 << 4;
+	public static final short POWER_UP_BIT = 1 << 5;
 
 
 	public static final float GAME_SCALE = 1f;

@@ -59,8 +59,11 @@ public class FlameSystem extends IteratingSystem {
         bodyCom.body.setUserData(ent);
 
         positionCom.position.set(posX, posY, -2);
+        positionCom.scale.set(1.0f, 1.0f);
 
         typeCom.type = TypeComponent.FLAME;
+
+        textureCom.color.set(1, 1, 1, 1);
 
         stateCom.set(StateComponent.STATE_NORMAL);
         stateCom.isMoving = true;
@@ -79,5 +82,8 @@ public class FlameSystem extends IteratingSystem {
         ent.add(flameCom);
 
         engine.addEntity(ent);
+
+        if(!MapSystem.checkBlock(posX, posY, "destroyable"))
+            throw new Exception();
     }
 }

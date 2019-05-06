@@ -5,8 +5,9 @@ import com.mygdx.game.BomberMan;
 
 public class PlayerComponent implements Component {
     public static final short defaultMaskBits = BomberMan.INDESTRUCTIBLE_BIT | BomberMan.DESTRUCTIBLE_BIT | BomberMan.FLAME_BIT
-                                                | BomberMan.BOMB_BIT;
-    public static final short hitMaskBits = BomberMan.INDESTRUCTIBLE_BIT | BomberMan.DESTRUCTIBLE_BIT | BomberMan.BOMB_BIT;
+                                                | BomberMan.BOMB_BIT | BomberMan.POWER_UP_BIT;
+    public static final short hitMaskBits = BomberMan.INDESTRUCTIBLE_BIT | BomberMan.DESTRUCTIBLE_BIT | BomberMan.BOMB_BIT
+                                            | BomberMan.POWER_UP_BIT;
 
     public static final short cheatMaskBits = 0;
 

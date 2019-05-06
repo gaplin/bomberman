@@ -202,10 +202,12 @@ public class PlayerSystem extends IteratingSystem {
 
         body.body = bodyFactory.makePlayer(posX, posY);
         position.position.set(posX,posY,0);
+        position.scale.set(1.0f, 1.0f);
         type.type = TypeComponent.PLAYER;
         body.body.setUserData(entity);
         stateCom.set(StateComponent.STATE_MOVING_DOWN);
         stateCom.isLooping = true;
+        texture.color.set(1, 1, 1, 1);
 
         animCom.animations.put(1,
                 new Animation<>(0.05f, atlas.findRegions("player/back/Bman_b")));
