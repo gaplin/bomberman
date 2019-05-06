@@ -50,7 +50,7 @@ public class PowerUpSystem extends IteratingSystem {
         TextureComponent texture = engine.createComponent(TextureComponent.class);
         BodyComponent body = engine.createComponent(BodyComponent.class);
 
-        type.type = TypeComponent.OTHER;
+        type.type = TypeComponent.SCENERY;
 
         powerUp.type = upType;
 
