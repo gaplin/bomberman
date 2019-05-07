@@ -131,10 +131,14 @@ public class RenderingSystem extends SortedIteratingSystem {
                     width *= BomberMan.SCENERY_SCALE;
                     height *= BomberMan.SCENERY_SCALE;
                     break;
+                case TypeComponent.ENEMY:
+                    width *= BomberMan.PLAYER_SCALE;
+                    height *= BomberMan.PLAYER_SCALE;
+                    break;
             }
 
             float originX = width / 2f;
-            float originY = height / (type.type == TypeComponent.PLAYER ? 2.8f : 2f);
+            float originY = height / (type.type == TypeComponent.PLAYER || type.type == TypeComponent.ENEMY ? 2.8f : 2f);
 
             batch.draw(tex.region,
                     t.position.x - originX, t.position.y - originY,

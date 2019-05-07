@@ -50,7 +50,7 @@ public class PhysicsSystem extends IteratingSystem {
                 Vector2 position = bodyComp.body.getPosition();
                 tfm.position.x = position.x;
                 tfm.position.y = position.y;
-                if(type.type == TypeComponent.PLAYER){
+                if(type.type == TypeComponent.PLAYER || type.type == TypeComponent.ENEMY){
                     tfm.position.x += 1f * BomberMan.PLAYER_SCALE;
                     tfm.position.y += 1.45f * BomberMan.PLAYER_SCALE;
                 }

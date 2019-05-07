@@ -42,4 +42,7 @@ public class Mappers {
 
     public static final ComponentMapper<ControlsComponent> controlsMapper =
             ComponentMapper.getFor(ControlsComponent.class);
+
+    public static final ComponentMapper<EnemyComponent> enemyMapper =
+            ComponentMapper.getFor(EnemyComponent.class);
 }

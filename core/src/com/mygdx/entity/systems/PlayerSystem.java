@@ -89,7 +89,7 @@ public class PlayerSystem extends IteratingSystem {
         state.isMoving = body.body.getLinearVelocity().y != 0 || body.body.getLinearVelocity().x != 0;
 
         if((playerStats.bombs > 0 || player.cheat) && state.placeBombJustPressed){
-            if(checkForCollision(new Vector2(transform.position.x, transform.position.y), BomberMan.BOMB_RADIUS / 2f)){
+            if(checkForCollision(new Vector2(transform.position.x, transform.position.y), BomberMan.BOMB_RADIUS)){
                 return;
             }
             getEngine().getSystem(BombSystem.class).createBomb(transform.position.x, transform.position.y, entity);

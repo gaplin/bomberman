@@ -58,6 +58,7 @@ public class GameScreen implements Screen {
         engine.addSystem(new PowerUpSystem(atlas, bodyFactory));
         engine.addSystem(new DeathSystem());
         engine.addSystem(new PlayerControlSystem());
+        engine.addSystem(new EnemySystem(atlas, bodyFactory, engine));
     }
 
     @Override

@@ -32,6 +32,13 @@ public class StateComponent implements Component, Pool.Poolable {
         return state;
     }
 
+    public void resetPresses(){
+        upPressed = false;
+        leftPressed = false;
+        downPressed = false;
+        rightPressed = false;
+    }
+
     @Override
     public void reset() {
         time = 0.0f;

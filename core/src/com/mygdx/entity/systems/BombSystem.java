@@ -69,10 +69,10 @@ public class BombSystem extends IteratingSystem {
             getEngine().removeEntity(entity);
 
             Entity player = bomb.owner;
-            if(player != null){
-                StatsComponent stats = Mappers.statsMapper.get(player);
-                stats.bombs++;
-            }
+            StatsComponent stats = Mappers.statsMapper.get(player);
+            if(stats == null)
+                return;
+            stats.bombs++;
 
             explosionSound.play(BomberMan.GAME_VOLUME);
 

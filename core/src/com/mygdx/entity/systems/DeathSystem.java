@@ -7,10 +7,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.mygdx.entity.Mappers;
-import com.mygdx.entity.components.BodyComponent;
-import com.mygdx.entity.components.StateComponent;
-import com.mygdx.entity.components.StatsComponent;
-import com.mygdx.entity.components.TextureComponent;
+import com.mygdx.entity.components.*;
 import com.mygdx.game.BomberMan;
 import com.mygdx.views.GameScreen;
 
@@ -50,9 +47,11 @@ public class DeathSystem extends IteratingSystem {
                 texture.color.a = Math.max(stats.deathCountDown / BomberMan.AGONY_TIME - 0.3f, 0.0f);
             }
             else{
+                int type = Mappers.typeMapper.get(entity).type;
                 body.getWorld().destroyBody(body);
                 getEngine().removeEntity(entity);
-                BomberMan.PLAYER_COUNT--;
+                if(type == TypeComponent.PLAYER)
+                    BomberMan.PLAYER_COUNT--;
                 if(BomberMan.PLAYER_COUNT == 0){
                     GameScreen.endGame();
                 }
