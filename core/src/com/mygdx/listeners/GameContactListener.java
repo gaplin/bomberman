@@ -48,10 +48,10 @@ public class GameContactListener implements ContactListener {
                 state.time = bomb.detonationTime;
                 break;
             case BomberMan.PLAYER_BIT:
-                PlayerComponent player = Mappers.playerMapper.get(entity);
-                if(!player.gotHit) {
-                    player.resetCountDown();
-                    player.gotHit = true;
+                StatsComponent stats = Mappers.statsMapper.get(entity);
+                if(!stats.gotHit) {
+                    stats.resetCountDown();
+                    stats.gotHit = true;
                 }
                 break;
         }

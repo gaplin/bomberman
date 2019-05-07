@@ -58,7 +58,7 @@ public class BodyFactory {
 
         FixtureDef fd = makeFixture();
         fd.filter.categoryBits = BomberMan.DESTRUCTIBLE_BIT;
-        fd.filter.maskBits = BomberMan.PLAYER_BIT | BomberMan.BOMB_BIT | BomberMan.FLAME_BIT;
+        fd.filter.maskBits = BomberMan.PLAYER_BIT | BomberMan.FLAME_BIT;
 
         Body boxBody = world.createBody(boxBodyDef);
         PolygonShape poly = new PolygonShape();
@@ -74,7 +74,7 @@ public class BodyFactory {
 
         FixtureDef fd = makeFixture();
         fd.filter.categoryBits = BomberMan.INDESTRUCTIBLE_BIT;
-        fd.filter.maskBits = BomberMan.PLAYER_BIT | BomberMan.BOMB_BIT;
+        fd.filter.maskBits = BomberMan.PLAYER_BIT;
 
         Body boxBody = world.createBody(boxBodyDef);
         PolygonShape poly = new PolygonShape();
@@ -99,6 +99,10 @@ public class BodyFactory {
         loader.attachFixture(playerModel, "bman", fd, 2.0f * BomberMan.PLAYER_SCALE);
 
         return playerModel;
+    }
+
+    public Body makeEnemy(float posX, float posY){
+        return makePlayer(posX, posY);
     }
 
     public Body makeBomb(float posX, float posY){

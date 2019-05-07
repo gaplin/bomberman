@@ -16,6 +16,12 @@ public class StateComponent implements Component, Pool.Poolable {
     public boolean isLooping = false;
     public boolean isMoving = false;
 
+    public boolean upPressed;
+    public boolean downPressed;
+    public boolean leftPressed;
+    public boolean rightPressed;
+    public boolean placeBombJustPressed;
+
     public void set(int newState){
         if(newState != state)
             time = 0.0f;
@@ -32,5 +38,11 @@ public class StateComponent implements Component, Pool.Poolable {
         state = 3;
         isLooping = false;
         isMoving = false;
+
+        upPressed = false;
+        leftPressed = false;
+        downPressed = false;
+        rightPressed = false;
+        placeBombJustPressed = false;
     }
 }

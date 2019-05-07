@@ -19,6 +19,13 @@ public class StatsComponent implements Component, Pool.Poolable {
     public boolean dead;
     public boolean markedToDeath;
     public float deathCountDown;
+    public float hitCountDown;
+    public boolean gotHit;
+
+    public void resetCountDown(){
+        hitCountDown = 3.0f;
+    }
+
     @Override
     public void reset() {
         movementSpeed = BomberMan.STARTING_MOVEMENT_SPEED;
@@ -30,5 +37,6 @@ public class StatsComponent implements Component, Pool.Poolable {
         dead = false;
         markedToDeath = false;
         deathCountDown = BomberMan.AGONY_TIME;
+        gotHit = false;
     }
 }
