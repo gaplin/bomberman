@@ -50,10 +50,17 @@ public class DeathSystem extends IteratingSystem {
                 int type = Mappers.typeMapper.get(entity).type;
                 body.getWorld().destroyBody(body);
                 getEngine().removeEntity(entity);
-                if(type == TypeComponent.PLAYER)
+                if(type == TypeComponent.PLAYER) {
                     BomberMan.PLAYER_COUNT--;
-                if(BomberMan.PLAYER_COUNT == 0){
-                    GameScreen.endGame();
+                    if (BomberMan.PLAYER_COUNT == 0) {
+                        GameScreen.endGame();
+                    }
+                }
+                else if(type == TypeComponent.ENEMY){
+                    BomberMan.ENEMY_COUNT--;
+                    if(BomberMan.ENEMY_COUNT == 0) {
+                        GameScreen.endGame();
+                    }
                 }
             }
         }

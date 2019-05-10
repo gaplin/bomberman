@@ -7,9 +7,12 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
+import com.mygdx.game.BomberMan;
 
 import java.util.Random;
 
@@ -19,6 +22,7 @@ public class EnemySystem extends IteratingSystem {
     private BodyFactory bodyFactory;
     private PooledEngine engine;
     private Random random = new Random();
+    private short hitBit;
 
     public EnemySystem(TextureAtlas atlas , BodyFactory bodyFactory, PooledEngine engine){
         super(Family.all(EnemyComponent.class).get());
@@ -26,43 +30,213 @@ public class EnemySystem extends IteratingSystem {
         this.atlas = atlas;
         this.bodyFactory = bodyFactory;
         this.engine = engine;
+        BomberMan.ENEMY_COUNT = 0;
 
-        createEnemy(22.0f ,1.0f, new Color(1.0f, 0.1f, 0.3f, 1));
+        createEnemy(1.0f, 1.0f, Color.YELLOW);
+        createEnemy(22.0f ,1.0f, Color.RED);
+        createEnemy(22.0f, 15.0f, Color.BLUE);
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         EnemyComponent enemy = Mappers.enemyMapper.get(entity);
         StateComponent state = Mappers.stateMapper.get(entity);
-        enemy.time -= deltaTime;
-        if(enemy.time <= 0){
-            int direction = random.nextInt(4);
-            state.resetPresses();
-            enemy.time = 0.2f;
-            switch (direction){
-                case 0:
-                    state.upPressed = true;
-                    break;
-                case 1:
-                    state.leftPressed = true;
-                    break;
-                case 2:
-                    state.downPressed = true;
-                    break;
-                case 3:
-                    state.rightPressed = true;
-                    break;
+        StatsComponent stats = Mappers.statsMapper.get(entity);
+        if(enemy.time == 0){
+            enemy.time = 5f;
+            setDirection(state, random.nextInt(4));
+        }
+
+        enemy.damageUpTimer -= deltaTime;
+        enemy.newBombTimer -= deltaTime;
+
+        if(enemy.damageUpTimer <= 0 && stats.bombPower <= 2){
+            stats.bombPower++;
+            enemy.resetDamageUpTimer();
+        }
+
+        if(enemy.newBombTimer <= 0 && stats.bombs <= 2){
+            stats.bombs++;
+            enemy.resetNewBombTimer();
+        }
+
+
+        if(state.state == StateComponent.STATE_MOVING_RIGHT){
+            horizontalScan(entity, 1);
+        }
+        else if(state.state == StateComponent.STATE_MOVING_LEFT){
+            horizontalScan(entity, -1);
+        }
+        else if(state.state == StateComponent.STATE_MOVING_UP){
+            verticalScan(entity, 1);
+        }
+        else if(state.state == StateComponent.STATE_MOVING_DOWN){
+            verticalScan(entity, -1);
+        }
+
+        boolean placeBomb = false;
+        boolean changeDirection = false;
+
+
+        switch(hitBit){
+            case BomberMan.PLAYER_BIT:
+                placeBomb = true;
+                changeDirection = true;
+                break;
+            case BomberMan.DESTRUCTIBLE_BIT:
+                placeBomb = true;
+                changeDirection = true;
+                break;
+            case BomberMan.FLAME_BIT:
+                changeDirection = true;
+                break;
+            case BomberMan.INDESTRUCTIBLE_BIT:
+                changeDirection = true;
+                break;
+            case BomberMan.BOMB_BIT:
+                changeDirection = true;
+                break;
+        }
+
+        hitBit = 0;
+
+
+        state.placeBombJustPressed = placeBomb;
+
+        if(changeDirection)
+            setDirection(state, random.nextInt(4));
+
+
+    }
+
+
+    private void setDirection(StateComponent state, int direction){
+        switch (direction){
+            case 0:
+                if(state.upPressed) {
+                    setDirection(state, random.nextInt(4));
+                    return;
+                }
+                state.resetPresses();
+                state.upPressed = true;
+                break;
+            case 1:
+                if(state.leftPressed) {
+                    setDirection(state, random.nextInt(4));
+                    return;
+                }
+                state.resetPresses();
+                state.leftPressed = true;
+                break;
+            case 2:
+                if(state.downPressed) {
+                    setDirection(state, random.nextInt(4));
+                    return;
+                }
+                state.resetPresses();
+                state.downPressed = true;
+                break;
+            case 3:
+                if(state.downPressed) {
+                    setDirection(state, random.nextInt(4));
+                    return;
+                }
+                state.resetPresses();
+                state.rightPressed = true;
+                break;
+        }
+    }
+
+    private void scan(Entity player, Vector2 from, Vector2 to){
+        BodyComponent bd = Mappers.bodyMapper.get(player);
+        Body body = bd.body;
+        World world = body.getWorld();
+        Filter bodyFilter = bd.body.getFixtureList().first().getFilterData();
+        hitBit = 0;
+        RayCastCallback rayCastCallback = new RayCastCallback() {
+            @Override
+            public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
+                if(fixture.getBody() == body)
+                    return 1;
+
+                if((bodyFilter.maskBits & fixture.getFilterData().categoryBits) != 0) {
+                    hitBit = fixture.getFilterData().categoryBits;
+                    return 0;
+                }
+                return 1;
             }
-        }
+        };
+        world.rayCast(rayCastCallback, from, to);
+    }
 
-        float placeBomb = random.nextFloat();
-        if(placeBomb < 0.01f){
-            state.placeBombJustPressed = true;
-        }
-        else{
-            state.placeBombJustPressed = false;
-        }
 
+    private void verticalScan(Entity entity, float mod){
+        TransformComponent transform = Mappers.transformMapper.get(entity);
+
+        float distance = 0.7f * mod;
+        float goodPosY = transform.position.y + BomberMan.PLAYER_RADIUS * mod;
+        if(mod < 0)
+            goodPosY += 0.3f * BomberMan.PLAYER_SCALE;
+        float posX = transform.position.x;
+        float posY = goodPosY;
+        Vector2 newPosition = new Vector2(posX, posY + distance + 0.2f * mod);
+
+
+        scan(entity, new Vector2(posX, posY), newPosition);
+        if(hitBit != 0)
+            return;
+
+        posX = transform.position.x + 0.7f * BomberMan.PLAYER_SCALE;
+        posY = goodPosY - BomberMan.PLAYER_RADIUS / 3f * mod;
+        newPosition.set(posX, posY + distance + 0.2f * mod);
+        scan(entity, new Vector2(posX, posY), newPosition);
+        if(hitBit != 0)
+            return;
+
+        posX = transform.position.x - 0.7f * BomberMan.PLAYER_SCALE;
+        posY = goodPosY - BomberMan.PLAYER_RADIUS / 3f * mod;
+        newPosition.set(posX, posY + distance + 0.2f * mod);
+        scan(entity, new Vector2(posX, posY), newPosition);
+    }
+
+    private void horizontalScan(Entity entity, float mod){
+        TransformComponent transform = Mappers.transformMapper.get(entity);
+
+        float distance = 0.7f * mod;
+        float posX = transform.position.x + 0.5f * mod;
+        float posY = transform.position.y;
+        Vector2 newPosition = new Vector2(posX + distance, posY);
+
+
+        scan(entity, new Vector2(posX, posY), newPosition);
+        if(hitBit != 0)
+            return;
+
+        posY = transform.position.y + BomberMan.PLAYER_RADIUS;
+        posX = transform.position.x + distance - (distance - 0.4f * BomberMan.PLAYER_SCALE * mod);
+        newPosition.set(posX + distance, posY);
+        scan(entity, new Vector2(posX, posY), newPosition);
+        if(hitBit != 0)
+            return;
+
+        posY = transform.position.y + BomberMan.PLAYER_RADIUS / 2f;
+        posX = transform.position.x + 0.9f * BomberMan.PLAYER_SCALE * mod;
+        newPosition.set(posX + distance, posY);
+        scan(entity, new Vector2(posX, posY), newPosition);
+        if(hitBit != 0)
+            return;
+
+        posY = transform.position.y - (BomberMan.PLAYER_RADIUS + 0.2f * BomberMan.PLAYER_SCALE) / 3f;
+        posX = transform.position.x + distance - (distance - 0.4f * BomberMan.PLAYER_SCALE * mod);
+        newPosition.set(posX + distance, posY);
+        scan(entity, new Vector2(posX, posY), newPosition);
+        if(hitBit != 0)
+            return;
+
+        posY = transform.position.y - BomberMan.PLAYER_RADIUS + 0.2f * BomberMan.PLAYER_SCALE;
+        posX = transform.position.x + distance - (distance - 0.4f * BomberMan.PLAYER_SCALE * mod);
+        newPosition.set(posX + distance, posY);
+        scan(entity, new Vector2(posX, posY), newPosition);
     }
 
     public Entity createEnemy(float posX, float posY){
@@ -106,6 +280,8 @@ public class EnemySystem extends IteratingSystem {
 
 
         engine.addEntity(entity);
+
+        BomberMan.ENEMY_COUNT++;
 
         return entity;
     }

@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
@@ -32,11 +33,11 @@ public class PlayerSystem extends IteratingSystem {
 
         BomberMan.PLAYER_COUNT = 0;
 
-        createPlayer(1.0f, 1.0f);
-        /*
-        createPlayer(22.0f, 1.0f,
-                Input.Keys.W, Input.Keys.S, Input.Keys.A, Input.Keys.D, Input.Keys.F);
-                */
+        createPlayer(1.0f, 15.0f);
+
+        /*createPlayer(1.0f, 1.0f,
+                Input.Keys.W, Input.Keys.S, Input.Keys.A, Input.Keys.D, Input.Keys.F, Color.YELLOW);*/
+
     }
 
     @Override
@@ -48,6 +49,7 @@ public class PlayerSystem extends IteratingSystem {
         PlayerComponent player = Mappers.playerMapper.get(entity);
         TransformComponent transform = Mappers.transformMapper.get(entity);
         StatsComponent playerStats = Mappers.statsMapper.get(entity);
+
 
         if(playerStats.dead) {
             return;
@@ -182,12 +184,44 @@ public class PlayerSystem extends IteratingSystem {
         TransformComponent transform = Mappers.transformMapper.get(entity);
         if(player.cheat)
             return false;
-        float distance = BomberMan.PLAYER_RADIUS * mod;
+        float distance = 0.5f * mod;
+        float goodPosY = transform.position.y + BomberMan.PLAYER_RADIUS * mod;
+        if(mod < 0)
+            goodPosY += 0.3f * BomberMan.PLAYER_SCALE;
         float posX = transform.position.x;
-        float posY = transform.position.y;
-        Vector2 newPosition = new Vector2(posX, posY + distance);
+        float posY = goodPosY;
+
+        Vector2 newPosition = new Vector2(posX, posY + distance + 0.2f * mod);
         Vector2 bombSpeed = new Vector2(0.0f, (playerStats.movementSpeed + 2.0f) * mod);
-        return !canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed);
+
+        boolean result = false;
+
+        PhysicsDebugSystem.start4.setZero();
+        PhysicsDebugSystem.end4.setZero();
+        PhysicsDebugSystem.start5.setZero();
+        PhysicsDebugSystem.end5.setZero();
+        PhysicsDebugSystem.start.set(posX, posY);
+        PhysicsDebugSystem.end.set(newPosition);
+        if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
+            result = true;
+
+        posX = transform.position.x + 0.7f * BomberMan.PLAYER_SCALE;
+        posY = goodPosY - BomberMan.PLAYER_RADIUS / 3f * mod;
+        newPosition.set(posX, posY + distance + 0.2f * mod);
+        PhysicsDebugSystem.start2.set(posX, posY);
+        PhysicsDebugSystem.end2.set(newPosition);
+        if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
+            result = true;
+
+        posX = transform.position.x - 0.7f * BomberMan.PLAYER_SCALE;
+        posY = goodPosY - BomberMan.PLAYER_RADIUS / 3f * mod;
+        newPosition.set(posX, posY + distance + 0.2f * mod);
+        PhysicsDebugSystem.start3.set(posX, posY);
+        PhysicsDebugSystem.end3.set(newPosition);
+        if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
+            result = true;
+
+        return result;
     }
 
     public boolean horizontalHit(Entity entity, float mod){
@@ -196,12 +230,51 @@ public class PlayerSystem extends IteratingSystem {
         TransformComponent transform = Mappers.transformMapper.get(entity);
         if(player.cheat)
             return false;
-        float distance = BomberMan.PLAYER_RADIUS * mod;
-        float posX = transform.position.x;
+        float distance = 0.5f * mod;
+        float posX = transform.position.x + 0.5f * mod;
         float posY = transform.position.y;
         Vector2 newPosition = new Vector2(posX + distance, posY);
         Vector2 bombSpeed = new Vector2((playerStats.movementSpeed + 2.0f) * mod, 0.0f);
-        return !canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed);
+
+        boolean result = false;
+
+        PhysicsDebugSystem.start.set(posX, posY);
+        PhysicsDebugSystem.end.set(newPosition);
+        if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
+            result = true;
+         posY = transform.position.y + BomberMan.PLAYER_RADIUS;
+         posX = transform.position.x + distance - (distance - 0.4f * BomberMan.PLAYER_SCALE * mod);
+         newPosition.set(posX + distance, posY);
+         PhysicsDebugSystem.start2.set(posX, posY);
+         PhysicsDebugSystem.end2.set(newPosition);
+         if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
+             result = true;
+
+         posY = transform.position.y + BomberMan.PLAYER_RADIUS / 2f;
+         posX = transform.position.x + 0.9f * BomberMan.PLAYER_SCALE * mod;
+         newPosition.set(posX + distance, posY);
+         PhysicsDebugSystem.start5.set(posX, posY);
+         PhysicsDebugSystem.end5.set(newPosition);
+         if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
+             result = true;
+
+         posY = transform.position.y - (BomberMan.PLAYER_RADIUS + 0.2f * BomberMan.PLAYER_SCALE) / 3f;
+         posX = transform.position.x + distance - (distance - 0.4f * BomberMan.PLAYER_SCALE * mod);
+         newPosition.set(posX + distance, posY);
+         PhysicsDebugSystem.start3.set(posX, posY);
+         PhysicsDebugSystem.end3.set(newPosition);
+         if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
+             result = true;
+
+         posY = transform.position.y - BomberMan.PLAYER_RADIUS + 0.2f * BomberMan.PLAYER_SCALE;
+         posX = transform.position.x + distance - (distance - 0.4f * BomberMan.PLAYER_SCALE * mod);
+         newPosition.set(posX + distance, posY);
+         PhysicsDebugSystem.start4.set(posX, posY);
+         PhysicsDebugSystem.end4.set(newPosition);
+         if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
+             result = true;
+
+        return result;
     }
 
     public Entity createPlayer(float posX, float posY){
@@ -251,12 +324,12 @@ public class PlayerSystem extends IteratingSystem {
         return entity;
     }
 
-    public void createPlayer(float posX, float posY, int UP, int DOWN, int LEFT, int RIGHT, int PLACE_BOMB){
+    public void createPlayer(float posX, float posY, int UP, int DOWN, int LEFT, int RIGHT, int PLACE_BOMB, Color color){
         Entity entity = createPlayer(posX, posY);
         ControlsComponent controls = Mappers.controlsMapper.get(entity);
         TextureComponent texture = Mappers.textureMapper.get(entity);
         controls.setControls(UP, DOWN, LEFT, RIGHT, PLACE_BOMB);
-        texture.color.set(1, 0.188f, 0.917f, 1);
+        texture.color.set(color);
     }
 
     private boolean checkForCollision(Vector2 wh, float r){
