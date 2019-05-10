@@ -10,10 +10,13 @@ import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
+import com.badlogic.gdx.math.Vector3;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
 import com.mygdx.game.BomberMan;
+
+import java.util.Random;
 
 public class MapSystem extends IteratingSystem {
 
@@ -21,6 +24,7 @@ public class MapSystem extends IteratingSystem {
     private static TiledMap map;
     private BodyFactory bodyFactory;
     private PooledEngine engine;
+    Random generator = new Random();
 
     public MapSystem(BodyFactory bf, PooledEngine eng) {
         super(Family.all(BlockComponent.class).get());
@@ -36,6 +40,19 @@ public class MapSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         BlockComponent block = Mappers.blockMapper.get(entity);
+        if(block.toDestroy){
+            Vector3 pos = Mappers.transformMapper.get(entity).position;
+            BodyComponent body = Mappers.bodyMapper.get(entity);
+            body.body.getWorld().destroyBody(body.body);
+            getEngine().removeEntity(entity);
+
+
+            float drop = generator.nextFloat();
+            if(drop <= 0.4f) {
+                int type = generator.nextInt(4);
+                getEngine().getSystem(PowerUpSystem.class).createPowerUp(pos.x, pos.y, type);
+            }
+        }
 
     }
 

@@ -138,7 +138,7 @@ public class RenderingSystem extends SortedIteratingSystem {
             }
 
             float originX = width / 2f;
-            float originY = height / (type.type == TypeComponent.PLAYER || type.type == TypeComponent.ENEMY ? 2.8f : 2f);
+            float originY = height / (type.type == TypeComponent.PLAYER || type.type == TypeComponent.ENEMY ? 2.7f : 2f);
 
             batch.draw(tex.region,
                     t.position.x - originX, t.position.y - originY,

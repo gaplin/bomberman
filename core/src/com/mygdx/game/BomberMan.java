@@ -27,16 +27,17 @@ public class BomberMan extends Game {
 	public static final short POWER_UP_BIT = 1 << 5;
 
 
-	public static final float GAME_SCALE = 1f;
+	private static final float GAME_SCALE = 1.0f;
 
-	public static final float PLAYER_SCALE = 1f * GAME_SCALE;
-	public static final float BOMB_SCALE = 1f * GAME_SCALE;
+	public static final float PLAYER_SCALE = 1.0f * GAME_SCALE;
+	public static final float BOMB_SCALE = 1.0f * GAME_SCALE;
 	public static final float SCENERY_SCALE = 1f * GAME_SCALE;
 
-	public final static float STARTING_MOVEMENT_SPEED = 10f;
+	public final static float STARTING_MOVEMENT_SPEED = 8f;
 	public final static int STARTING_BOMB_POWER = 1;
 	public final static float AGONY_TIME = 2.0f;
 	public static int PLAYER_COUNT = 0;
+	public static int ENEMY_COUNT = 0;
 
 	public final static float PLAYER_RADIUS = 1.4f * PLAYER_SCALE;
 	public final static float BOMB_RADIUS = 1.5f * BOMB_SCALE;
