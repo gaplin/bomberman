@@ -87,10 +87,10 @@ public class MapSystem extends IteratingSystem {
             mapComp.type = blockType;
 
             if(blockType == BlockComponent.DESTROYABLE){
-                body.body = bodyFactory.makeDestroyableBlock(tile.getX() / 32 + 0.45f, tile.getY() / 32 + 0.2f);
+                body.body = bodyFactory.makeDestroyableBlock(tile.getX() / 32 + 1f, tile.getY() / 32 + 1f);
             }
             else{
-                body.body = bodyFactory.makeWall(tile.getX() / 32 + 0.45f, tile.getY() / 32 + 0.2f);
+                body.body = bodyFactory.makeWall(tile.getX() / 32f + 1f , tile.getY() / 32f + 1f);
             }
             body.body.setUserData(ent);
 
@@ -100,7 +100,7 @@ public class MapSystem extends IteratingSystem {
 
             type.type = TypeComponent.SCENERY;
 
-            tranComp.position.set(tile.getX() / 32 + 0.45f, tile.getY() / 32 + 0.2f, -1);
+            tranComp.position.set(tile.getX() / 32 + 1f, tile.getY() / 32 + 1f, -2);
 
 
             ent.add(body);
