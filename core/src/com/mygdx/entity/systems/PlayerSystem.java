@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
@@ -11,7 +12,9 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
@@ -334,30 +337,20 @@ public class PlayerSystem extends IteratingSystem {
 
     private boolean checkForCollision(Vector2 wh, float r){
         r /= 2f;
-        for(Entity entity : getEngine().getEntities()){
-            PlayerComponent pl = Mappers.playerMapper.get(entity);
-            if(pl == null){
-                BodyComponent body = Mappers.bodyMapper.get(entity);
-                if(body != null && Mappers.bombMapper.get(entity) != null){
-                    float x = wh.x;
-                    float y = wh.y;
-                    float x2 = body.body.getWorldCenter().x;
-                    float y2 = body.body.getWorldCenter().y;
-                    float r2;
-                    if(Mappers.bodyMapper.get(entity) != null ||
-                    Mappers.flameMapper.get(entity) != null)
-                        r2 = BomberMan.BOMB_RADIUS / 2f;
-                    else
-                        r2 = BomberMan.PLAYER_RADIUS / 2f;
-                    float AB = (x2 - x) * (x2 - x) + (y2 - y) * (y2 - y);
-                    float dist = (r - r2) * (r - r2);
-                    float sum = (r + r2) * (r + r2);
-                    if(AB <= dist || AB < sum)
-                        return true;
-                }
-            }
+        ImmutableArray<Entity> ent = engine.getEntitiesFor(Family.one(FlameComponent.class, BombComponent.class).get());
+        for(Entity entity : ent){
+            Vector3 position = Mappers.transformMapper.get(entity).position;
+            float x = wh.x;
+            float y = wh.y;
+            float x2 = position.x;
+            float y2 = position.y;
+            float r2 = BomberMan.BOMB_RADIUS / 2f;
+            float AB = (x2 - x) * (x2 - x) + (y2 - y) * (y2 - y);
+            float dist = (r - r2) * (r - r2);
+            float sum = (r + r2) * (r + r2);
+            if(AB <= dist || AB < sum)
+                return true;
         }
         return false;
     }
-
 }
