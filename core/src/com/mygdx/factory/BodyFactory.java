@@ -62,7 +62,7 @@ public class BodyFactory {
 
         Body boxBody = world.createBody(boxBodyDef);
         PolygonShape poly = new PolygonShape();
-        poly.setAsBox(BomberMan.TILE_WIDTH / 2f,BomberMan.TILE_HEIGHT / 2f);
+        poly.setAsBox(BomberMan.TILE_WIDTH * 1.1f,BomberMan.TILE_HEIGHT * 1.1f);
         fd.shape = poly;
         boxBody.createFixture(fd);
         poly.dispose();
@@ -78,7 +78,7 @@ public class BodyFactory {
 
         Body boxBody = world.createBody(boxBodyDef);
         PolygonShape poly = new PolygonShape();
-        poly.setAsBox(BomberMan.TILE_WIDTH / 2f,BomberMan.TILE_HEIGHT / 2f);
+        poly.setAsBox(BomberMan.TILE_WIDTH * 1.1f,BomberMan.TILE_HEIGHT * 1.1f);
         fd.shape = poly;
         boxBody.createFixture(fd);
         poly.dispose();
@@ -86,7 +86,7 @@ public class BodyFactory {
     }
 
     public Body makePlayer(float posX, float posY){
-        com.mygdx.BodyEditor.BodyEditorLoader loader = new com.mygdx.BodyEditor.BodyEditorLoader(Gdx.files.internal("bodies/bomberman.json"));
+        com.mygdx.BodyEditor.BodyEditorLoader loader = new com.mygdx.BodyEditor.BodyEditorLoader(Gdx.files.internal("core/assets/bodies/bomberman.json"));
 
         BodyDef bdBody = makeBodyDef(posX, posY, BodyDef.BodyType.DynamicBody);
 

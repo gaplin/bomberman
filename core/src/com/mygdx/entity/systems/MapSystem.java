@@ -95,8 +95,8 @@ public class MapSystem extends IteratingSystem {
             body.body.setUserData(ent);
 
             texture.region = texreg;
-            texture.region.setRegionX(35);
-            texture.region.setRegionY(35);
+            texture.region.setRegionX(64);
+            texture.region.setRegionY(64);
 
             type.type = TypeComponent.SCENERY;
 
@@ -117,8 +117,8 @@ public class MapSystem extends IteratingSystem {
 
     public static boolean checkBlock(float posx,float posy, String name){
         MapObjects objects = map.getLayers().get(name).getObjects();
-        float width = BomberMan.TILE_WIDTH;
-        float height = BomberMan.TILE_HEIGHT;
+        float width = BomberMan.TILE_WIDTH * 1.1f;
+        float height = BomberMan.TILE_HEIGHT * 1.1f;
 
         for(MapObject obj : objects){
             TiledMapTileMapObject tile = (TiledMapTileMapObject) obj;

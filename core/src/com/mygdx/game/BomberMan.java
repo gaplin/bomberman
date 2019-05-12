@@ -29,7 +29,7 @@ public class BomberMan extends Game {
 
 	private static final float GAME_SCALE = 1.0f;
 
-	public static final float PLAYER_SCALE = 1.0f * GAME_SCALE;
+	public static final float PLAYER_SCALE = 0.75f * GAME_SCALE;
 	public static final float BOMB_SCALE = 1.0f * GAME_SCALE;
 	public static final float SCENERY_SCALE = 1f * GAME_SCALE;
 
