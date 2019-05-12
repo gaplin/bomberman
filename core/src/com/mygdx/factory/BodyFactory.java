@@ -86,7 +86,7 @@ public class BodyFactory {
     }
 
     public Body makePlayer(float posX, float posY){
-        com.mygdx.BodyEditor.BodyEditorLoader loader = new com.mygdx.BodyEditor.BodyEditorLoader(Gdx.files.internal("core/assets/bodies/bomberman.json"));
+        com.mygdx.BodyEditor.BodyEditorLoader loader = new com.mygdx.BodyEditor.BodyEditorLoader(Gdx.files.internal("bodies/bomberman.json"));
 
         BodyDef bdBody = makeBodyDef(posX, posY, BodyDef.BodyType.DynamicBody);
 
