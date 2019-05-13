@@ -4,7 +4,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
-import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
@@ -12,9 +11,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
-import com.badlogic.gdx.utils.Array;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
@@ -94,10 +91,16 @@ public class PlayerSystem extends IteratingSystem {
         state.isMoving = body.body.getLinearVelocity().y != 0 || body.body.getLinearVelocity().x != 0;
 
         if((playerStats.bombs > 0 || player.cheat) && state.placeBombJustPressed){
-            if(checkForCollision(new Vector2(transform.position.x, transform.position.y), BomberMan.BOMB_RADIUS)){
+            float posX = MathUtils.floor(transform.position.x);
+            float posY = MathUtils.floor(transform.position.y) + 1.0f;
+            if(posX % 2 == 0)
+                posX++;
+            if(posY % 2 == 0)
+                posY--;
+            if(checkForCollision(new Vector2(posX, posY))){
                 return;
             }
-            getEngine().getSystem(BombSystem.class).createBomb(transform.position.x, transform.position.y, entity);
+            getEngine().getSystem(BombSystem.class).createBomb(posX, posY, entity);
             playerStats.bombs--;
         }
 
@@ -335,21 +338,12 @@ public class PlayerSystem extends IteratingSystem {
         texture.color.set(color);
     }
 
-    private boolean checkForCollision(Vector2 wh, float r){
-        r /= 2f;
-        ImmutableArray<Entity> ent = engine.getEntitiesFor(Family.one(FlameComponent.class, BombComponent.class).get());
-        for(Entity entity : ent){
-            Vector3 position = Mappers.transformMapper.get(entity).position;
-            float x = wh.x;
-            float y = wh.y;
-            float x2 = position.x;
-            float y2 = position.y;
-            float r2 = BomberMan.BOMB_RADIUS / 2f;
-            float AB = (x2 - x) * (x2 - x) + (y2 - y) * (y2 - y);
-            float dist = (r - r2) * (r - r2);
-            float sum = (r + r2) * (r + r2);
-            if(AB <= dist || AB < sum)
-                return true;
+    private boolean checkForCollision(Vector2 wh){
+        for(Entity entity : engine.getEntitiesFor(Family.one(BombComponent.class, FlameComponent.class).get())){
+            for(Fixture fix : Mappers.bodyMapper.get(entity).body.getFixtureList()){
+                if(fix.testPoint(wh.x, wh.y))
+                    return true;
+            }
         }
         return false;
     }
