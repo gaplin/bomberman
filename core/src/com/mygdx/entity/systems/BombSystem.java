@@ -9,6 +9,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Fixture;
@@ -64,6 +65,12 @@ public class BombSystem extends IteratingSystem {
 
         if(bombState.time >= bomb.detonationTime) {
             Vector2 pos = bombBody.body.getWorldCenter();
+            pos.x = MathUtils.floor(pos.x);
+            pos.y = MathUtils.floor(pos.y);
+            if(pos.x % 2 == 0)
+                pos.x++;
+            if(pos.y % 2 == 0)
+                pos.y--;
 
             bombBody.body.getWorld().destroyBody(bombBody.body);
             getEngine().removeEntity(entity);
@@ -84,28 +91,28 @@ public class BombSystem extends IteratingSystem {
 
             for(int i = 1; i <= bomb.range; i++){
                 try {
-                    flames.createFlame(pos.x - (BomberMan.BOMB_RADIUS) * i, pos.y);
+                    flames.createFlame(pos.x - (BomberMan.BOMB_RADIUS + 0.5f) * i, pos.y);
                 } catch(Exception e) {
                     break;
                 }
             }
             for(int i = 1; i <= bomb.range; i++) {
                 try {
-                    flames.createFlame(pos.x + (BomberMan.BOMB_RADIUS) * i, pos.y);
+                    flames.createFlame(pos.x + (BomberMan.BOMB_RADIUS + 0.5f) * i, pos.y);
                 } catch (Exception e) {
                     break;
                 }
             }
             for(int i = 1; i <= bomb.range; i++){
                 try {
-                    flames.createFlame(pos.x, pos.y - (BomberMan.BOMB_RADIUS) * i);
+                    flames.createFlame(pos.x, pos.y - (BomberMan.BOMB_RADIUS + 0.5f) * i);
                 } catch(Exception e){
                     break;
                 }
             }
             for(int i = 1; i <= bomb.range; i++){
                 try {
-                    flames.createFlame(pos.x, pos.y + (BomberMan.BOMB_RADIUS) * i);
+                    flames.createFlame(pos.x, pos.y + (BomberMan.BOMB_RADIUS + 0.5f) * i);
                 } catch(Exception e){
                     break;
                 }
@@ -144,7 +151,7 @@ public class BombSystem extends IteratingSystem {
     public boolean verticalHit(Entity entity, float mod){
         BodyComponent bodyCom = Mappers.bodyMapper.get(entity);
         Body body = bodyCom.body;
-        float distance = BomberMan.BOMB_RADIUS / 2f * mod;
+        float distance = (BomberMan.BOMB_RADIUS / 2f + 0.5f) * mod;
         float radius = BomberMan.BOMB_RADIUS / 2f;
         float posX = body.getPosition().x;
         float posY = body.getPosition().y;
@@ -159,7 +166,7 @@ public class BombSystem extends IteratingSystem {
     public boolean horizontalHit(Entity entity, float mod){
         BodyComponent bodyCom = Mappers.bodyMapper.get(entity);
         Body body = bodyCom.body;
-        float distance = BomberMan.BOMB_RADIUS / 2f * mod;
+        float distance = (BomberMan.BOMB_RADIUS / 2f + 0.5f) * mod;
         float radius = BomberMan.BOMB_RADIUS / 2f;
         float posX = body.getPosition().x;
         float posY = body.getPosition().y;

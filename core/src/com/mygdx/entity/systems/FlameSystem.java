@@ -37,10 +37,10 @@ public class FlameSystem extends IteratingSystem {
     }
 
     public void createFlame(float posX, float posY) throws Exception{
-        if(!MapSystem.checkBlock(posX, posY, "wall"))
-            throw new Exception();
-
         PooledEngine engine = (PooledEngine) getEngine();
+
+        if(!engine.getSystem(MapSystem.class).checkBlock(posX, posY, BlockComponent.WALL))
+            throw new Exception();
 
         Entity ent = engine.createEntity();
 
@@ -80,7 +80,7 @@ public class FlameSystem extends IteratingSystem {
 
         engine.addEntity(ent);
 
-        if(!MapSystem.checkBlock(posX, posY, "destroyable"))
+        if(!engine.getSystem(MapSystem.class).checkBlock(posX, posY, BlockComponent.DESTROYABLE))
             throw new Exception();
     }
 }

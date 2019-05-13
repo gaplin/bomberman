@@ -11,10 +11,10 @@ import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
-import com.mygdx.game.BomberMan;
 
 import java.util.Random;
 
@@ -115,38 +115,17 @@ public class MapSystem extends IteratingSystem {
     }
 
 
-    public static boolean checkBlock(float posx,float posy, String name){
-        MapObjects objects = map.getLayers().get(name).getObjects();
-        float width = BomberMan.TILE_WIDTH * 1.1f;
-        float height = BomberMan.TILE_HEIGHT * 1.1f;
-
-        for(MapObject obj : objects){
-            TiledMapTileMapObject tile = (TiledMapTileMapObject) obj;
-            float x = tile.getX() / 32 + 0.45f;
-            float y = tile.getY() / 32 + 0.2f;
-            if(intersects(x+width/2, y+height/2, width, height, posx, posy, BomberMan.BOMB_RADIUS / 3))
-                return false;
+    public boolean checkBlock(float posX, float posY, int type){
+        for(Entity entity : engine.getEntitiesFor(Family.one(BlockComponent.class).get())){
+            BlockComponent block = Mappers.blockMapper.get(entity);
+            if(block.type != type)
+                continue;
+            for(Fixture fix : Mappers.bodyMapper.get(entity).body.getFixtureList()){
+                if(fix.testPoint(posX, posY)){
+                    return false;
+                }
+            }
         }
         return true;
-    }
-
-    private static boolean intersects(float rectX, float rectY, float rectWidth, float rectHeight, float circleX, float circleY, float circleR){
-        float circleDistX = circleX - rectX;
-        circleDistX = circleDistX < 0 ? -1 * circleDistX : circleDistX;
-        float circleDistY = circleY - rectY;
-        circleDistY = circleDistY < 0 ? -1 * circleDistY : circleDistY;
-
-        if(circleDistX > (rectWidth/2 + circleR))
-            return false;
-        if(circleDistY > (rectHeight/2 + circleR))
-            return false;
-
-        if(circleDistX <= (rectWidth/2))
-            return true;
-        if(circleDistY <= (rectHeight/2))
-            return true;
-
-        float cornerDist = (circleDistX - rectWidth/2)*(circleDistX - rectWidth/2) + (circleDistY - rectHeight/2)*(circleDistY - rectHeight/2);
-        return cornerDist <= circleR * circleR;
     }
 }
