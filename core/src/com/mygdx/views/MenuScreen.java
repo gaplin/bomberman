@@ -104,11 +104,11 @@ public class MenuScreen extends ButtonsCount implements Screen {
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN) && pressed == -1) {
             pointer = (pointer + 1) % nButtons;
-            buttonSound1.play(buttonSound2.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME)));
+            buttonSound1.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME));
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.UP) && pressed == -1) {
             pointer = ((pointer - 1) % nButtons + nButtons) % nButtons;
-            buttonSound1.play(buttonSound2.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME)));
+            buttonSound1.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME));
         }
 
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1/30f));

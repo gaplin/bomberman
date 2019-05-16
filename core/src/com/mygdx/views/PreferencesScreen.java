@@ -7,6 +7,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -18,7 +19,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.game.BomberMan;
 
-public class PrefernecesScreen extends ButtonsCount implements Screen {
+public class PreferencesScreen extends ButtonsCount implements Screen {
     private BomberMan parent;
 
     private Sound buttonSound1;
@@ -40,7 +41,7 @@ public class PrefernecesScreen extends ButtonsCount implements Screen {
     private final int range = 10;
 
 
-    public PrefernecesScreen(BomberMan parent){
+    public PreferencesScreen(BomberMan parent){
         super();
         this.parent = parent;
         this.buttonSound1 = parent.assMan.manager.get("sounds/buttonSound.wav");
@@ -139,32 +140,45 @@ public class PrefernecesScreen extends ButtonsCount implements Screen {
         if(Gdx.input.isKeyJustPressed(Input.Keys.LEFT)){
             if(pointer == 0){
                 float prev = BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME);
-                BomberMan.prefs.putFloat("menuVol", Math.max(0.0f, prev - 0.1f));
+                float current = MathUtils.round(Math.max(0.0f, prev - 0.1f) * 10.0f) / 10.0f;
+                BomberMan.prefs.putFloat("menuVol", current);
                 BomberMan.prefs.flush();
+                if(prev != current)
+                    buttonSound2.play(current);
             }
             else if(pointer == 1){
                 float prev = BomberMan.prefs.getFloat("gameVol", BomberMan.GAME_VOLUME);
-                BomberMan.prefs.putFloat("gameVol", Math.max(0.0f, prev - 0.1f));
+                float current = MathUtils.round(Math.max(0.0f, prev - 0.1f) * 10.0f) / 10.0f;
+                BomberMan.prefs.putFloat("gameVol", current);
                 BomberMan.prefs.flush();
+                if(prev != current)
+                    buttonSound2.play(current);
             }
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)){
             if(pointer == 0){
                 float prev = BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME);
-                BomberMan.prefs.putFloat("menuVol", Math.min(1.0f, prev + 0.1f));
+                float current = MathUtils.round(Math.min(1.0f, prev + 0.1f) * 10.0f) / 10.0f;
+                BomberMan.prefs.putFloat("menuVol", current);
                 BomberMan.prefs.flush();
+                if(prev != current)
+                    buttonSound2.play(current);
             }
             else if(pointer == 1){
                 float prev = BomberMan.prefs.getFloat("gameVol", BomberMan.GAME_VOLUME);
-                BomberMan.prefs.putFloat("gameVol", Math.min(1.0f, prev + 0.1f));
+                float current = MathUtils.round(Math.min(1.0f, prev + 0.1f) * 10.0f) / 10.0f;
+                BomberMan.prefs.putFloat("gameVol", current);
                 BomberMan.prefs.flush();
+                if(prev != current)
+                    buttonSound2.play(current);
             }
         }
 
 
         int menuVol = (int)(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME) * 10);
         int gameVol = (int)(BomberMan.prefs.getFloat("gameVol", BomberMan.GAME_VOLUME) * 10);
+
 
         for(int i = 0; i < menuVol; i++){
             menuTable.getCells().get(i).getActor().setVisible(true);

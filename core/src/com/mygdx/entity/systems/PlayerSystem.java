@@ -52,16 +52,11 @@ public class PlayerSystem extends IteratingSystem {
         TypeComponent typeComp = Mappers.typeMapper.get(entity);
 
         float posX = MathUtils.floor(transform.position.x);
-        float posY = MathUtils.floor(transform.position.y) + 1.0f;
+        float posY = MathUtils.floor(transform.position.y);
         if(posX % 2 == 0)
             posX++;
         if(posY % 2 == 0)
-            posY--;
-
-
-        if(typeComp.type == TypeComponent.PLAYER) {
-            System.out.println(MapSystem.toGridPosition(transform.position) + " " + transform.position);
-        }
+            posY++;
 
         if(playerStats.dead) {
             return;

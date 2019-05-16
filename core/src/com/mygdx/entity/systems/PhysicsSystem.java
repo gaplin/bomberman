@@ -53,7 +53,11 @@ public class PhysicsSystem extends IteratingSystem {
                 Vector2 oldGridPosition = MapSystem.toGridPosition(oldPosition);
 
                 MapSystem mapSystem = getEngine().getSystem(MapSystem.class);
-                mapSystem.grid[(int)oldGridPosition.y][(int)oldGridPosition.x].type = TypeComponent.OTHER;
+                if(oldGridPosition.y == -1){
+                    System.out.println(tfm.position.x + " " + tfm.position.y);
+                }
+                mapSystem.grid[(int)oldGridPosition.y]
+                        [(int)oldGridPosition.x].type = TypeComponent.OTHER;
 
 
                 tfm.position.x = position.x;

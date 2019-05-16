@@ -71,7 +71,7 @@ public class BombSystem extends IteratingSystem {
             if(posX % 2 == 0)
                 posX++;
             if(posY % 2 == 0)
-                posY--;
+                posY++;
 
             Vector2 gridPosition = MapSystem.toGridPosition(pos);
             MapSystem mapSystem = getEngine().getSystem(MapSystem.class);

@@ -13,7 +13,7 @@ public class BomberMan extends Game {
 	private LevelsScreen levelsScreen;
 	private LoadingScreen loadingScreen;
 	private MenuScreen menuScreen;
-	private PrefernecesScreen prefernecesScreen;
+	private PreferencesScreen preferencesScreen;
 
 	public static Preferences prefs;
 
@@ -34,7 +34,7 @@ public class BomberMan extends Game {
 	private static final float GAME_SCALE = 1.0f;
 
 	public static final float PLAYER_SCALE = 0.65f * GAME_SCALE;
-	public static final float BOMB_SCALE = 0.85f * GAME_SCALE;
+	public static final float BOMB_SCALE = 0.9f * GAME_SCALE;
 	public static final float SCENERY_SCALE = 1f * GAME_SCALE;
 
 	public final static float STARTING_MOVEMENT_SPEED = 10f;
@@ -92,8 +92,8 @@ public class BomberMan extends Game {
 				this.setScreen(endScreen);
 				break;
 			case PREFERENCES:
-				if(prefernecesScreen == null)prefernecesScreen = new PrefernecesScreen(this);
-				this.setScreen(prefernecesScreen);
+				if(preferencesScreen == null) preferencesScreen = new PreferencesScreen(this);
+				this.setScreen(preferencesScreen);
 				break;
 		}
 	}

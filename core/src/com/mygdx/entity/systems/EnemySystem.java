@@ -88,7 +88,6 @@ public class EnemySystem extends IteratingSystem {
         while(!Q.isEmpty()){
             v = Q.removeFirst();
             Vector2 position = v.obj.position;
-            System.out.println(position);
             //
             int up = map[(int)position.y + 1][(int)position.x].type;
             if(!visited[(int)position.y + 1][(int)position.x] && (up == TypeComponent.OTHER ||
