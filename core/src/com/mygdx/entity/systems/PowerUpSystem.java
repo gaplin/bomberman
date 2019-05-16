@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
@@ -27,6 +28,12 @@ public class PowerUpSystem extends IteratingSystem {
         PowerUpComponent powerUp = Mappers.powerUpMapper.get(entity);
         powerUp.time -= deltaTime;
         if(powerUp.time <= 0) {
+            TransformComponent tranform = Mappers.transformMapper.get(entity);
+            Vector2 gridPosition = MapSystem.toGridPosition(tranform.position);
+            MapSystem mapSystem = getEngine().getSystem(MapSystem.class);
+
+            mapSystem.grid[(int)gridPosition.y][(int)gridPosition.x].type = TypeComponent.OTHER;
+
             BodyComponent body = Mappers.bodyMapper.get(entity);
             body.body.getWorld().destroyBody(body.body);
             getEngine().removeEntity(entity);
@@ -50,7 +57,7 @@ public class PowerUpSystem extends IteratingSystem {
         TextureComponent texture = engine.createComponent(TextureComponent.class);
         BodyComponent body = engine.createComponent(BodyComponent.class);
 
-        type.type = TypeComponent.SCENERY;
+        type.type = TypeComponent.POWER_UP;
 
         powerUp.type = upType;
 

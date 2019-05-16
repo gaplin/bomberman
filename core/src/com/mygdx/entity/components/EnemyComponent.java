@@ -2,6 +2,8 @@ package com.mygdx.entity.components;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.utils.Pool;
+import com.badlogic.gdx.utils.Queue;
+import com.mygdx.entity.systems.MapSystem;
 
 public class EnemyComponent implements Component, Pool.Poolable {
 
@@ -12,6 +14,17 @@ public class EnemyComponent implements Component, Pool.Poolable {
     public float time;
     public float newBombTimer;
     public float damageUpTimer;
+    public boolean moving;
+    public boolean correctingX;
+    public boolean correctingY;
+    public boolean up;
+    public boolean down;
+    public boolean left;
+    public boolean right;
+    public boolean processingMove;
+
+    public Queue<MapSystem.MapObjs> move;
+    public MapSystem.MapObjs lastMove;
 
     public void resetNewBombTimer(){
         newBombTimer = 10.0f;
@@ -21,10 +34,23 @@ public class EnemyComponent implements Component, Pool.Poolable {
         damageUpTimer = 15.0f;
     }
 
+    public void resetDirections(){
+        up = false;
+        down = false;
+        left = false;
+        right = false;
+        processingMove = false;
+    }
+
     @Override
     public void reset() {
         time = 0.0f;
         resetNewBombTimer();
         resetDamageUpTimer();
+        resetDirections();
+        move = new Queue<>();
+        lastMove = null;
+        correctingX = false;
+        correctingY = false;
     }
 }

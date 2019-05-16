@@ -48,12 +48,24 @@ public class PhysicsSystem extends IteratingSystem {
                     continue;
                 TypeComponent type = Mappers.typeMapper.get(entity);
                 Vector2 position = bodyComp.body.getPosition();
+
+                Vector2 oldPosition = new Vector2(tfm.position.x, tfm.position.y);
+                Vector2 oldGridPosition = MapSystem.toGridPosition(oldPosition);
+
+                MapSystem mapSystem = getEngine().getSystem(MapSystem.class);
+                mapSystem.grid[(int)oldGridPosition.y][(int)oldGridPosition.x].type = TypeComponent.OTHER;
+
+
                 tfm.position.x = position.x;
                 tfm.position.y = position.y;
+
                 if(type.type == TypeComponent.PLAYER || type.type == TypeComponent.ENEMY){
                     tfm.position.x += 1f * BomberMan.PLAYER_SCALE;
                     tfm.position.y += 1.45f * BomberMan.PLAYER_SCALE;
                 }
+
+                Vector2 newGridPosition = MapSystem.toGridPosition(tfm.position);
+                mapSystem.grid[(int)newGridPosition.y][(int)newGridPosition.x].type = type.type;
             }
             bodiesQueue.clear();
         }

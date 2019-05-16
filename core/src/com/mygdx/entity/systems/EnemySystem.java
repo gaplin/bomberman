@@ -8,21 +8,18 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.utils.Queue;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
 import com.mygdx.game.BomberMan;
 
-import java.util.Random;
 
 public class EnemySystem extends IteratingSystem {
 
     private TextureAtlas atlas;
     private BodyFactory bodyFactory;
     private PooledEngine engine;
-    private Random random = new Random();
-    private short hitBit;
 
     public EnemySystem(TextureAtlas atlas , BodyFactory bodyFactory, PooledEngine engine){
         super(Family.all(EnemyComponent.class).get());
@@ -32,211 +29,298 @@ public class EnemySystem extends IteratingSystem {
         this.engine = engine;
         BomberMan.ENEMY_COUNT = 0;
 
-        createEnemy(1.0f, 1.0f, Color.YELLOW);
-        createEnemy(22.0f ,1.0f, Color.RED);
-        createEnemy(22.0f, 15.0f, Color.BLUE);
+        createEnemy(2f, 2.0f, Color.YELLOW);
+        createEnemy(23.0f,2.0f, Color.RED);
+        createEnemy(23.0f, 16.0f, Color.BLUE);
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         EnemyComponent enemy = Mappers.enemyMapper.get(entity);
-        StateComponent state = Mappers.stateMapper.get(entity);
-        StatsComponent stats = Mappers.statsMapper.get(entity);
-        if(enemy.time == 0){
-            enemy.time = 5f;
-            setDirection(state, random.nextInt(4));
+
+        if(enemy.correctingX){
+            correctX(entity);
+            return;
         }
 
-        enemy.damageUpTimer -= deltaTime;
-        enemy.newBombTimer -= deltaTime;
-
-        if(enemy.damageUpTimer <= 0 && stats.bombPower <= 2){
-            stats.bombPower++;
-            enemy.resetDamageUpTimer();
+        if(enemy.correctingY){
+            correctY(entity);
+            return;
         }
 
-        if(enemy.newBombTimer <= 0 && stats.bombs <= 2){
-            stats.bombs++;
-            enemy.resetNewBombTimer();
+        if(!enemy.moving){
+            calculateMove(entity);
         }
-
-
-        if(state.state == StateComponent.STATE_MOVING_RIGHT){
-            horizontalScan(entity, 1);
+        else{
+            move(entity);
         }
-        else if(state.state == StateComponent.STATE_MOVING_LEFT){
-            horizontalScan(entity, -1);
-        }
-        else if(state.state == StateComponent.STATE_MOVING_UP){
-            verticalScan(entity, 1);
-        }
-        else if(state.state == StateComponent.STATE_MOVING_DOWN){
-            verticalScan(entity, -1);
-        }
-
-        boolean placeBomb = false;
-        boolean changeDirection = false;
-
-
-        switch(hitBit){
-            case BomberMan.PLAYER_BIT:
-                placeBomb = true;
-                changeDirection = true;
-                break;
-            case BomberMan.DESTRUCTIBLE_BIT:
-                placeBomb = true;
-                changeDirection = true;
-                break;
-            case BomberMan.FLAME_BIT:
-                changeDirection = true;
-                break;
-            case BomberMan.INDESTRUCTIBLE_BIT:
-                changeDirection = true;
-                break;
-            case BomberMan.BOMB_BIT:
-                changeDirection = true;
-                break;
-        }
-
-        hitBit = 0;
-
-
-        state.placeBombJustPressed = placeBomb;
-
-        if(changeDirection)
-            setDirection(state, random.nextInt(4));
-
 
     }
 
+    private static class node{
+        MapSystem.MapObjs obj;
+        node prev;
 
-    private void setDirection(StateComponent state, int direction){
-        switch (direction){
-            case 0:
-                if(state.upPressed) {
-                    setDirection(state, random.nextInt(4));
-                    return;
-                }
-                state.resetPresses();
-                state.upPressed = true;
-                break;
-            case 1:
-                if(state.leftPressed) {
-                    setDirection(state, random.nextInt(4));
-                    return;
-                }
-                state.resetPresses();
-                state.leftPressed = true;
-                break;
-            case 2:
-                if(state.downPressed) {
-                    setDirection(state, random.nextInt(4));
-                    return;
-                }
-                state.resetPresses();
-                state.downPressed = true;
-                break;
-            case 3:
-                if(state.downPressed) {
-                    setDirection(state, random.nextInt(4));
-                    return;
-                }
-                state.resetPresses();
-                state.rightPressed = true;
-                break;
+        public node(){}
+        public node(MapSystem.MapObjs obj, node prev){
+            this.obj = obj;
+            this.prev = prev;
         }
     }
 
-    private void scan(Entity player, Vector2 from, Vector2 to){
-        BodyComponent bd = Mappers.bodyMapper.get(player);
-        Body body = bd.body;
-        World world = body.getWorld();
-        Filter bodyFilter = bd.body.getFixtureList().first().getFilterData();
-        hitBit = 0;
-        RayCastCallback rayCastCallback = new RayCastCallback() {
-            @Override
-            public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
-                if(fixture.getBody() == body)
-                    return 1;
 
-                if((bodyFilter.maskBits & fixture.getFilterData().categoryBits) != 0) {
-                    hitBit = fixture.getFilterData().categoryBits;
-                    return 0;
-                }
-                return 1;
+
+    private void calculateMove(Entity entity){
+        EnemyComponent enemy = Mappers.enemyMapper.get(entity);
+        Vector2 gridPosition = MapSystem.toGridPosition(Mappers.transformMapper.get(entity).position);
+        MapSystem mapSystem = getEngine().getSystem(MapSystem.class);
+        MapSystem.MapObjs[][] map = mapSystem.grid;
+
+        Queue<node> Q = new Queue<>();
+        Q.addLast(new node(map[(int)gridPosition.y][(int)gridPosition.x], null));
+
+        boolean[][] visited = new boolean[MapSystem.height + 1][MapSystem.width + 1];
+        visited[(int)gridPosition.y][(int)gridPosition.x] = true;
+
+
+        node v = new node();
+
+        while(!Q.isEmpty()){
+            v = Q.removeFirst();
+            Vector2 position = v.obj.position;
+            System.out.println(position);
+            //
+            int up = map[(int)position.y + 1][(int)position.x].type;
+            if(!visited[(int)position.y + 1][(int)position.x] && (up == TypeComponent.OTHER ||
+            up == TypeComponent.POWER_UP || up == TypeComponent.PLAYER || up == TypeComponent.ENEMY)){
+                Q.addLast(new node(map[(int)position.y + 1][(int)position.x], v));
+                visited[(int)position.y + 1][(int)position.x] = true;
             }
-        };
-        world.rayCast(rayCastCallback, from, to);
+            //
+            int down = map[(int)position.y - 1][(int)position.x].type;
+            if(!visited[(int)position.y - 1][(int)position.x] && (down == TypeComponent.OTHER ||
+                    down == TypeComponent.POWER_UP || down == TypeComponent.PLAYER || down == TypeComponent.ENEMY)){
+                Q.addLast(new node(map[(int)position.y - 1][(int)position.x], v));
+                visited[(int)position.y - 1][(int)position.x] = true;
+            }
+            //
+            int left = map[(int)position.y][(int)position.x - 1].type;
+            if(!visited[(int)position.y][(int)position.x - 1] && (left == TypeComponent.OTHER ||
+                    left == TypeComponent.POWER_UP || left == TypeComponent.PLAYER || left == TypeComponent.ENEMY)){
+                Q.addLast(new node(map[(int)position.y][(int)position.x - 1], v));
+                visited[(int)position.y][(int)position.x - 1] = true;
+            }
+            //
+            int right = map[(int)position.y][(int)position.x + 1].type;
+            if(!visited[(int)position.y][(int)position.x + 1] && (right == TypeComponent.OTHER ||
+                    right == TypeComponent.POWER_UP || right == TypeComponent.PLAYER || right == TypeComponent.ENEMY)){
+                Q.addLast(new node(map[(int)position.y][(int)position.x + 1], v));
+                visited[(int)position.y][(int)position.x + 1] = true;
+            }
+
+        }
+        while(!(v.prev == null)){
+            enemy.move.addFirst(v.obj);
+            v = v.prev;
+        }
+        System.out.println("------------");
+        for(MapSystem.MapObjs objs : enemy.move){
+            System.out.println(objs.position);
+        }
+        System.out.println("----------");
+        if(!enemy.move.isEmpty())
+            enemy.moving = true;
+    }
+
+    private void move(Entity entity){
+        EnemyComponent enemy = Mappers.enemyMapper.get(entity);
+        StateComponent state = Mappers.stateMapper.get(entity);
+        if(enemy.move.isEmpty()){
+            enemy.moving = false;
+            state.resetPresses();
+            enemy.resetDirections();
+            return;
+        }
+        TransformComponent transform = Mappers.transformMapper.get(entity);
+        Vector2 gridPosition = MapSystem.toGridPosition(Mappers.transformMapper.get(entity).position);
+        Vector2 position = new Vector2(transform.position.x, transform.position.y);
+        Vector2 newGridPosition = enemy.move.first().position;
+        Vector2 newPosition = new Vector2(newGridPosition.x * 2 + 1, newGridPosition.y * 2 + 0.95f);
+
+        if(!enemy.processingMove){
+            if(newGridPosition.y > gridPosition.y){
+                enemy.up = true;
+            }
+            else if(newGridPosition.y < gridPosition.y){
+                enemy.down = true;
+            }
+            else if(newGridPosition.x > gridPosition.x){
+                enemy.right = true;
+            }
+            else if(newGridPosition.x < gridPosition.x){
+                enemy.left = true;
+            }
+            else{
+                enemy.move.clear();
+                enemy.resetDirections();
+                state.resetPresses();
+                enemy.moving = false;
+                return;
+            }
+            enemy.processingMove = true;
+        }
+
+
+        if(enemy.up){
+            if(position.y >= newPosition.y){
+                enemy.resetDirections();
+                enemy.lastMove = enemy.move.removeFirst();
+                state.resetPresses();
+                move(entity);
+            }
+            else{
+                state.upPressed = true;
+            }
+        }
+
+        if(enemy.down){
+            if(position.y <= newPosition.y){
+                enemy.resetDirections();
+                enemy.lastMove = enemy.move.removeFirst();
+                state.resetPresses();
+                move(entity);
+            }
+            else {
+                state.downPressed = true;
+            }
+        }
+
+        if(enemy.left){
+            if(position.x <= newPosition.x){
+                enemy.resetDirections();
+                enemy.lastMove = enemy.move.removeFirst();
+                state.resetPresses();
+                move(entity);
+            }
+            else{
+                state.leftPressed = true;
+            }
+        }
+
+        if(enemy.right){
+            if(position.x >= newPosition.x){
+                enemy.resetDirections();
+                enemy.lastMove = enemy.move.removeFirst();
+                state.resetPresses();
+                move(entity);
+            }
+            else{
+                state.rightPressed = true;
+            }
+        }
+    }
+
+    private void correctX(Entity entity){
+        EnemyComponent enemy = Mappers.enemyMapper.get(entity);
+        TransformComponent transform = Mappers.transformMapper.get(entity);
+        StateComponent state = Mappers.stateMapper.get(entity);
+        Vector2 position = new Vector2(transform.position.x, transform.position.y);
+        Vector2 perfectPosition = MapSystem.toGridPosition(position);
+        perfectPosition.x = perfectPosition.x * 2 + 1.0f;
+        perfectPosition.y =  perfectPosition.y * 2 + 0.95f;
+
+        if(!enemy.processingMove){
+            if(perfectPosition.x > position.x){
+                enemy.right = true;
+            }
+            else{
+                enemy.left = true;
+            }
+            enemy.processingMove = true;
+        }
+
+        if(enemy.right){
+            if(perfectPosition.x <= position.x){
+                enemy.resetDirections();
+                state.resetPresses();
+                enemy.correctingX = false;
+                enemy.correctingY = true;
+                correctY(entity);
+            }
+            else{
+                state.rightPressed = true;
+            }
+        }
+        else{
+            if(perfectPosition.x >= position.x){
+                enemy.resetDirections();
+                state.resetPresses();
+                enemy.correctingX = false;
+                enemy.correctingY = true;
+                correctY(entity);
+            }
+            else{
+                state.leftPressed = true;
+            }
+        }
+    }
+
+    private void correctY(Entity entity){
+        EnemyComponent enemy = Mappers.enemyMapper.get(entity);
+        TransformComponent transform = Mappers.transformMapper.get(entity);
+        StateComponent state = Mappers.stateMapper.get(entity);
+        Vector2 position = new Vector2(transform.position.x, transform.position.y);
+        Vector2 perfectPosition = MapSystem.toGridPosition(position);
+        perfectPosition.x = perfectPosition.x * 2 + 1.0f;
+        perfectPosition.y =  perfectPosition.y * 2 + 0.95f;
+
+        if(!enemy.processingMove){
+            if(perfectPosition.y > position.y){
+                enemy.up = true;
+            }
+            else{
+                enemy.down = true;
+            }
+            enemy.processingMove = true;
+        }
+
+        if(enemy.up){
+            if(perfectPosition.y <= position.y){
+                enemy.resetDirections();
+                state.resetPresses();
+                enemy.correctingY = false;
+            }
+            else{
+                state.upPressed = true;
+            }
+        }
+        else{
+            if(perfectPosition.y >= position.y){
+                enemy.resetDirections();
+                state.resetPresses();
+                enemy.correctingY = false;
+            }
+            else{
+                state.downPressed = true;
+            }
+        }
     }
 
 
-    private void verticalScan(Entity entity, float mod){
-        TransformComponent transform = Mappers.transformMapper.get(entity);
-
-        float distance = 0.7f * mod;
-        float goodPosY = transform.position.y + BomberMan.PLAYER_RADIUS * mod;
-        if(mod < 0)
-            goodPosY += 0.3f * BomberMan.PLAYER_SCALE;
-        float posX = transform.position.x;
-        float posY = goodPosY;
-        Vector2 newPosition = new Vector2(posX, posY + distance + 0.2f * mod);
-
-
-        scan(entity, new Vector2(posX, posY), newPosition);
-        if(hitBit != 0)
-            return;
-
-        posX = transform.position.x + 0.7f * BomberMan.PLAYER_SCALE;
-        posY = goodPosY - BomberMan.PLAYER_RADIUS / 3f * mod;
-        newPosition.set(posX, posY + distance + 0.2f * mod);
-        scan(entity, new Vector2(posX, posY), newPosition);
-        if(hitBit != 0)
-            return;
-
-        posX = transform.position.x - 0.7f * BomberMan.PLAYER_SCALE;
-        posY = goodPosY - BomberMan.PLAYER_RADIUS / 3f * mod;
-        newPosition.set(posX, posY + distance + 0.2f * mod);
-        scan(entity, new Vector2(posX, posY), newPosition);
+    public void notifyEnemies(){
+        for(Entity entity : engine.getEntitiesFor(Family.one(EnemyComponent.class).get())){
+            notifyEnemy(entity);
+        }
     }
 
-    private void horizontalScan(Entity entity, float mod){
-        TransformComponent transform = Mappers.transformMapper.get(entity);
-
-        float distance = 0.7f * mod;
-        float posX = transform.position.x + 0.5f * mod;
-        float posY = transform.position.y;
-        Vector2 newPosition = new Vector2(posX + distance, posY);
-
-
-        scan(entity, new Vector2(posX, posY), newPosition);
-        if(hitBit != 0)
-            return;
-
-        posY = transform.position.y + BomberMan.PLAYER_RADIUS;
-        posX = transform.position.x + distance - (distance - 0.4f * BomberMan.PLAYER_SCALE * mod);
-        newPosition.set(posX + distance, posY);
-        scan(entity, new Vector2(posX, posY), newPosition);
-        if(hitBit != 0)
-            return;
-
-        posY = transform.position.y + BomberMan.PLAYER_RADIUS / 2f;
-        posX = transform.position.x + 0.9f * BomberMan.PLAYER_SCALE * mod;
-        newPosition.set(posX + distance, posY);
-        scan(entity, new Vector2(posX, posY), newPosition);
-        if(hitBit != 0)
-            return;
-
-        posY = transform.position.y - (BomberMan.PLAYER_RADIUS + 0.2f * BomberMan.PLAYER_SCALE) / 3f;
-        posX = transform.position.x + distance - (distance - 0.4f * BomberMan.PLAYER_SCALE * mod);
-        newPosition.set(posX + distance, posY);
-        scan(entity, new Vector2(posX, posY), newPosition);
-        if(hitBit != 0)
-            return;
-
-        posY = transform.position.y - BomberMan.PLAYER_RADIUS + 0.2f * BomberMan.PLAYER_SCALE;
-        posX = transform.position.x + distance - (distance - 0.4f * BomberMan.PLAYER_SCALE * mod);
-        newPosition.set(posX + distance, posY);
-        scan(entity, new Vector2(posX, posY), newPosition);
+    public void notifyEnemy(Entity entity){
+        EnemyComponent enemy = Mappers.enemyMapper.get(entity);
+        StateComponent state = Mappers.stateMapper.get(entity);
+        enemy.move.clear();
+        state.resetPresses();
+        enemy.resetDirections();
+        enemy.moving = false;
+        enemy.correctingX = true;
     }
 
     public Entity createEnemy(float posX, float posY){

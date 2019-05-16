@@ -49,7 +49,19 @@ public class PlayerSystem extends IteratingSystem {
         PlayerComponent player = Mappers.playerMapper.get(entity);
         TransformComponent transform = Mappers.transformMapper.get(entity);
         StatsComponent playerStats = Mappers.statsMapper.get(entity);
+        TypeComponent typeComp = Mappers.typeMapper.get(entity);
 
+        float posX = MathUtils.floor(transform.position.x);
+        float posY = MathUtils.floor(transform.position.y) + 1.0f;
+        if(posX % 2 == 0)
+            posX++;
+        if(posY % 2 == 0)
+            posY--;
+
+
+        if(typeComp.type == TypeComponent.PLAYER) {
+            System.out.println(MapSystem.toGridPosition(transform.position) + " " + transform.position);
+        }
 
         if(playerStats.dead) {
             return;
@@ -91,16 +103,11 @@ public class PlayerSystem extends IteratingSystem {
         state.isMoving = body.body.getLinearVelocity().y != 0 || body.body.getLinearVelocity().x != 0;
 
         if((playerStats.bombs > 0 || player.cheat) && state.placeBombJustPressed){
-            float posX = MathUtils.floor(transform.position.x);
-            float posY = MathUtils.floor(transform.position.y) + 1.0f;
-            if(posX % 2 == 0)
-                posX++;
-            if(posY % 2 == 0)
-                posY--;
             if(checkForCollision(new Vector2(posX, posY))){
                 return;
             }
             getEngine().getSystem(BombSystem.class).createBomb(posX, posY, entity);
+            getEngine().getSystem(EnemySystem.class).notifyEnemies();
             playerStats.bombs--;
         }
 
@@ -126,6 +133,9 @@ public class PlayerSystem extends IteratingSystem {
         }
 
         if(BomberMan.CHEATS && Gdx.input.isKeyJustPressed(Input.Keys.C)){
+            int type = Mappers.typeMapper.get(entity).type;
+            if(type == TypeComponent.ENEMY)
+                return;
             player.cheat = !player.cheat;
             Filter filter = new Filter();
             if(player.cheat) {
@@ -147,6 +157,7 @@ public class PlayerSystem extends IteratingSystem {
     private boolean canMove(Entity player, Vector2 from, Vector2 to, Vector2 bombSpeed){
         StatsComponent playerStats = Mappers.statsMapper.get(player);
         BodyComponent bd = Mappers.bodyMapper.get(player);
+        int type = Mappers.typeMapper.get(player).type;
         Body body = bd.body;
         World world = body.getWorld();
         move = true;
@@ -156,6 +167,9 @@ public class PlayerSystem extends IteratingSystem {
                 if(fixture.getBody() == body)
                     return 1;
                 if(fixture.getFilterData().categoryBits == BomberMan.BOMB_BIT){
+                    if(type == TypeComponent.ENEMY){
+                        getEngine().getSystem(EnemySystem.class).notifyEnemy(player);
+                    }
                     move = false;
                     if(playerStats.canMoveBombs){
                         BombSystem bombSystem = getEngine().getSystem(BombSystem.class);
