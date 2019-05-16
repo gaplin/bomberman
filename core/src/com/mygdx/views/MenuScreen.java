@@ -74,7 +74,7 @@ public class MenuScreen extends ButtonsCount implements Screen {
         play.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonSound2.play(BomberMan.MENU_VOLUME);
+                buttonSound2.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME));
                 parent.changeScreen(BomberMan.LEVELS);
             }
         });
@@ -82,7 +82,7 @@ public class MenuScreen extends ButtonsCount implements Screen {
         preferences.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonSound2.play(BomberMan.MENU_VOLUME);
+                buttonSound2.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME));
                 parent.changeScreen(BomberMan.PREFERENCES);
             }
         });
@@ -104,11 +104,11 @@ public class MenuScreen extends ButtonsCount implements Screen {
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN) && pressed == -1) {
             pointer = (pointer + 1) % nButtons;
-            buttonSound1.play(BomberMan.MENU_VOLUME);
+            buttonSound1.play(buttonSound2.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME)));
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.UP) && pressed == -1) {
             pointer = ((pointer - 1) % nButtons + nButtons) % nButtons;
-            buttonSound1.play(BomberMan.MENU_VOLUME);
+            buttonSound1.play(buttonSound2.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME)));
         }
 
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1/30f));

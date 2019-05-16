@@ -57,6 +57,7 @@ public class RenderingSystem extends SortedIteratingSystem {
 
     private static TiledMap map;
     private TiledMapRenderer renderer;
+    public boolean pause = false;
 
     public RenderingSystem(SpriteBatch batch){
         super(Family.all(TransformComponent.class, TextureComponent.class).get(), new ZComparator());
@@ -112,6 +113,8 @@ public class RenderingSystem extends SortedIteratingSystem {
             float height = tex.region.getRegionHeight();
 
             batch.setColor(tex.color);
+            if(pause)
+                batch.setColor(tex.color.r, tex.color.g, tex.color.b, 0.5f);
 
 
             switch(type.type){
@@ -134,6 +137,14 @@ public class RenderingSystem extends SortedIteratingSystem {
                 case TypeComponent.ENEMY:
                     width *= BomberMan.PLAYER_SCALE;
                     height *= BomberMan.PLAYER_SCALE;
+                    break;
+                case TypeComponent.DESTRUCTIBLE_BLOCK:
+                    width *= BomberMan.SCENERY_SCALE;
+                    height *= BomberMan.SCENERY_SCALE;
+                    break;
+                case TypeComponent.INDESTRUCTIBLE_BLOCK:
+                    width *= BomberMan.SCENERY_SCALE;
+                    height *= BomberMan.SCENERY_SCALE;
                     break;
             }
 

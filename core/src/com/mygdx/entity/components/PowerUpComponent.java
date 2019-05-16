@@ -9,9 +9,13 @@ public class PowerUpComponent implements Component, Pool.Poolable {
     public static final int damagePowerUp = 2;
     public static final int kickPowerUp = 3;
 
+    public PowerUpComponent(){
+        reset();
+    }
+
     public int type;
 
-    public float time = 10.0f;
+    public float time;
 
     @Override
     public void reset() {

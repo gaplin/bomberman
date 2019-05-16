@@ -101,21 +101,21 @@ public class PrefernecesScreen extends ButtonsCount implements Screen {
         menuVol.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonSound2.play(BomberMan.MENU_VOLUME);
+                buttonSound2.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME));
             }
         });
 
         gameVol.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonSound2.play(BomberMan.MENU_VOLUME);
+                buttonSound2.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME));
             }
         });
 
         back.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonSound2.play(BomberMan.MENU_VOLUME);
+                buttonSound2.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME));
                 parent.changeScreen(BomberMan.MENU);
             }
         });
@@ -129,34 +129,42 @@ public class PrefernecesScreen extends ButtonsCount implements Screen {
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN) && pressed == -1) {
             pointer = (pointer + 1) % nButtons;
-            buttonSound1.play(BomberMan.MENU_VOLUME);
+            buttonSound1.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME));
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.UP) && pressed == -1) {
             pointer = ((pointer - 1) % nButtons + nButtons) % nButtons;
-            buttonSound1.play(BomberMan.MENU_VOLUME);
+            buttonSound1.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME));
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.LEFT)){
             if(pointer == 0){
-                BomberMan.MENU_VOLUME = Math.max(0.0f, BomberMan.MENU_VOLUME - 0.1f);
+                float prev = BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME);
+                BomberMan.prefs.putFloat("menuVol", Math.max(0.0f, prev - 0.1f));
+                BomberMan.prefs.flush();
             }
             else if(pointer == 1){
-                BomberMan.GAME_VOLUME = Math.max(0.0f, BomberMan.GAME_VOLUME - 0.1f);
+                float prev = BomberMan.prefs.getFloat("gameVol", BomberMan.GAME_VOLUME);
+                BomberMan.prefs.putFloat("gameVol", Math.max(0.0f, prev - 0.1f));
+                BomberMan.prefs.flush();
             }
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)){
             if(pointer == 0){
-                BomberMan.MENU_VOLUME = Math.min(1.0f, BomberMan.MENU_VOLUME + 0.1f);
+                float prev = BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME);
+                BomberMan.prefs.putFloat("menuVol", Math.min(1.0f, prev + 0.1f));
+                BomberMan.prefs.flush();
             }
             else if(pointer == 1){
-                BomberMan.GAME_VOLUME = Math.min(1.0f, BomberMan.GAME_VOLUME + 0.1f);
+                float prev = BomberMan.prefs.getFloat("gameVol", BomberMan.GAME_VOLUME);
+                BomberMan.prefs.putFloat("gameVol", Math.min(1.0f, prev + 0.1f));
+                BomberMan.prefs.flush();
             }
         }
 
 
-        int menuVol = (int)(BomberMan.MENU_VOLUME * 10);
-        int gameVol = (int)(BomberMan.GAME_VOLUME * 10);
+        int menuVol = (int)(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME) * 10);
+        int gameVol = (int)(BomberMan.prefs.getFloat("gameVol", BomberMan.GAME_VOLUME) * 10);
 
         for(int i = 0; i < menuVol; i++){
             menuTable.getCells().get(i).getActor().setVisible(true);
