@@ -206,9 +206,6 @@ public class MapSystem extends IteratingSystem {
             this.position = position;
         }
 
-        public Vector2 reverse(){
-            return new Vector2(position.y, position.x);
-        }
     }
 
 }

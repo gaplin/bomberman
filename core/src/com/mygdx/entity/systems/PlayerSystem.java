@@ -35,8 +35,8 @@ public class PlayerSystem extends IteratingSystem {
 
         createPlayer(1.0f, 15.0f);
 
-        /*createPlayer(1.0f, 1.0f,
-                Input.Keys.W, Input.Keys.S, Input.Keys.A, Input.Keys.D, Input.Keys.F, Color.YELLOW);*/
+    /*    createPlayer(1.0f, 1.0f,
+                Input.Keys.W, Input.Keys.S, Input.Keys.A, Input.Keys.D, Input.Keys.F, Color.BLUE);*/
 
     }
 
@@ -162,13 +162,14 @@ public class PlayerSystem extends IteratingSystem {
                 if(fixture.getBody() == body)
                     return 1;
                 if(fixture.getFilterData().categoryBits == BomberMan.BOMB_BIT){
-                    if(type == TypeComponent.ENEMY){
-                        getEngine().getSystem(EnemySystem.class).notifyEnemy(player);
+                    Entity bomb = (Entity)fixture.getBody().getUserData();
+                    Body body = Mappers.bodyMapper.get(bomb).body;
+                    if(!body.getLinearVelocity().equals(new Vector2(0, 0))){
+                        return 0;
                     }
                     move = false;
                     if(playerStats.canMoveBombs){
                         BombSystem bombSystem = getEngine().getSystem(BombSystem.class);
-                        Entity bomb = (Entity)fixture.getBody().getUserData();
                         if(bombSpeed.x < 0 && bombSystem.horizontalHit(bomb, -1)){
                             return 0;
                         }
@@ -199,7 +200,7 @@ public class PlayerSystem extends IteratingSystem {
         TransformComponent transform = Mappers.transformMapper.get(entity);
         if(player.cheat)
             return false;
-        float distance = 0.5f * mod;
+        float distance = 0.2f * mod;
         float goodPosY = transform.position.y + BomberMan.PLAYER_RADIUS * mod;
         if(mod < 0)
             goodPosY += 0.3f * BomberMan.PLAYER_SCALE;
@@ -245,7 +246,7 @@ public class PlayerSystem extends IteratingSystem {
         TransformComponent transform = Mappers.transformMapper.get(entity);
         if(player.cheat)
             return false;
-        float distance = 0.5f * mod;
+        float distance = 0.2f * mod;
         float posX = transform.position.x + 0.5f * mod;
         float posY = transform.position.y;
         Vector2 newPosition = new Vector2(posX + distance, posY);

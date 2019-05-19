@@ -122,11 +122,11 @@ public class EnemySystem extends IteratingSystem {
             enemy.move.addFirst(v.obj);
             v = v.prev;
         }
-        System.out.println("------------");
+        System.out.println(">>>>>>>>>>>>>>>");
         for(MapSystem.MapObjs objs : enemy.move){
             System.out.println(objs.position);
         }
-        System.out.println("----------");
+        System.out.println("<<<<<<<<<<<<<<<");
         if(!enemy.move.isEmpty())
             enemy.moving = true;
     }
@@ -144,7 +144,7 @@ public class EnemySystem extends IteratingSystem {
         Vector2 gridPosition = MapSystem.toGridPosition(Mappers.transformMapper.get(entity).position);
         Vector2 position = new Vector2(transform.position.x, transform.position.y);
         Vector2 newGridPosition = enemy.move.first().position;
-        Vector2 newPosition = new Vector2(newGridPosition.x * 2 + 1, newGridPosition.y * 2 + 0.95f);
+        Vector2 newPosition = new Vector2(newGridPosition.x * 2 + 1, newGridPosition.y * 2 + 0.9f);
 
         if(!enemy.processingMove){
             if(newGridPosition.y > gridPosition.y){

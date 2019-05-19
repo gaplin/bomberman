@@ -21,6 +21,7 @@ public class ControlsComponent implements Component, Pool.Poolable {
         this.DOWN = DOWN;
         this.LEFT = LEFT;
         this.RIGHT = RIGHT;
+        this.PLACE_BOMB = PLACE_BOMB;
     }
 
     @Override

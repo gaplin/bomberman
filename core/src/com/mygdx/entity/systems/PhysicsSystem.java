@@ -53,11 +53,6 @@ public class PhysicsSystem extends IteratingSystem {
                 Vector2 oldGridPosition = MapSystem.toGridPosition(oldPosition);
 
                 MapSystem mapSystem = getEngine().getSystem(MapSystem.class);
-                if(oldGridPosition.y == -1){
-                    System.out.println(tfm.position.x + " " + tfm.position.y);
-                }
-                mapSystem.grid[(int)oldGridPosition.y]
-                        [(int)oldGridPosition.x].type = TypeComponent.OTHER;
 
 
                 tfm.position.x = position.x;
@@ -68,8 +63,15 @@ public class PhysicsSystem extends IteratingSystem {
                     tfm.position.y += 1.45f * BomberMan.PLAYER_SCALE;
                 }
 
-                Vector2 newGridPosition = MapSystem.toGridPosition(tfm.position);
-                mapSystem.grid[(int)newGridPosition.y][(int)newGridPosition.x].type = type.type;
+                if(type.type != TypeComponent.PLAYER && type.type != TypeComponent.ENEMY) {
+                    mapSystem.grid[(int)oldGridPosition.y]
+                            [(int)oldGridPosition.x].type = TypeComponent.OTHER;
+                    Vector2 newGridPosition = MapSystem.toGridPosition(tfm.position);
+                    if(!newGridPosition.equals(oldGridPosition)){
+                        getEngine().getSystem(EnemySystem.class).notifyEnemies();
+                    }
+                    mapSystem.grid[(int) newGridPosition.y][(int) newGridPosition.x].type = type.type;
+                }
             }
             bodiesQueue.clear();
         }

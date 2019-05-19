@@ -138,16 +138,10 @@ public class BombSystem extends IteratingSystem {
             public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
                 if(fixture.getBody() == body)
                     return 1;
-                if(fixture.getFilterData().categoryBits == BomberMan.PLAYER_BIT ||
-                 fixture.getFilterData().categoryBits == BomberMan.INDESTRUCTIBLE_BIT ||
+                if(fixture.getFilterData().categoryBits == BomberMan.INDESTRUCTIBLE_BIT ||
                  fixture.getFilterData().categoryBits == BomberMan.DESTRUCTIBLE_BIT ||
                 fixture.getFilterData().categoryBits == BomberMan.BOMB_BIT
                 ){
-                    Entity ent = (Entity)fixture.getBody().getUserData();
-                    int type = Mappers.typeMapper.get(ent).type;
-                    if(type == TypeComponent.ENEMY){
-                        getEngine().getSystem(EnemySystem.class).notifyEnemy(ent);
-                    }
                     moving = false;
                     return 0;
                 }
