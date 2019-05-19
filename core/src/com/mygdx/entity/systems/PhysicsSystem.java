@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.BodyComponent;
+import com.mygdx.entity.components.BombComponent;
 import com.mygdx.entity.components.TransformComponent;
 import com.mygdx.entity.components.TypeComponent;
 import com.mygdx.game.BomberMan;
@@ -64,11 +65,17 @@ public class PhysicsSystem extends IteratingSystem {
                 }
 
                 if(type.type != TypeComponent.PLAYER && type.type != TypeComponent.ENEMY) {
+                    if(type.type == TypeComponent.BOMB){
+                        setBomb(entity, oldGridPosition, TypeComponent.OTHER);
+                    }
                     mapSystem.grid[(int)oldGridPosition.y]
                             [(int)oldGridPosition.x].type = TypeComponent.OTHER;
                     Vector2 newGridPosition = MapSystem.toGridPosition(tfm.position);
-                    if(!newGridPosition.equals(oldGridPosition)){
-                        getEngine().getSystem(EnemySystem.class).notifyEnemies();
+                    if(type.type == TypeComponent.BOMB){
+                        setBomb(entity, newGridPosition, TypeComponent.FLAME);
+                        if(!oldGridPosition.equals(newGridPosition)) {
+                            getEngine().getSystem(EnemySystem.class).notifyEnemies();
+                        }
                     }
                     mapSystem.grid[(int) newGridPosition.y][(int) newGridPosition.x].type = type.type;
                 }
@@ -77,4 +84,40 @@ public class PhysicsSystem extends IteratingSystem {
         }
 
     }
+
+    public void setBomb(Entity entity, Vector2 position, int newType){
+        BombComponent bomb = Mappers.bombMapper.get(entity);
+        int range = bomb.range;
+        int posX = (int)position.x;
+        int posY = (int)position.y;
+        setX(posX, posY, range, 1, newType);
+        setX(posX, posY, range, -1, newType);
+        setY(posX, posY, range, 1, newType);
+        setY(posX, posY, range, -1, newType);
+    }
+
+    private void setX(int posX, int posY, int range, int mod, int newType){
+        MapSystem.MapObjs[][] grid = getEngine().getSystem(MapSystem.class).grid;
+        for(int i = 1; i <= range; i++){
+            int type = grid[posY][posX + i * mod].type;
+            if(type == TypeComponent.INDESTRUCTIBLE_BLOCK ||
+                    type == TypeComponent.DESTRUCTIBLE_BLOCK){
+                break;
+            }
+            grid[posY][posX + i * mod].type = newType;
+        }
+    }
+
+    private void setY(int posX, int posY, int range, int mod, int newType){
+        MapSystem.MapObjs[][] grid = getEngine().getSystem(MapSystem.class).grid;
+        for(int i = 1; i <= range; i++){
+            int type = grid[posY + i * mod][posX].type;
+            if(type == TypeComponent.INDESTRUCTIBLE_BLOCK ||
+                    type == TypeComponent.DESTRUCTIBLE_BLOCK){
+                break;
+            }
+            grid[posY + i * mod][posX].type = newType;
+        }
+    }
+
 }

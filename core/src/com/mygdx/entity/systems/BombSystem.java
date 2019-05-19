@@ -183,7 +183,7 @@ public class BombSystem extends IteratingSystem {
     }
 
 
-    public void createBomb(float posX, float posY, Entity player){
+    public Entity createBomb(float posX, float posY, Entity player){
         PooledEngine engine = (PooledEngine) getEngine();
 
         Entity ent = engine.createEntity();
@@ -225,5 +225,6 @@ public class BombSystem extends IteratingSystem {
         ent.add(bombCom);
 
         engine.addEntity(ent);
+        return ent;
     }
 }

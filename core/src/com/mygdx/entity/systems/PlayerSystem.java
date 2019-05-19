@@ -101,7 +101,8 @@ public class PlayerSystem extends IteratingSystem {
             if(checkForCollision(new Vector2(posX, posY))){
                 return;
             }
-            getEngine().getSystem(BombSystem.class).createBomb(posX, posY, entity);
+            Entity ent = getEngine().getSystem(BombSystem.class).createBomb(posX, posY, entity);
+            getEngine().getSystem(PhysicsSystem.class).setBomb(ent, MapSystem.toGridPosition(transform.position), TypeComponent.FLAME);
             getEngine().getSystem(EnemySystem.class).notifyEnemies();
             playerStats.bombs--;
         }

@@ -29,9 +29,9 @@ public class EnemySystem extends IteratingSystem {
         this.engine = engine;
         BomberMan.ENEMY_COUNT = 0;
 
-        createEnemy(2f, 2.0f, Color.YELLOW);
         createEnemy(23.0f,2.0f, Color.RED);
-        createEnemy(23.0f, 16.0f, Color.BLUE);
+        /*createEnemy(2f, 2.0f, Color.YELLOW);
+        createEnemy(23.0f, 16.0f, Color.BLUE);*/
     }
 
     @Override
@@ -60,11 +60,15 @@ public class EnemySystem extends IteratingSystem {
     private static class node{
         MapSystem.MapObjs obj;
         node prev;
+        public int distance = 0;
 
         public node(){}
         public node(MapSystem.MapObjs obj, node prev){
             this.obj = obj;
             this.prev = prev;
+            if(prev != null){
+                this.distance = prev.distance + 1;
+            }
         }
     }
 
@@ -85,38 +89,92 @@ public class EnemySystem extends IteratingSystem {
 
         node v = new node();
 
+        boolean escape = false;
+        int tmp = map[(int)gridPosition.y][(int)gridPosition.x].type;
+        if(tmp == TypeComponent.BOMB || tmp == TypeComponent.FLAME)
+            escape = true;
+
         while(!Q.isEmpty()){
             v = Q.removeFirst();
             Vector2 position = v.obj.position;
             //
-            int up = map[(int)position.y + 1][(int)position.x].type;
-            if(!visited[(int)position.y + 1][(int)position.x] && (up == TypeComponent.OTHER ||
-            up == TypeComponent.POWER_UP || up == TypeComponent.PLAYER || up == TypeComponent.ENEMY)){
-                Q.addLast(new node(map[(int)position.y + 1][(int)position.x], v));
-                visited[(int)position.y + 1][(int)position.x] = true;
+            int posY = (int)position.y + 1;
+            int posX = (int)position.x;
+            int up = map[posY][posX].type;
+            if(!visited[posY][posX] && up != TypeComponent.DESTRUCTIBLE_BLOCK &&
+                    up != TypeComponent.INDESTRUCTIBLE_BLOCK && up != TypeComponent.BOMB){
+                visited[posY][posX] = true;
+                if(escape) {
+                    Q.addLast(new node(map[posY][posX], v));
+                    if(up != TypeComponent.FLAME){
+                        break;
+                    }
+                }
+                else{
+                    if(up != TypeComponent.FLAME){
+                        Q.addLast(new node(map[posY][posX], v));
+                    }
+                }
             }
             //
-            int down = map[(int)position.y - 1][(int)position.x].type;
-            if(!visited[(int)position.y - 1][(int)position.x] && (down == TypeComponent.OTHER ||
-                    down == TypeComponent.POWER_UP || down == TypeComponent.PLAYER || down == TypeComponent.ENEMY)){
-                Q.addLast(new node(map[(int)position.y - 1][(int)position.x], v));
-                visited[(int)position.y - 1][(int)position.x] = true;
+            posY = (int)position.y - 1;
+            int down = map[posY][posX].type;
+            if(!visited[posY][posX] && down != TypeComponent.DESTRUCTIBLE_BLOCK &&
+                    down != TypeComponent.INDESTRUCTIBLE_BLOCK && down != TypeComponent.BOMB){
+                visited[posY][posX] = true;
+                if(escape) {
+                    Q.addLast(new node(map[posY][posX], v));
+                    if(down != TypeComponent.FLAME){
+                        break;
+                    }
+                }
+                else{
+                    if(down != TypeComponent.FLAME){
+                        Q.addLast(new node(map[posY][posX], v));
+                    }
+                }
             }
             //
-            int left = map[(int)position.y][(int)position.x - 1].type;
-            if(!visited[(int)position.y][(int)position.x - 1] && (left == TypeComponent.OTHER ||
-                    left == TypeComponent.POWER_UP || left == TypeComponent.PLAYER || left == TypeComponent.ENEMY)){
-                Q.addLast(new node(map[(int)position.y][(int)position.x - 1], v));
-                visited[(int)position.y][(int)position.x - 1] = true;
+            posY = (int)position.y;
+            posX = (int)position.x - 1;
+            int left = map[posY][posX].type;
+            if(!visited[posY][posX] && left != TypeComponent.DESTRUCTIBLE_BLOCK &&
+                    left != TypeComponent.INDESTRUCTIBLE_BLOCK && left != TypeComponent.BOMB){
+                visited[posY][posX] = true;
+                if(escape) {
+                    Q.addLast(new node(map[posY][posX], v));
+                    if(left != TypeComponent.FLAME){
+                        break;
+                    }
+                }
+                else{
+                    if(left != TypeComponent.FLAME){
+                        Q.addLast(new node(map[posY][posX], v));
+                    }
+                }
             }
             //
-            int right = map[(int)position.y][(int)position.x + 1].type;
-            if(!visited[(int)position.y][(int)position.x + 1] && (right == TypeComponent.OTHER ||
-                    right == TypeComponent.POWER_UP || right == TypeComponent.PLAYER || right == TypeComponent.ENEMY)){
-                Q.addLast(new node(map[(int)position.y][(int)position.x + 1], v));
-                visited[(int)position.y][(int)position.x + 1] = true;
+            posX = (int)position.x + 1;
+            int right = map[posY][posX].type;
+            if(!visited[posY][posX] && right != TypeComponent.DESTRUCTIBLE_BLOCK &&
+                    right != TypeComponent.INDESTRUCTIBLE_BLOCK && right != TypeComponent.BOMB){
+                visited[posY][posX] = true;
+                if(escape) {
+                    Q.addLast(new node(map[posY][posX], v));
+                    if(right != TypeComponent.FLAME){
+                        break;
+                    }
+                }
+                else{
+                    if(right != TypeComponent.FLAME){
+                        Q.addLast(new node(map[posY][posX], v));
+                    }
+                }
             }
 
+        }
+        if(!Q.isEmpty()) {
+            v = Q.last();
         }
         while(!(v.prev == null)){
             enemy.move.addFirst(v.obj);
@@ -315,6 +373,20 @@ public class EnemySystem extends IteratingSystem {
     public void notifyEnemy(Entity entity){
         EnemyComponent enemy = Mappers.enemyMapper.get(entity);
         StateComponent state = Mappers.stateMapper.get(entity);
+        MapSystem.MapObjs[][] grid = getEngine().getSystem(MapSystem.class).grid;
+        for(MapSystem.MapObjs mapObjs : enemy.move){
+            int posX = (int)mapObjs.position.x;
+            int posY = (int)mapObjs.position.y;
+            int type = grid[posY][posX].type;
+            if(type == TypeComponent.FLAME ||
+            type == TypeComponent.BOMB){
+                resetMove(state, enemy);
+                return;
+            }
+        }
+    }
+
+    private void resetMove(StateComponent state, EnemyComponent enemy){
         enemy.move.clear();
         state.resetPresses();
         enemy.resetDirections();
