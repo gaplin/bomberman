@@ -4,3 +4,4 @@
 ## Game Controls
 * Arrow keys to move
 * Space to place bomb
+* p to pause/unpause
