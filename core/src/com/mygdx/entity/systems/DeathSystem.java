@@ -3,6 +3,7 @@ package com.mygdx.entity.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
@@ -48,6 +49,12 @@ public class DeathSystem extends IteratingSystem {
             }
             else{
                 int type = Mappers.typeMapper.get(entity).type;
+                TransformComponent transform = Mappers.transformMapper.get(entity);
+
+                Vector2 gridPosition = MapSystem.toGridPosition(transform.position);
+                MapSystem mapSystem = getEngine().getSystem(MapSystem.class);
+                mapSystem.grid[(int)gridPosition.y][(int)gridPosition.x].type = TypeComponent.OTHER;
+
                 body.getWorld().destroyBody(body);
                 getEngine().removeEntity(entity);
                 if(type == TypeComponent.PLAYER) {

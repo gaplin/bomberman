@@ -7,8 +7,12 @@ public class BlockComponent implements Component, Pool.Poolable {
     public static final int WALL = 0;
     public static final int DESTROYABLE = 1;
 
-    public boolean toDestroy = false;
-    public int type = 0;
+    public boolean toDestroy;
+    public int type;
+
+    public BlockComponent(){
+        reset();
+    }
 
     @Override
     public void reset() {

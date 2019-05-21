@@ -35,8 +35,8 @@ public class PlayerSystem extends IteratingSystem {
 
         createPlayer(1.0f, 15.0f);
 
-        /*createPlayer(1.0f, 1.0f,
-                Input.Keys.W, Input.Keys.S, Input.Keys.A, Input.Keys.D, Input.Keys.F, Color.YELLOW);*/
+    /*    createPlayer(1.0f, 1.0f,
+                Input.Keys.W, Input.Keys.S, Input.Keys.A, Input.Keys.D, Input.Keys.F, Color.BLUE);*/
 
     }
 
@@ -49,7 +49,14 @@ public class PlayerSystem extends IteratingSystem {
         PlayerComponent player = Mappers.playerMapper.get(entity);
         TransformComponent transform = Mappers.transformMapper.get(entity);
         StatsComponent playerStats = Mappers.statsMapper.get(entity);
+        TypeComponent typeComp = Mappers.typeMapper.get(entity);
 
+        float posX = MathUtils.floor(transform.position.x);
+        float posY = MathUtils.floor(transform.position.y);
+        if(posX % 2 == 0)
+            posX++;
+        if(posY % 2 == 0)
+            posY++;
 
         if(playerStats.dead) {
             return;
@@ -91,16 +98,12 @@ public class PlayerSystem extends IteratingSystem {
         state.isMoving = body.body.getLinearVelocity().y != 0 || body.body.getLinearVelocity().x != 0;
 
         if((playerStats.bombs > 0 || player.cheat) && state.placeBombJustPressed){
-            float posX = MathUtils.floor(transform.position.x);
-            float posY = MathUtils.floor(transform.position.y) + 1.0f;
-            if(posX % 2 == 0)
-                posX++;
-            if(posY % 2 == 0)
-                posY--;
+            state.placeBombJustPressed = false;
             if(checkForCollision(new Vector2(posX, posY))){
                 return;
             }
             getEngine().getSystem(BombSystem.class).createBomb(posX, posY, entity);
+            getEngine().getSystem(PhysicsSystem.class).setBomb(playerStats.bombPower, MapSystem.toGridPosition(transform.position), TypeComponent.FLAME);
             playerStats.bombs--;
         }
 
@@ -126,6 +129,9 @@ public class PlayerSystem extends IteratingSystem {
         }
 
         if(BomberMan.CHEATS && Gdx.input.isKeyJustPressed(Input.Keys.C)){
+            int type = Mappers.typeMapper.get(entity).type;
+            if(type == TypeComponent.ENEMY)
+                return;
             player.cheat = !player.cheat;
             Filter filter = new Filter();
             if(player.cheat) {
@@ -147,6 +153,7 @@ public class PlayerSystem extends IteratingSystem {
     private boolean canMove(Entity player, Vector2 from, Vector2 to, Vector2 bombSpeed){
         StatsComponent playerStats = Mappers.statsMapper.get(player);
         BodyComponent bd = Mappers.bodyMapper.get(player);
+        int type = Mappers.typeMapper.get(player).type;
         Body body = bd.body;
         World world = body.getWorld();
         move = true;
@@ -156,10 +163,14 @@ public class PlayerSystem extends IteratingSystem {
                 if(fixture.getBody() == body)
                     return 1;
                 if(fixture.getFilterData().categoryBits == BomberMan.BOMB_BIT){
+                    Entity bomb = (Entity)fixture.getBody().getUserData();
+                    Body body = Mappers.bodyMapper.get(bomb).body;
+                    if(!body.getLinearVelocity().equals(new Vector2(0, 0))){
+                        return 0;
+                    }
                     move = false;
                     if(playerStats.canMoveBombs){
                         BombSystem bombSystem = getEngine().getSystem(BombSystem.class);
-                        Entity bomb = (Entity)fixture.getBody().getUserData();
                         if(bombSpeed.x < 0 && bombSystem.horizontalHit(bomb, -1)){
                             return 0;
                         }
@@ -190,7 +201,7 @@ public class PlayerSystem extends IteratingSystem {
         TransformComponent transform = Mappers.transformMapper.get(entity);
         if(player.cheat)
             return false;
-        float distance = 0.5f * mod;
+        float distance = 0.2f * mod;
         float goodPosY = transform.position.y + BomberMan.PLAYER_RADIUS * mod;
         if(mod < 0)
             goodPosY += 0.3f * BomberMan.PLAYER_SCALE;
@@ -236,7 +247,7 @@ public class PlayerSystem extends IteratingSystem {
         TransformComponent transform = Mappers.transformMapper.get(entity);
         if(player.cheat)
             return false;
-        float distance = 0.5f * mod;
+        float distance = 0.2f * mod;
         float posX = transform.position.x + 0.5f * mod;
         float posY = transform.position.y;
         Vector2 newPosition = new Vector2(posX + distance, posY);

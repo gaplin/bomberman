@@ -43,6 +43,7 @@ public class BombSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         BodyComponent bombBody = Mappers.bodyMapper.get(entity);
+        TransformComponent transform = Mappers.transformMapper.get(entity);
 
         Body body = bombBody.body;
         Vector2 speed = body.getLinearVelocity();
@@ -64,55 +65,55 @@ public class BombSystem extends IteratingSystem {
         }
 
         if(bombState.time >= bomb.detonationTime) {
-            Vector2 pos = bombBody.body.getWorldCenter();
-            pos.x = MathUtils.floor(pos.x);
-            pos.y = MathUtils.floor(pos.y);
-            if(pos.x % 2 == 0)
-                pos.x++;
-            if(pos.y % 2 == 0)
-                pos.y--;
+            Vector2 pos = new Vector2(transform.position.x, transform.position.y);
+            float posX = pos.x = MathUtils.floor(pos.x);
+            float posY = MathUtils.floor(pos.y);
+            if(posX % 2 == 0)
+                posX++;
+            if(posY % 2 == 0)
+                posY++;
+
 
             bombBody.body.getWorld().destroyBody(bombBody.body);
             getEngine().removeEntity(entity);
 
             Entity player = bomb.owner;
             StatsComponent stats = Mappers.statsMapper.get(player);
-            if(stats == null)
-                return;
-            stats.bombs++;
+            if(stats != null)
+                stats.bombs++;
 
-            explosionSound.play(BomberMan.GAME_VOLUME);
+            explosionSound.play(BomberMan.prefs.getFloat("gameVol", BomberMan.GAME_VOLUME));
 
             FlameSystem flames = getEngine().getSystem(FlameSystem.class);
 
             try {
-                flames.createFlame(pos.x, pos.y);
+                flames.createFlame(posX, posY);
             } catch(Exception ignored){}
 
             for(int i = 1; i <= bomb.range; i++){
                 try {
-                    flames.createFlame(pos.x - (BomberMan.BOMB_RADIUS + 0.5f) * i, pos.y);
+                    flames.createFlame(posX - 2.0f * i, posY);
                 } catch(Exception e) {
                     break;
                 }
             }
             for(int i = 1; i <= bomb.range; i++) {
                 try {
-                    flames.createFlame(pos.x + (BomberMan.BOMB_RADIUS + 0.5f) * i, pos.y);
+                    flames.createFlame(posX + 2.0f * i, posY);
                 } catch (Exception e) {
                     break;
                 }
             }
             for(int i = 1; i <= bomb.range; i++){
                 try {
-                    flames.createFlame(pos.x, pos.y - (BomberMan.BOMB_RADIUS + 0.5f) * i);
+                    flames.createFlame(posX, posY - 2.0f * i);
                 } catch(Exception e){
                     break;
                 }
             }
             for(int i = 1; i <= bomb.range; i++){
                 try {
-                    flames.createFlame(pos.x, pos.y + (BomberMan.BOMB_RADIUS + 0.5f) * i);
+                    flames.createFlame(posX, posY + 2.0f * i);
                 } catch(Exception e){
                     break;
                 }
@@ -133,8 +134,7 @@ public class BombSystem extends IteratingSystem {
             public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
                 if(fixture.getBody() == body)
                     return 1;
-                if(fixture.getFilterData().categoryBits == BomberMan.PLAYER_BIT ||
-                 fixture.getFilterData().categoryBits == BomberMan.INDESTRUCTIBLE_BIT ||
+                if(fixture.getFilterData().categoryBits == BomberMan.INDESTRUCTIBLE_BIT ||
                  fixture.getFilterData().categoryBits == BomberMan.DESTRUCTIBLE_BIT ||
                 fixture.getFilterData().categoryBits == BomberMan.BOMB_BIT
                 ){
@@ -179,7 +179,7 @@ public class BombSystem extends IteratingSystem {
     }
 
 
-    public void createBomb(float posX, float posY, Entity player){
+    public Entity createBomb(float posX, float posY, Entity player){
         PooledEngine engine = (PooledEngine) getEngine();
 
         Entity ent = engine.createEntity();
@@ -221,5 +221,6 @@ public class BombSystem extends IteratingSystem {
         ent.add(bombCom);
 
         engine.addEntity(ent);
+        return ent;
     }
 }

@@ -10,6 +10,8 @@ import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.mygdx.entity.Mappers;
@@ -24,7 +26,11 @@ public class MapSystem extends IteratingSystem {
     private static TiledMap map;
     private BodyFactory bodyFactory;
     private PooledEngine engine;
-    Random generator = new Random();
+    private Random generator = new Random();
+    public static int width;
+    public static int height;
+    MapObjs[][] grid;
+    private float time = 1.0f;
 
     public MapSystem(BodyFactory bf, PooledEngine eng) {
         super(Family.all(BlockComponent.class).get());
@@ -33,8 +39,24 @@ public class MapSystem extends IteratingSystem {
         bodyFactory = bf;
         engine = eng;
         map = RenderingSystem.getMap();
+        width = 12;
+        height = 9;
+        grid = new MapObjs[height + 1][width + 1];
+        for(int i = 0; i <= height; i++)
+            for(int j = 0; j <= width; j++)
+                grid[i][j] = new MapObjs(new Vector2(j, i));
         createMap();
         createBlocks();
+    }
+
+    @Override
+    public void update(float deltaTime) {
+        super.update(deltaTime);
+        time -= deltaTime;
+        if(time < 0){
+            time = 1.0f;
+            //printMap();
+        }
     }
 
     @Override
@@ -55,6 +77,23 @@ public class MapSystem extends IteratingSystem {
         }
 
     }
+
+    private void printMap(){
+        for(int i = 0; i <= width + 5; i++)
+            System.out.print("-");
+        System.out.println();
+        for(int i = height; i >= 0; i--){
+            for(int j = 0; j <= width; j++){
+                System.out.print(grid[i][j].type + " ");
+            }
+            System.out.println();
+        }
+        for(int i = 0; i <= width + 5; i++)
+            System.out.print("-");
+        System.out.println();
+    }
+
+
 
     private void createMap() {
         MapObjects objs = map.getLayers().get("wall").getObjects();
@@ -98,9 +137,13 @@ public class MapSystem extends IteratingSystem {
             texture.region.setRegionX(64);
             texture.region.setRegionY(64);
 
-            type.type = TypeComponent.SCENERY;
+            type.type = blockType == BlockComponent.WALL ? TypeComponent.INDESTRUCTIBLE_BLOCK : TypeComponent.DESTRUCTIBLE_BLOCK;
 
             tranComp.position.set(tile.getX() / 32 + 1f, tile.getY() / 32 + 1f, -2);
+
+            Vector2 gridPosition = toGridPosition(tranComp.position);
+
+            grid[(int)gridPosition.y][(int)gridPosition.x].type = type.type;
 
 
             ent.add(body);
@@ -114,8 +157,27 @@ public class MapSystem extends IteratingSystem {
         }
     }
 
+    static Vector2 toGridPosition(float posX, float posY){
+        Vector2 position = new Vector2(MathUtils.floor(posX), MathUtils.floor(posY));
+        if(position.x % 2 == 0)
+            position.x++;
+        if(position.y % 2 == 0)
+            position.y++;
+        position.x = (position.x - 3) / 2 + 1.0f;
+        position.y = (position.y - 3) / 2 + 1.0f;
+        return position;
+    }
 
-    public boolean checkBlock(float posX, float posY, int type){
+    static Vector2 toGridPosition(Vector3 pos){
+        return toGridPosition(pos.x, pos.y);
+    }
+
+    static Vector2 toGridPosition(Vector2 pos){
+        return toGridPosition(pos.x, pos.y);
+    }
+
+
+    boolean checkBlock(float posX, float posY, int type){
         for(Entity entity : engine.getEntitiesFor(Family.one(BlockComponent.class).get())){
             BlockComponent block = Mappers.blockMapper.get(entity);
             if(block.type != type)
@@ -128,4 +190,27 @@ public class MapSystem extends IteratingSystem {
         }
         return true;
     }
+
+    public static class MapObjs{
+        int type;
+        float time;
+        Vector2 position;
+
+        MapObjs(){
+            type = TypeComponent.OTHER;
+            time = 0;
+            position = new Vector2();
+        }
+        MapObjs(Vector2 position){
+            this();
+            this.position = position;
+        }
+        MapObjs(MapObjs obj){
+            this.type = obj.type;
+            this.time = obj.time;
+            this.position = new Vector2(obj.position);
+        }
+
+    }
+
 }

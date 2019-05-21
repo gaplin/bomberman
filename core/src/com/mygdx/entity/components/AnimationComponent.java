@@ -7,7 +7,11 @@ import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pool;
 
 public class AnimationComponent implements Component, Pool.Poolable {
-    public IntMap<Animation<TextureRegion>> animations = new IntMap<>();
+    public IntMap<Animation<TextureRegion>> animations;
+
+    public AnimationComponent(){
+        reset();
+    }
 
     @Override
     public void reset() {

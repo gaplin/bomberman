@@ -28,6 +28,8 @@ public class GameScreen implements Screen {
     BodyFactory bodyFactory;
     TextureAtlas atlas;
     FitViewport viewport;
+    private boolean pause = false;
+    RenderingSystem renderingSystem;
 
     public GameScreen(BomberMan parent){
         super();
@@ -38,7 +40,7 @@ public class GameScreen implements Screen {
         bodyFactory = BodyFactory.getInstance(world);
         atlas = parent.assMan.manager.get("game/game.atlas");
 
-        RenderingSystem renderingSystem = new RenderingSystem(sb);
+        renderingSystem = new RenderingSystem(sb);
         cam = renderingSystem.getCamera();
         viewport = renderingSystem.getViewport();
         sb.setProjectionMatrix(cam.combined);
@@ -66,13 +68,28 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(1f, 0f, 0f, 1);
+        Gdx.gl.glClearColor(0f, 0f, 0f, 0.5f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         engine.update(delta);
-        if((Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !world.isLocked())){
+        if((Gdx.input.isKeyJustPressed(Input.Keys.P) && !world.isLocked())){
+            manageSystems(pause);
+            pause = !pause;
+        }
+        else if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !world.isLocked()){
             parent.changeScreen(BomberMan.LEVELS);
             parent.gameScreen = null;
         }
+    }
+
+    private void manageSystems(boolean processing){
+        engine.getSystem(PlayerSystem.class).setProcessing(processing);
+        engine.getSystem(EnemySystem.class).setProcessing(processing);
+        engine.getSystem(FlameSystem.class).setProcessing(processing);
+        engine.getSystem(BombSystem.class).setProcessing(processing);
+        engine.getSystem(PlayerControlSystem.class).setProcessing(processing);
+        engine.getSystem(AnimationSystem.class).setProcessing(processing);
+        engine.getSystem(PhysicsSystem.class).setProcessing(processing);
+        renderingSystem.pause = !processing;
     }
 
     @Override
@@ -95,7 +112,9 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-
+        world.dispose();
+        sb.dispose();
+        atlas.dispose();
     }
 
 

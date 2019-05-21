@@ -1,6 +1,8 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.mygdx.loader.CustomAssetManager;
 import com.mygdx.views.*;
 
@@ -11,7 +13,9 @@ public class BomberMan extends Game {
 	private LevelsScreen levelsScreen;
 	private LoadingScreen loadingScreen;
 	private MenuScreen menuScreen;
-	private PrefernecesScreen prefernecesScreen;
+	private PreferencesScreen preferencesScreen;
+
+	public static Preferences prefs;
 
 	public final static int MENU = 0;
 	public final static int GAME = 1;
@@ -29,11 +33,11 @@ public class BomberMan extends Game {
 
 	private static final float GAME_SCALE = 1.0f;
 
-	public static final float PLAYER_SCALE = 0.75f * GAME_SCALE;
-	public static final float BOMB_SCALE = 1.0f * GAME_SCALE;
+	public static final float PLAYER_SCALE = 0.65f * GAME_SCALE;
+	public static final float BOMB_SCALE = 0.9f * GAME_SCALE;
 	public static final float SCENERY_SCALE = 1f * GAME_SCALE;
 
-	public final static float STARTING_MOVEMENT_SPEED = 8f;
+	public final static float STARTING_MOVEMENT_SPEED = 10f;
 	public final static int STARTING_BOMB_POWER = 1;
 	public final static float AGONY_TIME = 2.0f;
 	public static int PLAYER_COUNT = 0;
@@ -55,6 +59,16 @@ public class BomberMan extends Game {
 
 	@Override
 	public void create() {
+		prefs = Gdx.app.getPreferences("options");
+		if(prefs.getFloat("gameVol", GAME_VOLUME) > 1.0f)
+			prefs.putFloat("gameVol", 1.0f);
+		if(prefs.getFloat("gameVol", GAME_VOLUME) < 0.0f)
+			prefs.putFloat("gameVol", 0.0f);
+		if(prefs.getFloat("menuVol", MENU_VOLUME) > 1.0f)
+			prefs.putFloat("menuVol", 1.0f);
+		if(prefs.getFloat("menuVol", MENU_VOLUME) < 0.0f)
+			prefs.putFloat("menuVol", 0.0f);
+		prefs.flush();
 		loadingScreen = new LoadingScreen(this);
 		setScreen(loadingScreen);
 	}
@@ -78,8 +92,8 @@ public class BomberMan extends Game {
 				this.setScreen(endScreen);
 				break;
 			case PREFERENCES:
-				if(prefernecesScreen == null)prefernecesScreen = new PrefernecesScreen(this);
-				this.setScreen(prefernecesScreen);
+				if(preferencesScreen == null) preferencesScreen = new PreferencesScreen(this);
+				this.setScreen(preferencesScreen);
 				break;
 		}
 	}
