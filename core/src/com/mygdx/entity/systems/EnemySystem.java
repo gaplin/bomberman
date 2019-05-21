@@ -8,18 +8,23 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Queue;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
 import com.mygdx.game.BomberMan;
 
+import java.util.Comparator;
+import java.util.Random;
 
 public class EnemySystem extends IteratingSystem {
 
     private TextureAtlas atlas;
     private BodyFactory bodyFactory;
     private PooledEngine engine;
+    private BombNodeComparator comparator = new BombNodeComparator();
+    private Random random = new Random();
 
     public EnemySystem(TextureAtlas atlas , BodyFactory bodyFactory, PooledEngine engine){
         super(Family.all(EnemyComponent.class).get());
@@ -30,13 +35,19 @@ public class EnemySystem extends IteratingSystem {
         BomberMan.ENEMY_COUNT = 0;
 
         createEnemy(23.0f,2.0f, Color.RED);
-        /*createEnemy(2f, 2.0f, Color.YELLOW);
-        createEnemy(23.0f, 16.0f, Color.BLUE);*/
+        createEnemy(2f, 2.0f, Color.YELLOW);
+        createEnemy(23.0f, 16.0f, Color.BLUE);
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
+        if(!scanMove(entity))
+            return;
         EnemyComponent enemy = Mappers.enemyMapper.get(entity);
+        Vector2 gridPosition = MapSystem.toGridPosition(Mappers.transformMapper.get(entity).position);
+        int posX = (int)gridPosition.x;
+        int posY = (int)gridPosition.y;
+        MapSystem.MapObjs[][] map = getEngine().getSystem(MapSystem.class).grid;
 
         if(enemy.correctingX){
             correctX(entity);
@@ -49,7 +60,9 @@ public class EnemySystem extends IteratingSystem {
         }
 
         if(!enemy.moving){
-            calculateMove(entity);
+            if(!bombPlant(entity)){
+                calculateMove(entity, posX, posY, map, false);
+            }
         }
         else{
             move(entity);
@@ -57,13 +70,13 @@ public class EnemySystem extends IteratingSystem {
 
     }
 
-    private static class node{
+    private static class Node{
         MapSystem.MapObjs obj;
-        node prev;
-        public int distance = 0;
+        Node prev;
+        int distance = 0;
 
-        public node(){}
-        public node(MapSystem.MapObjs obj, node prev){
+        Node(){}
+        Node(MapSystem.MapObjs obj, Node prev){
             this.obj = obj;
             this.prev = prev;
             if(prev != null){
@@ -72,47 +85,124 @@ public class EnemySystem extends IteratingSystem {
         }
     }
 
+    private static class DetonationInfo{
+        int destroyedBlocks = 0;
+        int flames = 1;
+        int distanceToPlayer = 99;
+        DetonationInfo(){}
+        DetonationInfo(int destroyedBlocks){
+            this.destroyedBlocks = destroyedBlocks;
+        }
+        DetonationInfo(int destroyedBlocks, int flames){
+            this(destroyedBlocks);
+            this.flames = flames;
+        }
+        DetonationInfo(int destroyedBlocks, int flames, int distanceToPlayer){
+            this(destroyedBlocks, flames);
+            this.distanceToPlayer = distanceToPlayer;
+        }
+        DetonationInfo merge(DetonationInfo second){
+            this.destroyedBlocks += second.destroyedBlocks;
+            this.flames += second.flames;
+            this.distanceToPlayer = Math.min(this.distanceToPlayer, second.distanceToPlayer);
+            return this;
+        }
+    }
+
+    private static class BombNode extends Node{
+        boolean safe = true;
+        DetonationInfo info = new DetonationInfo();
+        BombNode(){
+            super();
+        }
+        BombNode(MapSystem.MapObjs obj, Node prev){
+            super(obj, prev);
+        }
+        BombNode(MapSystem.MapObjs obj, Node prev, boolean safe){
+            super(obj, prev);
+            this.safe = safe;
+        }
+        BombNode(MapSystem.MapObjs obj, Node prev, boolean safe, DetonationInfo info){
+            this(obj, prev, safe);
+            this.info = info;
+        }
+    }
+
+    private static class BombNodeComparator implements Comparator<BombNode> {
+        BombNodeComparator(){}
+
+        @Override
+        public int compare(BombNode o1, BombNode o2) {
+            DetonationInfo a = o1.info;
+            DetonationInfo b = o2.info;
+            if(o1.safe && !o2.safe)
+                return -1;
+            if(!o1.safe && o2.safe)
+                return 1;
+            if(o1.safe){
+                if(a.destroyedBlocks < b.destroyedBlocks)
+                    return 1;
+                if(a.destroyedBlocks == b.destroyedBlocks){
+                    if(a.flames < b.flames)
+                        return 1;
+                    if(a.flames == b.flames){
+                        return Integer.compare(o1.distance, o2.distance);
+                    }
+                    return -1;
+                }
+                return -1;
+            }
+            return 0;
+        }
+    }
 
 
-    private void calculateMove(Entity entity){
+
+    private boolean calculateMove(Entity entity, int posX, int posY, MapSystem.MapObjs[][] map, boolean fakeMove){
         EnemyComponent enemy = Mappers.enemyMapper.get(entity);
-        Vector2 gridPosition = MapSystem.toGridPosition(Mappers.transformMapper.get(entity).position);
-        MapSystem mapSystem = getEngine().getSystem(MapSystem.class);
-        MapSystem.MapObjs[][] map = mapSystem.grid;
 
-        Queue<node> Q = new Queue<>();
-        Q.addLast(new node(map[(int)gridPosition.y][(int)gridPosition.x], null));
+        Queue<Node> Q = new Queue<>();
 
         boolean[][] visited = new boolean[MapSystem.height + 1][MapSystem.width + 1];
-        visited[(int)gridPosition.y][(int)gridPosition.x] = true;
+        Q.addLast(new Node(map[posY][posX], null));
+        visited[posY][posX] = true;
 
 
-        node v = new node();
+        Node v = new Node();
 
         boolean escape = false;
-        int tmp = map[(int)gridPosition.y][(int)gridPosition.x].type;
-        if(tmp == TypeComponent.BOMB || tmp == TypeComponent.FLAME)
+        int tmp = map[posY][posX].type;
+        if(!fakeMove && (tmp == TypeComponent.BOMB || tmp == TypeComponent.FLAME)) {
             escape = true;
+        }
+
 
         while(!Q.isEmpty()){
             v = Q.removeFirst();
             Vector2 position = v.obj.position;
             //
-            int posY = (int)position.y + 1;
-            int posX = (int)position.x;
+            posY = (int)position.y;
+            posX = (int)position.x;
+            tmp = map[posY][posX].type;
+            if(escape && tmp != TypeComponent.FLAME && tmp != TypeComponent.BOMB) {
+                escape = false;
+                break;
+            }
+            if(fakeMove && tmp != TypeComponent.FAKE_FLAME && tmp != TypeComponent.BOMB && tmp != TypeComponent.FLAME){
+                return true;
+            }
+
+            posY++;
             int up = map[posY][posX].type;
             if(!visited[posY][posX] && up != TypeComponent.DESTRUCTIBLE_BLOCK &&
                     up != TypeComponent.INDESTRUCTIBLE_BLOCK && up != TypeComponent.BOMB){
                 visited[posY][posX] = true;
                 if(escape) {
-                    Q.addLast(new node(map[posY][posX], v));
-                    if(up != TypeComponent.FLAME){
-                        break;
-                    }
+                    Q.addLast(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
                 }
                 else{
                     if(up != TypeComponent.FLAME){
-                        Q.addLast(new node(map[posY][posX], v));
+                        Q.addLast(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
                     }
                 }
             }
@@ -123,14 +213,11 @@ public class EnemySystem extends IteratingSystem {
                     down != TypeComponent.INDESTRUCTIBLE_BLOCK && down != TypeComponent.BOMB){
                 visited[posY][posX] = true;
                 if(escape) {
-                    Q.addLast(new node(map[posY][posX], v));
-                    if(down != TypeComponent.FLAME){
-                        break;
-                    }
+                    Q.addLast(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
                 }
                 else{
                     if(down != TypeComponent.FLAME){
-                        Q.addLast(new node(map[posY][posX], v));
+                        Q.addLast(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
                     }
                 }
             }
@@ -142,14 +229,11 @@ public class EnemySystem extends IteratingSystem {
                     left != TypeComponent.INDESTRUCTIBLE_BLOCK && left != TypeComponent.BOMB){
                 visited[posY][posX] = true;
                 if(escape) {
-                    Q.addLast(new node(map[posY][posX], v));
-                    if(left != TypeComponent.FLAME){
-                        break;
-                    }
+                    Q.addLast(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
                 }
                 else{
                     if(left != TypeComponent.FLAME){
-                        Q.addLast(new node(map[posY][posX], v));
+                        Q.addLast(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
                     }
                 }
             }
@@ -160,49 +244,221 @@ public class EnemySystem extends IteratingSystem {
                     right != TypeComponent.INDESTRUCTIBLE_BLOCK && right != TypeComponent.BOMB){
                 visited[posY][posX] = true;
                 if(escape) {
-                    Q.addLast(new node(map[posY][posX], v));
-                    if(right != TypeComponent.FLAME){
-                        break;
-                    }
+                    Q.addLast(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
                 }
                 else{
                     if(right != TypeComponent.FLAME){
-                        Q.addLast(new node(map[posY][posX], v));
+                        Q.addLast(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
                     }
                 }
             }
 
         }
-        if(!Q.isEmpty()) {
-            v = Q.last();
+        if(fakeMove) {
+            return false;
+        }
+        if(escape){
+            return false;
         }
         while(!(v.prev == null)){
             enemy.move.addFirst(v.obj);
             v = v.prev;
         }
-        System.out.println(">>>>>>>>>>>>>>>");
-        for(MapSystem.MapObjs objs : enemy.move){
-            System.out.println(objs.position);
-        }
-        System.out.println("<<<<<<<<<<<<<<<");
+
         if(!enemy.move.isEmpty())
             enemy.moving = true;
+        return true;
+    }
+
+    private boolean bombPlant(Entity entity){
+        EnemyComponent enemy = Mappers.enemyMapper.get(entity);
+        StatsComponent stats = Mappers.statsMapper.get(entity);
+        if(stats.bombs == 0){
+            return false;
+        }
+        int range = stats.bombPower;
+        Vector2 gridPosition = MapSystem.toGridPosition(Mappers.transformMapper.get(entity).position);
+        MapSystem mapSystem = getEngine().getSystem(MapSystem.class);
+        MapSystem.MapObjs[][] map = mapSystem.grid;
+
+        Queue<BombNode> Q = new Queue<>();
+        Array<BombNode> possibleNotDestructibleMoves = new Array<>();
+        Array<BombNode> possibleDestructibleMoves = new Array<>();
+        Q.addLast(new BombNode(map[(int)gridPosition.y][(int)gridPosition.x], null));
+
+        boolean[][] visited = new boolean[MapSystem.height + 1][MapSystem.width + 1];
+        int posX = (int)gridPosition.x;
+        int posY = (int)gridPosition.y;
+        visited[posY][posX] = true;
+
+        BombNode v;
+
+        while(!Q.isEmpty()){
+            v = Q.removeFirst();
+            Vector2 position = v.obj.position;
+            //
+            posY = (int)position.y;
+            posX = (int)position.x;
+
+            DetonationInfo info = safePlant(entity, posX, posY, range);
+            BombNode next = new BombNode(new MapSystem.MapObjs(map[posY][posX]), v.prev, true, info);
+            if(info != null && map[posY][posX].type != TypeComponent.BOMB && map[posY][posX].type != TypeComponent.FLAME){
+                if(info.destroyedBlocks > 0) {
+                    possibleDestructibleMoves.add(next);
+                }
+                else{
+                    possibleNotDestructibleMoves.add(next);
+                }
+            }
+
+            posY += 1;
+            int up = map[posY][posX].type;
+            if(!visited[posY][posX] && up != TypeComponent.DESTRUCTIBLE_BLOCK &&
+                    up != TypeComponent.INDESTRUCTIBLE_BLOCK && up != TypeComponent.BOMB &&
+                    up != TypeComponent.FLAME){
+                visited[posY][posX] = true;
+                next = new BombNode(map[posY][posX], v, true);
+                Q.addLast(next);
+            }
+            //
+            posY = (int)position.y - 1;
+            int down = map[posY][posX].type;
+            if(!visited[posY][posX] && down != TypeComponent.DESTRUCTIBLE_BLOCK &&
+                    down != TypeComponent.INDESTRUCTIBLE_BLOCK && down != TypeComponent.BOMB &&
+                    down != TypeComponent.FLAME){
+                visited[posY][posX] = true;
+                next = new BombNode(map[posY][posX], v, true);
+                Q.addLast(next);
+            }
+            //
+            posY = (int)position.y;
+            posX = (int)position.x - 1;
+            int left = map[posY][posX].type;
+            if(!visited[posY][posX] && left != TypeComponent.DESTRUCTIBLE_BLOCK &&
+                    left != TypeComponent.INDESTRUCTIBLE_BLOCK && left != TypeComponent.BOMB &&
+                    left != TypeComponent.FLAME){
+                visited[posY][posX] = true;
+                next = new BombNode(map[posY][posX], v, true);
+                Q.addLast(next);
+            }
+            //
+            posX = (int)position.x + 1;
+            int right = map[posY][posX].type;
+            if(!visited[posY][posX] && right != TypeComponent.DESTRUCTIBLE_BLOCK &&
+                    right != TypeComponent.INDESTRUCTIBLE_BLOCK && right != TypeComponent.BOMB &&
+                    right != TypeComponent.FLAME){
+                visited[posY][posX] = true;
+                next = new BombNode(map[posY][posX], v, true);
+                Q.addLast(next);
+            }
+        }
+
+        possibleDestructibleMoves.sort(comparator);
+        possibleNotDestructibleMoves.sort(comparator);
+        Node p = null;
+        if(!possibleDestructibleMoves.isEmpty()){
+            p = possibleDestructibleMoves.get(Math.min(random.nextInt(possibleDestructibleMoves.size), 3));
+        }
+        else if(!possibleNotDestructibleMoves.isEmpty()){
+            p = possibleNotDestructibleMoves.get(Math.min(random.nextInt(possibleNotDestructibleMoves.size), 3));
+        }
+        if(p != null){
+            while(p.prev != null){
+                enemy.move.addFirst(p.obj);
+                p = p.prev;
+            }
+            enemy.moving = true;
+            enemy.isProcessingBomb = true;
+            return true;
+        }
+        return false;
+    }
+
+    private DetonationInfo safePlant(Entity entity, int posX, int posY, int range){
+        MapSystem.MapObjs[][] mapCopy = new MapSystem.MapObjs[MapSystem.height + 1][MapSystem.width + 1];
+        MapSystem.MapObjs[][] grid = getEngine().getSystem(MapSystem.class).grid;
+        for(int i = 0; i <= MapSystem.height; i++){
+            for(int j = 0; j <= MapSystem.width; j++){
+                mapCopy[i][j] = new MapSystem.MapObjs(grid[i][j]);
+            }
+        }
+        DetonationInfo result = putBomb(posX, posY, range, mapCopy);
+        if(calculateMove(entity, posX, posY, mapCopy, true))
+            return result;
+        return null;
+    }
+
+    private DetonationInfo putBomb(int posX, int posY, int range, MapSystem.MapObjs[][] mapCopy){
+        return setX(posX, posY, range, 1, mapCopy).merge(
+                setX(posX, posY, range, -1, mapCopy)).merge(
+                setY(posX, posY, range, 1, mapCopy)).merge(
+                setY(posX, posY, range, -1, mapCopy));
+    }
+
+    private DetonationInfo setX(int posX, int posY, int range, int mod, MapSystem.MapObjs[][] mapCopy){
+        DetonationInfo result = new DetonationInfo();
+        mapCopy[posY][posX].type = TypeComponent.BOMB;
+        for(int i = 1; i <= range; i++){
+            int type = mapCopy[posY][posX + i * mod].type;
+            if(type == TypeComponent.INDESTRUCTIBLE_BLOCK){
+                break;
+            }
+
+            if(mapCopy[posY][posX + i * mod].type != TypeComponent.BOMB &&
+                    mapCopy[posY][posX + i * mod].type != TypeComponent.FLAME) {
+                mapCopy[posY][posX + i * mod].type = TypeComponent.FAKE_FLAME;
+            }
+            result.flames++;
+            if(type == TypeComponent.DESTRUCTIBLE_BLOCK){
+                result.destroyedBlocks++;
+                break;
+            }
+        }
+        return result;
+    }
+
+    private DetonationInfo setY(int posX, int posY, int range, int mod, MapSystem.MapObjs[][] mapCopy){
+        DetonationInfo result = new DetonationInfo();
+        mapCopy[posY][posX].type = TypeComponent.BOMB;
+        for(int i = 1; i <= range; i++){
+            int type = mapCopy[posY + i * mod][posX].type;
+            if(type == TypeComponent.INDESTRUCTIBLE_BLOCK){
+                break;
+            }
+
+            if(mapCopy[posY + i * mod][posX].type != TypeComponent.BOMB &&
+                    mapCopy[posY + i * mod][posX].type != TypeComponent.FLAME) {
+                mapCopy[posY + i * mod][posX].type = TypeComponent.FAKE_FLAME;
+            }
+            result.flames++;
+            if(type == TypeComponent.DESTRUCTIBLE_BLOCK){
+                result.destroyedBlocks++;
+                break;
+            }
+        }
+        return result;
     }
 
     private void move(Entity entity){
         EnemyComponent enemy = Mappers.enemyMapper.get(entity);
         StateComponent state = Mappers.stateMapper.get(entity);
+        StatsComponent stats = Mappers.statsMapper.get(entity);
+        TransformComponent transform = Mappers.transformMapper.get(entity);
+        Vector2 gridPosition = MapSystem.toGridPosition(Mappers.transformMapper.get(entity).position);
+        Vector2 position = new Vector2(transform.position.x, transform.position.y);
         if(enemy.move.isEmpty()){
             enemy.moving = false;
             state.resetPresses();
             enemy.resetDirections();
+            if(enemy.isProcessingBomb){
+                getEngine().getSystem(BombSystem.class).createBomb((gridPosition.x - 1) * 2 + 3, (gridPosition.y - 1) * 2 + 3, entity);
+                stats.bombs--;
+                enemy.isProcessingBomb = false;
+            }
             return;
         }
-        TransformComponent transform = Mappers.transformMapper.get(entity);
-        Vector2 gridPosition = MapSystem.toGridPosition(Mappers.transformMapper.get(entity).position);
-        Vector2 position = new Vector2(transform.position.x, transform.position.y);
         Vector2 newGridPosition = enemy.move.first().position;
-        Vector2 newPosition = new Vector2(newGridPosition.x * 2 + 1, newGridPosition.y * 2 + 0.9f);
+        Vector2 newPosition = new Vector2(newGridPosition.x * 2 + 1, newGridPosition.y * 2 + 0.85f);
 
         if(!enemy.processingMove){
             if(newGridPosition.y > gridPosition.y){
@@ -222,6 +478,7 @@ public class EnemySystem extends IteratingSystem {
                 enemy.resetDirections();
                 state.resetPresses();
                 enemy.moving = false;
+                enemy.isProcessingBomb = false;
                 return;
             }
             enemy.processingMove = true;
@@ -364,37 +621,36 @@ public class EnemySystem extends IteratingSystem {
     }
 
 
-    public void notifyEnemies(){
-        for(Entity entity : engine.getEntitiesFor(Family.one(EnemyComponent.class).get())){
-            notifyEnemy(entity);
-        }
-    }
-
-    public void notifyEnemy(Entity entity){
+    private boolean scanMove(Entity entity){
         EnemyComponent enemy = Mappers.enemyMapper.get(entity);
-        StateComponent state = Mappers.stateMapper.get(entity);
         MapSystem.MapObjs[][] grid = getEngine().getSystem(MapSystem.class).grid;
-        for(MapSystem.MapObjs mapObjs : enemy.move){
-            int posX = (int)mapObjs.position.x;
-            int posY = (int)mapObjs.position.y;
-            int type = grid[posY][posX].type;
-            if(type == TypeComponent.FLAME ||
-            type == TypeComponent.BOMB){
-                resetMove(state, enemy);
-                return;
+        for(MapSystem.MapObjs obj : enemy.move){
+            int type = grid[(int)obj.position.y][(int)obj.position.x].type;
+            if(type == TypeComponent.BOMB){
+                resetMove(entity);
+                return false;
+            }
+            if(type != obj.type && type == TypeComponent.FLAME){
+                resetMove(entity);
+                return false;
             }
         }
+        return true;
     }
 
-    private void resetMove(StateComponent state, EnemyComponent enemy){
+
+    private void resetMove(Entity entity){
+        StateComponent state = Mappers.stateMapper.get(entity);
+        EnemyComponent enemy = Mappers.enemyMapper.get(entity);
         enemy.move.clear();
         state.resetPresses();
         enemy.resetDirections();
         enemy.moving = false;
+        enemy.isProcessingBomb = false;
         enemy.correctingX = true;
     }
 
-    public Entity createEnemy(float posX, float posY){
+    private Entity createEnemy(float posX, float posY){
         Entity entity = engine.createEntity();
         BodyComponent body = engine.createComponent(BodyComponent.class);
         TransformComponent position = engine.createComponent(TransformComponent.class);
@@ -441,7 +697,7 @@ public class EnemySystem extends IteratingSystem {
         return entity;
     }
 
-    public void createEnemy(float posX, float posY, Color color){
+    private void createEnemy(float posX, float posY, Color color){
         Entity ent = createEnemy(posX, posY);
         TextureComponent texture = Mappers.textureMapper.get(ent);
         texture.color.set(color);

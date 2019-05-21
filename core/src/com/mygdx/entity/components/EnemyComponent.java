@@ -22,6 +22,7 @@ public class EnemyComponent implements Component, Pool.Poolable {
     public boolean left;
     public boolean right;
     public boolean processingMove;
+    public boolean isProcessingBomb;
 
     public Queue<MapSystem.MapObjs> move;
     public MapSystem.MapObjs lastMove;
@@ -52,5 +53,6 @@ public class EnemyComponent implements Component, Pool.Poolable {
         lastMove = null;
         correctingX = false;
         correctingY = false;
+        isProcessingBomb = false;
     }
 }

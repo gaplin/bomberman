@@ -98,12 +98,12 @@ public class PlayerSystem extends IteratingSystem {
         state.isMoving = body.body.getLinearVelocity().y != 0 || body.body.getLinearVelocity().x != 0;
 
         if((playerStats.bombs > 0 || player.cheat) && state.placeBombJustPressed){
+            state.placeBombJustPressed = false;
             if(checkForCollision(new Vector2(posX, posY))){
                 return;
             }
-            Entity ent = getEngine().getSystem(BombSystem.class).createBomb(posX, posY, entity);
-            getEngine().getSystem(PhysicsSystem.class).setBomb(ent, MapSystem.toGridPosition(transform.position), TypeComponent.FLAME);
-            getEngine().getSystem(EnemySystem.class).notifyEnemies();
+            getEngine().getSystem(BombSystem.class).createBomb(posX, posY, entity);
+            getEngine().getSystem(PhysicsSystem.class).setBomb(playerStats.bombPower, MapSystem.toGridPosition(transform.position), TypeComponent.FLAME);
             playerStats.bombs--;
         }
 

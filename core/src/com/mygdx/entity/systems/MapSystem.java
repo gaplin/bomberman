@@ -26,11 +26,11 @@ public class MapSystem extends IteratingSystem {
     private static TiledMap map;
     private BodyFactory bodyFactory;
     private PooledEngine engine;
-    Random generator = new Random();
+    private Random generator = new Random();
     public static int width;
     public static int height;
-    public MapObjs[][] grid;
-    private float time = 2.0f;
+    MapObjs[][] grid;
+    private float time = 1.0f;
 
     public MapSystem(BodyFactory bf, PooledEngine eng) {
         super(Family.all(BlockComponent.class).get());
@@ -54,8 +54,8 @@ public class MapSystem extends IteratingSystem {
         super.update(deltaTime);
         time -= deltaTime;
         if(time < 0){
-            time = 2.0f;
-          //  printMap();
+            time = 1.0f;
+            //printMap();
         }
     }
 
@@ -157,7 +157,7 @@ public class MapSystem extends IteratingSystem {
         }
     }
 
-    public static Vector2 toGridPosition(float posX, float posY){
+    static Vector2 toGridPosition(float posX, float posY){
         Vector2 position = new Vector2(MathUtils.floor(posX), MathUtils.floor(posY));
         if(position.x % 2 == 0)
             position.x++;
@@ -168,16 +168,16 @@ public class MapSystem extends IteratingSystem {
         return position;
     }
 
-    public static Vector2 toGridPosition(Vector3 pos){
+    static Vector2 toGridPosition(Vector3 pos){
         return toGridPosition(pos.x, pos.y);
     }
 
-    public static Vector2 toGridPosition(Vector2 pos){
+    static Vector2 toGridPosition(Vector2 pos){
         return toGridPosition(pos.x, pos.y);
     }
 
 
-    public boolean checkBlock(float posX, float posY, int type){
+    boolean checkBlock(float posX, float posY, int type){
         for(Entity entity : engine.getEntitiesFor(Family.one(BlockComponent.class).get())){
             BlockComponent block = Mappers.blockMapper.get(entity);
             if(block.type != type)
@@ -196,14 +196,19 @@ public class MapSystem extends IteratingSystem {
         float time;
         Vector2 position;
 
-        public MapObjs(){
+        MapObjs(){
             type = TypeComponent.OTHER;
             time = 0;
             position = new Vector2();
         }
-        public MapObjs(Vector2 position){
+        MapObjs(Vector2 position){
             this();
             this.position = position;
+        }
+        MapObjs(MapObjs obj){
+            this.type = obj.type;
+            this.time = obj.time;
+            this.position = new Vector2(obj.position);
         }
 
     }

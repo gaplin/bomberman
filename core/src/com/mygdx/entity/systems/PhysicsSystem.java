@@ -8,7 +8,6 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.BodyComponent;
-import com.mygdx.entity.components.BombComponent;
 import com.mygdx.entity.components.TransformComponent;
 import com.mygdx.entity.components.TypeComponent;
 import com.mygdx.game.BomberMan;
@@ -48,6 +47,10 @@ public class PhysicsSystem extends IteratingSystem {
                 if(bodyComp == null || tfm == null )
                     continue;
                 TypeComponent type = Mappers.typeMapper.get(entity);
+                int range = 0;
+                if(type.type == TypeComponent.BOMB){
+                    range = Mappers.bombMapper.get(entity).range;
+                }
                 Vector2 position = bodyComp.body.getPosition();
 
                 Vector2 oldPosition = new Vector2(tfm.position.x, tfm.position.y);
@@ -65,19 +68,19 @@ public class PhysicsSystem extends IteratingSystem {
                 }
 
                 if(type.type != TypeComponent.PLAYER && type.type != TypeComponent.ENEMY) {
-                    if(type.type == TypeComponent.BOMB){
-                        setBomb(entity, oldGridPosition, TypeComponent.OTHER);
+                    MapSystem.MapObjs[][] grid = getEngine().getSystem(MapSystem.class).grid;
+                    if(type.type == TypeComponent.FLAME){
+                        setBomb(0, oldGridPosition, TypeComponent.FLAME);
+                        grid[(int)oldGridPosition.y][(int)oldGridPosition.x].type = TypeComponent.FLAME;
+                        continue;
                     }
-                    mapSystem.grid[(int)oldGridPosition.y]
-                            [(int)oldGridPosition.x].type = TypeComponent.OTHER;
-                    Vector2 newGridPosition = MapSystem.toGridPosition(tfm.position);
                     if(type.type == TypeComponent.BOMB){
-                        setBomb(entity, newGridPosition, TypeComponent.FLAME);
-                        if(!oldGridPosition.equals(newGridPosition)) {
-                            getEngine().getSystem(EnemySystem.class).notifyEnemies();
-                        }
+                        grid[(int)oldGridPosition.y][(int)oldGridPosition.x].type = TypeComponent.OTHER;
+                        setBomb(range, oldGridPosition, TypeComponent.OTHER);
+                        Vector2 newGridPosition = MapSystem.toGridPosition(tfm.position);
+                        setBomb(range, newGridPosition, TypeComponent.FLAME);
+                        grid[(int)newGridPosition.y][(int)newGridPosition.x].type = TypeComponent.BOMB;
                     }
-                    mapSystem.grid[(int) newGridPosition.y][(int) newGridPosition.x].type = type.type;
                 }
             }
             bodiesQueue.clear();
@@ -85,11 +88,10 @@ public class PhysicsSystem extends IteratingSystem {
 
     }
 
-    public void setBomb(Entity entity, Vector2 position, int newType){
-        BombComponent bomb = Mappers.bombMapper.get(entity);
-        int range = bomb.range;
+    public void setBomb(int range, Vector2 position, int newType){
         int posX = (int)position.x;
         int posY = (int)position.y;
+        getEngine().getSystem(MapSystem.class).grid[posY][posX].type = newType;
         setX(posX, posY, range, 1, newType);
         setX(posX, posY, range, -1, newType);
         setY(posX, posY, range, 1, newType);

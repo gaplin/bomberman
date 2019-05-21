@@ -73,9 +73,6 @@ public class BombSystem extends IteratingSystem {
             if(posY % 2 == 0)
                 posY++;
 
-            Vector2 gridPosition = MapSystem.toGridPosition(pos);
-            MapSystem mapSystem = getEngine().getSystem(MapSystem.class);
-            mapSystem.grid[(int)gridPosition.y][(int)gridPosition.x].type = TypeComponent.OTHER;
 
             bombBody.body.getWorld().destroyBody(bombBody.body);
             getEngine().removeEntity(entity);
@@ -121,7 +118,6 @@ public class BombSystem extends IteratingSystem {
                     break;
                 }
             }
-            getEngine().getSystem(EnemySystem.class).notifyEnemies();
         }
 
     }
