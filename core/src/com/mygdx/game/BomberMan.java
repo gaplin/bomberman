@@ -38,7 +38,7 @@ public class BomberMan extends Game {
 	public static final float SCENERY_SCALE = 1f * GAME_SCALE;
 
 	public final static float STARTING_MOVEMENT_SPEED = 10f;
-	public final static int STARTING_BOMB_POWER = 1;
+	public final static int STARTING_BOMB_POWER = 20 ;
 	public final static float AGONY_TIME = 2.0f;
 	public static int PLAYER_COUNT = 0;
 	public static int ENEMY_COUNT = 0;
@@ -51,6 +51,8 @@ public class BomberMan extends Game {
 	public static float MENU_VOLUME = 0.1f;
 
 	public static float GAME_VOLUME = 0.2f;
+
+	public static int BOTS = 0;
 
 
 	public static final boolean CHEATS = true;

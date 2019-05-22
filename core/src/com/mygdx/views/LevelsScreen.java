@@ -48,24 +48,51 @@ public class LevelsScreen extends ButtonsCount implements Screen {
         table.setBackground(new TiledDrawable(background));
         stage.addActor(table);
 
-        CustomTextButton level_1 = new CustomTextButton("LEVEL 1", skin, "large", 0, this, buttonSound1);
-        CustomTextButton back = new CustomTextButton("BACK", skin, "large", 1, this, buttonSound1);
-        level_1.setTouchable(Touchable.disabled);
+        CustomTextButton enemy1 = new CustomTextButton("1 ENEMY", skin, "large", 0, this, buttonSound1);
+        CustomTextButton enemy2 = new CustomTextButton("2 ENEMIES", skin, "large", 1, this, buttonSound1);
+        CustomTextButton enemy3 = new CustomTextButton("3 ENEMIES", skin, "large", 2, this, buttonSound1);
+        CustomTextButton back = new CustomTextButton("BACK", skin, "large", 3, this, buttonSound1);
+        enemy1.setTouchable(Touchable.disabled);
+        enemy2.setTouchable(Touchable.disabled);
+        enemy3.setTouchable(Touchable.disabled);
         back.setTouchable(Touchable.disabled);
-        nButtons = 2;
+        nButtons = 4;
 
-        title = new Label("CHOOSE LEVEL", skin, "title", "white");
+        //title = new Label("CHOOSE LEVEL", skin, "title", "white");
 
-        table.add(title);
+//        table.add(title);
         table.row().pad(50, 0, 0, 0);
-        table.add(level_1).fillX().uniformX().width(300);
+        table.add(enemy1).fillX().uniformX().width(300);
+        table.row().pad(50, 0, 0, 0);
+        table.add(enemy2).fillX().uniformX().width(300);
+        table.row().pad(50, 0, 0, 0);
+        table.add(enemy3).fillX().uniformX().width(300);
         table.row().pad(50, 0, 0, 0);
         table.add(back).fillX().uniformX().width(300);
 
-        level_1.addListener(new ChangeListener() {
+        enemy1.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 buttonSound2.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME));
+                BomberMan.BOTS = 1;
+                parent.changeScreen(BomberMan.GAME);
+            }
+        });
+
+        enemy2.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                buttonSound2.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME));
+                BomberMan.BOTS = 2;
+                parent.changeScreen(BomberMan.GAME);
+            }
+        });
+
+        enemy3.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                buttonSound2.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME));
+                BomberMan.BOTS = 3;
                 parent.changeScreen(BomberMan.GAME);
             }
         });

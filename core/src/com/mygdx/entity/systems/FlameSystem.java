@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
@@ -34,11 +35,11 @@ public class FlameSystem extends IteratingSystem {
         if(flameCom.duration <= stateCom.time){
             Vector2 gridPosition = MapSystem.toGridPosition(transform.position);
             MapSystem mapSystem = getEngine().getSystem(MapSystem.class);
-
             BodyComponent bodyCom = Mappers.bodyMapper.get(entity);
-            bodyCom.body.getWorld().destroyBody(bodyCom.body);
+            World world = bodyCom.body.getWorld();
+
+            world.destroyBody(bodyCom.body);
             getEngine().removeEntity(entity);
-            mapSystem.grid[(int)gridPosition.y][(int)gridPosition.x].type = TypeComponent.OTHER;
         }
     }
 
