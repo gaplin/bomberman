@@ -6,7 +6,6 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.entity.Mappers;
@@ -29,12 +28,9 @@ public class FlameSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         FlameComponent flameCom = Mappers.flameMapper.get(entity);
-        StateComponent stateCom = Mappers.stateMapper.get(entity);
-        TransformComponent transform = Mappers.transformMapper.get(entity);
+        flameCom.duration -= deltaTime;
 
-        if(flameCom.duration <= stateCom.time){
-            Vector2 gridPosition = MapSystem.toGridPosition(transform.position);
-            MapSystem mapSystem = getEngine().getSystem(MapSystem.class);
+        if(flameCom.duration <= 0.0f){
             BodyComponent bodyCom = Mappers.bodyMapper.get(entity);
             World world = bodyCom.body.getWorld();
 
