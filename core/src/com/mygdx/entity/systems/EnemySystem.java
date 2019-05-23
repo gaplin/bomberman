@@ -4,6 +4,8 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.ai.msg.PriorityQueue;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -34,20 +36,25 @@ public class EnemySystem extends IteratingSystem {
         this.engine = engine;
         BomberMan.ENEMY_COUNT = 0;
 
-        createEnemy(23.0f,2.0f, Color.RED);
-        createEnemy(2f, 2.0f, Color.YELLOW);
-        createEnemy(23.0f, 16.0f, Color.BLUE);
+        if(BomberMan.BOTS > 0)
+            createEnemy(23.0f,2.0f, Color.RED);
+        if(BomberMan.BOTS > 1)
+            createEnemy(2f, 2.0f, Color.YELLOW);
+        if(BomberMan.BOTS > 2)
+            createEnemy(23.0f, 16.0f, Color.BLUE);
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        if(!scanMove(entity))
-            return;
         EnemyComponent enemy = Mappers.enemyMapper.get(entity);
         Vector2 gridPosition = MapSystem.toGridPosition(Mappers.transformMapper.get(entity).position);
         int posX = (int)gridPosition.x;
         int posY = (int)gridPosition.y;
-        MapSystem.MapObjs[][] map = getEngine().getSystem(MapSystem.class).grid;
+        MapSystem.MapObjs[][] map = copyMap(getEngine().getSystem(MapSystem.class).grid);
+        updateMap(map);
+        if(!scanMove(entity, map))
+            return;
+
 
         if(enemy.correctingX){
             correctX(entity);
@@ -60,17 +67,68 @@ public class EnemySystem extends IteratingSystem {
         }
 
         if(!enemy.moving){
-            if(!bombPlant(entity)){
-                calculateMove(entity, posX, posY, map, false);
+            if(!bombPlant(entity, copyMap(map))) {
+                if(map[posY][posX].type == TypeComponent.BOMB || map[posY][posX].type == TypeComponent.FLAME) {
+                    calculateMove(entity, posX, posY, map, false, 0.0f);
+                }
             }
         }
         else{
             move(entity);
         }
-
     }
 
-    private static class Node{
+    private MapSystem.MapObjs[][] copyMap(MapSystem.MapObjs[][] map){
+        MapSystem.MapObjs[][] result = new MapSystem.MapObjs[MapSystem.height + 1][MapSystem.width + 1];
+        for(int i = 0; i <= MapSystem.height; i++){
+            for(int j = 0; j <= MapSystem.width; j++){
+                result[i][j] = new MapSystem.MapObjs(map[i][j]);
+            }
+        }
+        return result;
+    }
+
+    private void updateMap(MapSystem.MapObjs[][] map){
+        ImmutableArray<Entity> entities = getEngine().getEntitiesFor(Family.one(FlameComponent.class, BombComponent.class).get());
+        for(Entity entity : entities){
+            int type = Mappers.typeMapper.get(entity).type;
+            Vector2 gridPosition = MapSystem.toGridPosition(Mappers.transformMapper.get(entity).position);
+            int posX = (int)gridPosition.x;
+            int posY = (int)gridPosition.y;
+            if(type == TypeComponent.BOMB){
+                BombComponent bomb = Mappers.bombMapper.get(entity);
+                int range = Mappers.bombMapper.get(entity).range;
+                putBomb(posX, posY, range, map, TypeComponent.FLAME, Math.max(bomb.detonationTime, 0.0f));
+            }
+            else{
+                FlameComponent flame = Mappers.flameMapper.get(entity);
+                if(map[posY][posX].type != TypeComponent.FLAME) {
+                    map[posY][posX].time = flame.duration;
+                }
+                else{
+                    map[posY][posX].time = Math.max(map[posY][posX].time, flame.duration);
+                }
+                map[posY][posX].type = TypeComponent.FLAME;
+            }
+        }
+    }
+
+    private void printMap(MapSystem.MapObjs[][] map, char symbol){
+        for(int i = 0; i < 15; i++)
+            System.out.print(symbol);
+        System.out.println();
+        for(int i = MapSystem.height - 1; i > 0; i--){
+            for(int j = 1; j < MapSystem.width; j++){
+                System.out.printf("(%d,%.2f) ", map[i][j].type, map[i][j].time);
+            }
+            System.out.println();
+        }
+        for(int i = 0; i < 15; i++)
+            System.out.print(symbol);
+        System.out.println();
+    }
+
+    private static class Node implements Comparable<Node>{
         MapSystem.MapObjs obj;
         Node prev;
         int distance = 0;
@@ -82,6 +140,17 @@ public class EnemySystem extends IteratingSystem {
             if(prev != null){
                 this.distance = prev.distance + 1;
             }
+        }
+
+        @Override
+        public int compareTo(Node o) {
+            if(o.distance == this.distance) {
+                return Float.compare(o.obj.time, this.obj.time);
+            }
+            if(this.distance > o.distance){
+                return 1;
+            }
+            return -1;
         }
     }
 
@@ -158,38 +227,41 @@ public class EnemySystem extends IteratingSystem {
 
 
 
-    private boolean calculateMove(Entity entity, int posX, int posY, MapSystem.MapObjs[][] map, boolean fakeMove){
+    private boolean calculateMove(Entity entity, int posX, int posY, MapSystem.MapObjs[][] map, boolean fakeMove, float delay){
         EnemyComponent enemy = Mappers.enemyMapper.get(entity);
+        StatsComponent stats = Mappers.statsMapper.get(entity);
+        float timePerUnit = 1.0f / (stats.movementSpeed / 4.0f);
 
-        Queue<Node> Q = new Queue<>();
+        PriorityQueue<Node> Q = new PriorityQueue<>();
+        Array<Node> possibleMoves = new Array<>();
 
         boolean[][] visited = new boolean[MapSystem.height + 1][MapSystem.width + 1];
-        Q.addLast(new Node(map[posY][posX], null));
+        Q.add(new Node(map[posY][posX], null));
         visited[posY][posX] = true;
 
 
-        Node v = new Node();
+        Node v;
 
         boolean escape = false;
         int tmp = map[posY][posX].type;
-        if(!fakeMove && (tmp == TypeComponent.BOMB || tmp == TypeComponent.FLAME)) {
+        if(tmp == TypeComponent.BOMB || tmp == TypeComponent.FLAME) {
             escape = true;
         }
 
 
-        while(!Q.isEmpty()){
-            v = Q.removeFirst();
+        while(!(Q.size() == 0)){
+            v = Q.poll();
             Vector2 position = v.obj.position;
             //
             posY = (int)position.y;
             posX = (int)position.x;
             tmp = map[posY][posX].type;
-            if(escape && tmp != TypeComponent.FLAME && tmp != TypeComponent.BOMB) {
+            if(tmp != TypeComponent.FLAME && tmp != TypeComponent.BOMB) {
                 escape = false;
-                break;
-            }
-            if(fakeMove && tmp != TypeComponent.FAKE_FLAME && tmp != TypeComponent.BOMB && tmp != TypeComponent.FLAME){
-                return true;
+                if(fakeMove){
+                    return true;
+                }
+                possibleMoves.add(v);
             }
 
             posY++;
@@ -197,14 +269,11 @@ public class EnemySystem extends IteratingSystem {
             if(!visited[posY][posX] && up != TypeComponent.DESTRUCTIBLE_BLOCK &&
                     up != TypeComponent.INDESTRUCTIBLE_BLOCK && up != TypeComponent.BOMB){
                 visited[posY][posX] = true;
-                if(escape) {
-                    Q.addLast(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
-                }
-                else{
-                    if(up != TypeComponent.FLAME){
-                        Q.addLast(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
+                if(up != TypeComponent.FLAME)
+                    Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
+                else if(checkRange(map[posY][posX].time, v.distance, timePerUnit, delay)){
+                        Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
                     }
-                }
             }
             //
             posY = (int)position.y - 1;
@@ -212,13 +281,10 @@ public class EnemySystem extends IteratingSystem {
             if(!visited[posY][posX] && down != TypeComponent.DESTRUCTIBLE_BLOCK &&
                     down != TypeComponent.INDESTRUCTIBLE_BLOCK && down != TypeComponent.BOMB){
                 visited[posY][posX] = true;
-                if(escape) {
-                    Q.addLast(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
-                }
-                else{
-                    if(down != TypeComponent.FLAME){
-                        Q.addLast(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
-                    }
+                if(down != TypeComponent.FLAME)
+                    Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
+                else if(checkRange(map[posY][posX].time, v.distance, timePerUnit, delay)){
+                    Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
                 }
             }
             //
@@ -228,13 +294,10 @@ public class EnemySystem extends IteratingSystem {
             if(!visited[posY][posX] && left != TypeComponent.DESTRUCTIBLE_BLOCK &&
                     left != TypeComponent.INDESTRUCTIBLE_BLOCK && left != TypeComponent.BOMB){
                 visited[posY][posX] = true;
-                if(escape) {
-                    Q.addLast(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
-                }
-                else{
-                    if(left != TypeComponent.FLAME){
-                        Q.addLast(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
-                    }
+                if(left != TypeComponent.FLAME)
+                    Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
+                else if(checkRange(map[posY][posX].time, v.distance, timePerUnit, delay)){
+                    Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
                 }
             }
             //
@@ -243,43 +306,37 @@ public class EnemySystem extends IteratingSystem {
             if(!visited[posY][posX] && right != TypeComponent.DESTRUCTIBLE_BLOCK &&
                     right != TypeComponent.INDESTRUCTIBLE_BLOCK && right != TypeComponent.BOMB){
                 visited[posY][posX] = true;
-                if(escape) {
-                    Q.addLast(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
-                }
-                else{
-                    if(right != TypeComponent.FLAME){
-                        Q.addLast(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
-                    }
+                if(right != TypeComponent.FLAME)
+                    Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
+                else if(checkRange(map[posY][posX].time, v.distance, timePerUnit, delay)){
+                    Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
                 }
             }
-
         }
-        if(fakeMove) {
+        if(fakeMove || escape) {
             return false;
         }
-        if(escape){
-            return false;
-        }
-        while(!(v.prev == null)){
-            enemy.move.addFirst(v.obj);
-            v = v.prev;
+        int movesRange = Math.min(possibleMoves.size, 5);
+        Node p = possibleMoves.get(random.nextInt(movesRange));
+        while(p.prev != null){
+            enemy.move.addFirst(p.obj);
+            p = p.prev;
         }
 
         if(!enemy.move.isEmpty())
             enemy.moving = true;
-        return true;
+        return enemy.moving;
     }
 
-    private boolean bombPlant(Entity entity){
+private boolean bombPlant(Entity entity, MapSystem.MapObjs[][] map){
         EnemyComponent enemy = Mappers.enemyMapper.get(entity);
         StatsComponent stats = Mappers.statsMapper.get(entity);
+        float timePerUnit = 1.0f / (stats.movementSpeed / 4.0f);
         if(stats.bombs == 0){
             return false;
         }
         int range = stats.bombPower;
         Vector2 gridPosition = MapSystem.toGridPosition(Mappers.transformMapper.get(entity).position);
-        MapSystem mapSystem = getEngine().getSystem(MapSystem.class);
-        MapSystem.MapObjs[][] map = mapSystem.grid;
 
         Queue<BombNode> Q = new Queue<>();
         Array<BombNode> possibleNotDestructibleMoves = new Array<>();
@@ -300,7 +357,8 @@ public class EnemySystem extends IteratingSystem {
             posY = (int)position.y;
             posX = (int)position.x;
 
-            DetonationInfo info = safePlant(entity, posX, posY, range);
+            float delay = v.distance * timePerUnit;
+            DetonationInfo info = safePlant(entity, posX, posY, range, copyMap(map), delay);
             BombNode next = new BombNode(new MapSystem.MapObjs(map[posY][posX]), v.prev, true, info);
             if(info != null && map[posY][posX].type != TypeComponent.BOMB && map[posY][posX].type != TypeComponent.FLAME){
                 if(info.destroyedBlocks > 0) {
@@ -355,12 +413,13 @@ public class EnemySystem extends IteratingSystem {
 
         possibleDestructibleMoves.sort(comparator);
         possibleNotDestructibleMoves.sort(comparator);
+        int movesRange = 10;
         Node p = null;
         if(!possibleDestructibleMoves.isEmpty()){
-            p = possibleDestructibleMoves.get(Math.min(random.nextInt(possibleDestructibleMoves.size), 3));
+            p = possibleDestructibleMoves.get(Math.min(random.nextInt(possibleDestructibleMoves.size), movesRange));
         }
         else if(!possibleNotDestructibleMoves.isEmpty()){
-            p = possibleNotDestructibleMoves.get(Math.min(random.nextInt(possibleNotDestructibleMoves.size), 3));
+            p = possibleNotDestructibleMoves.get(Math.min(random.nextInt(possibleNotDestructibleMoves.size), movesRange));
         }
         if(p != null){
             while(p.prev != null){
@@ -374,66 +433,80 @@ public class EnemySystem extends IteratingSystem {
         return false;
     }
 
-    private DetonationInfo safePlant(Entity entity, int posX, int posY, int range){
-        MapSystem.MapObjs[][] mapCopy = new MapSystem.MapObjs[MapSystem.height + 1][MapSystem.width + 1];
-        MapSystem.MapObjs[][] grid = getEngine().getSystem(MapSystem.class).grid;
-        for(int i = 0; i <= MapSystem.height; i++){
-            for(int j = 0; j <= MapSystem.width; j++){
-                mapCopy[i][j] = new MapSystem.MapObjs(grid[i][j]);
-            }
-        }
-        DetonationInfo result = putBomb(posX, posY, range, mapCopy);
-        if(calculateMove(entity, posX, posY, mapCopy, true))
+    private boolean checkRange(float flameTime, int distance, float timePerUnit, float delay){
+        float time = flameTime - distance * timePerUnit - delay;
+        float lim = 0.6f;
+        if(time >= -lim && time <= FlameComponent.flameTime + lim)
+            return false;
+        time = flameTime - (distance + 1) * timePerUnit - delay;
+        return !(time >= -lim) || !(time <= FlameComponent.flameTime + lim);
+    }
+
+    private DetonationInfo safePlant(Entity entity, int posX, int posY, int range, MapSystem.MapObjs[][] mapCopy, float delay){
+        DetonationInfo result = putBomb(posX, posY, range, mapCopy, TypeComponent.FLAME, BombComponent.bombTime + delay);
+        if(calculateMove(entity, posX, posY, mapCopy, true, delay))
             return result;
         return null;
     }
 
-    private DetonationInfo putBomb(int posX, int posY, int range, MapSystem.MapObjs[][] mapCopy){
-        return setX(posX, posY, range, 1, mapCopy).merge(
-                setX(posX, posY, range, -1, mapCopy)).merge(
-                setY(posX, posY, range, 1, mapCopy)).merge(
-                setY(posX, posY, range, -1, mapCopy));
+    private DetonationInfo putBomb(int posX, int posY, int range, MapSystem.MapObjs[][] mapCopy, int flameType, float time){
+        return setX(posX, posY, range, 1, mapCopy, flameType, time).merge(
+                setX(posX, posY, range, -1, mapCopy, flameType, time)).merge(
+                setY(posX, posY, range, 1, mapCopy, flameType, time)).merge(
+                setY(posX, posY, range, -1, mapCopy, flameType, time));
     }
 
-    private DetonationInfo setX(int posX, int posY, int range, int mod, MapSystem.MapObjs[][] mapCopy){
+    private DetonationInfo setX(int posX, int posY, int range, int mod, MapSystem.MapObjs[][] mapCopy, int flameType, float time){
         DetonationInfo result = new DetonationInfo();
-        mapCopy[posY][posX].type = TypeComponent.BOMB;
+        if(mapCopy[posY][posX].type != TypeComponent.FLAME) {
+            mapCopy[posY][posX].type = TypeComponent.BOMB;
+            mapCopy[posY][posX].time = time;
+        }
         for(int i = 1; i <= range; i++){
             int type = mapCopy[posY][posX + i * mod].type;
             if(type == TypeComponent.INDESTRUCTIBLE_BLOCK){
                 break;
             }
 
-            if(mapCopy[posY][posX + i * mod].type != TypeComponent.BOMB &&
-                    mapCopy[posY][posX + i * mod].type != TypeComponent.FLAME) {
-                mapCopy[posY][posX + i * mod].type = TypeComponent.FAKE_FLAME;
-            }
             result.flames++;
             if(type == TypeComponent.DESTRUCTIBLE_BLOCK){
                 result.destroyedBlocks++;
                 break;
             }
+
+            if(type != TypeComponent.BOMB) {
+                mapCopy[posY][posX + i * mod].type = flameType;
+                if(type != TypeComponent.FLAME){
+                    mapCopy[posY][posX + i * mod].time = time + FlameComponent.flameTime;
+                }
+            }
         }
         return result;
     }
 
-    private DetonationInfo setY(int posX, int posY, int range, int mod, MapSystem.MapObjs[][] mapCopy){
+    private DetonationInfo setY(int posX, int posY, int range, int mod, MapSystem.MapObjs[][] mapCopy, int flameType, float time){
         DetonationInfo result = new DetonationInfo();
-        mapCopy[posY][posX].type = TypeComponent.BOMB;
+        if(mapCopy[posY][posX].type != TypeComponent.FLAME) {
+            mapCopy[posY][posX].type = TypeComponent.BOMB;
+            mapCopy[posY][posX].time = time;
+        }
         for(int i = 1; i <= range; i++){
             int type = mapCopy[posY + i * mod][posX].type;
             if(type == TypeComponent.INDESTRUCTIBLE_BLOCK){
                 break;
             }
 
-            if(mapCopy[posY + i * mod][posX].type != TypeComponent.BOMB &&
-                    mapCopy[posY + i * mod][posX].type != TypeComponent.FLAME) {
-                mapCopy[posY + i * mod][posX].type = TypeComponent.FAKE_FLAME;
-            }
             result.flames++;
             if(type == TypeComponent.DESTRUCTIBLE_BLOCK){
                 result.destroyedBlocks++;
                 break;
+            }
+
+            if(type != TypeComponent.BOMB) {
+                mapCopy[posY + i * mod][posX].type = flameType;
+                if(type != TypeComponent.FLAME){
+                    mapCopy[posY + i * mod][posX].time = time + FlameComponent.flameTime;
+                }
             }
         }
         return result;
@@ -444,7 +517,7 @@ public class EnemySystem extends IteratingSystem {
         StateComponent state = Mappers.stateMapper.get(entity);
         StatsComponent stats = Mappers.statsMapper.get(entity);
         TransformComponent transform = Mappers.transformMapper.get(entity);
-        Vector2 gridPosition = MapSystem.toGridPosition(Mappers.transformMapper.get(entity).position);
+        Vector2 gridPosition = MapSystem.toGridPosition(transform.position);
         Vector2 position = new Vector2(transform.position.x, transform.position.y);
         if(enemy.move.isEmpty()){
             enemy.moving = false;
@@ -458,7 +531,7 @@ public class EnemySystem extends IteratingSystem {
             return;
         }
         Vector2 newGridPosition = enemy.move.first().position;
-        Vector2 newPosition = new Vector2(newGridPosition.x * 2 + 1, newGridPosition.y * 2 + 0.85f);
+        Vector2 newPosition = new Vector2(newGridPosition.x * 2 + 1.0f, newGridPosition.y * 2 + 0.9f);
 
         if(!enemy.processingMove){
             if(newGridPosition.y > gridPosition.y){
@@ -491,6 +564,7 @@ public class EnemySystem extends IteratingSystem {
                 enemy.lastMove = enemy.move.removeFirst();
                 state.resetPresses();
                 move(entity);
+                return;
             }
             else{
                 state.upPressed = true;
@@ -503,6 +577,7 @@ public class EnemySystem extends IteratingSystem {
                 enemy.lastMove = enemy.move.removeFirst();
                 state.resetPresses();
                 move(entity);
+                return;
             }
             else {
                 state.downPressed = true;
@@ -515,6 +590,7 @@ public class EnemySystem extends IteratingSystem {
                 enemy.lastMove = enemy.move.removeFirst();
                 state.resetPresses();
                 move(entity);
+                return;
             }
             else{
                 state.leftPressed = true;
@@ -527,6 +603,7 @@ public class EnemySystem extends IteratingSystem {
                 enemy.lastMove = enemy.move.removeFirst();
                 state.resetPresses();
                 move(entity);
+                return;
             }
             else{
                 state.rightPressed = true;
@@ -621,16 +698,15 @@ public class EnemySystem extends IteratingSystem {
     }
 
 
-    private boolean scanMove(Entity entity){
+    private boolean scanMove(Entity entity, MapSystem.MapObjs[][] grid){
         EnemyComponent enemy = Mappers.enemyMapper.get(entity);
-        MapSystem.MapObjs[][] grid = getEngine().getSystem(MapSystem.class).grid;
         for(MapSystem.MapObjs obj : enemy.move){
             int type = grid[(int)obj.position.y][(int)obj.position.x].type;
             if(type == TypeComponent.BOMB){
                 resetMove(entity);
                 return false;
             }
-            if(type != obj.type && type == TypeComponent.FLAME){
+            if(type != obj.type){
                 resetMove(entity);
                 return false;
             }

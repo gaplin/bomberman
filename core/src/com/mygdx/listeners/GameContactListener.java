@@ -3,7 +3,10 @@ package com.mygdx.listeners;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.entity.Mappers;
-import com.mygdx.entity.components.*;
+import com.mygdx.entity.components.BlockComponent;
+import com.mygdx.entity.components.BombComponent;
+import com.mygdx.entity.components.PowerUpComponent;
+import com.mygdx.entity.components.StatsComponent;
 import com.mygdx.game.BomberMan;
 
 public class GameContactListener implements ContactListener {
@@ -44,8 +47,7 @@ public class GameContactListener implements ContactListener {
                 break;
             case BomberMan.BOMB_BIT:
                 BombComponent bomb = Mappers.bombMapper.get(entity);
-                StateComponent state = Mappers.stateMapper.get(entity);
-                state.time = bomb.detonationTime;
+                bomb.detonationTime = 0.0f;
                 break;
             case BomberMan.PLAYER_BIT:
                 StatsComponent stats = Mappers.statsMapper.get(entity);

@@ -57,14 +57,14 @@ public class BombSystem extends IteratingSystem {
             body.setLinearVelocity(0.0f, 0.0f);
         }
 
-        StateComponent bombState = Mappers.stateMapper.get(entity);
         BombComponent bomb = Mappers.bombMapper.get(entity);
+        bomb.detonationTime -= deltaTime;
 
         if(BomberMan.CHEATS && Gdx.input.isKeyPressed(Input.Keys.L)){
-            bombState.time = 999999f;
+            bomb.detonationTime = 0.0f;
         }
 
-        if(bombState.time >= bomb.detonationTime) {
+        if(bomb.detonationTime <= 0.0f) {
             Vector2 pos = new Vector2(transform.position.x, transform.position.y);
             float posX = pos.x = MathUtils.floor(pos.x);
             float posY = MathUtils.floor(pos.y);

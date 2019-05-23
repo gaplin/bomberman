@@ -103,7 +103,6 @@ public class PlayerSystem extends IteratingSystem {
                 return;
             }
             getEngine().getSystem(BombSystem.class).createBomb(posX, posY, entity);
-            getEngine().getSystem(PhysicsSystem.class).setBomb(playerStats.bombPower, MapSystem.toGridPosition(transform.position), TypeComponent.FLAME);
             playerStats.bombs--;
         }
 

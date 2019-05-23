@@ -68,11 +68,23 @@ public class MapSystem extends IteratingSystem {
             body.body.getWorld().destroyBody(body.body);
             getEngine().removeEntity(entity);
 
+            Vector2 gridPosition = toGridPosition(pos);
+            grid[(int)gridPosition.y][(int)gridPosition.x].type = TypeComponent.OTHER;
+
 
             float drop = generator.nextFloat();
-            if(drop <= 0.4f) {
-                int type = generator.nextInt(4);
-                getEngine().getSystem(PowerUpSystem.class).createPowerUp(pos.x, pos.y, type);
+            if(drop <= 0.6f) {
+                float type = generator.nextFloat();
+                int powerUpType;
+                if(type <= 0.1f)
+                    powerUpType = PowerUpComponent.speedPowerUp;
+                else if(type <= 0.3f)
+                    powerUpType = PowerUpComponent.kickPowerUp;
+                else if(type <= 0.7f)
+                    powerUpType = PowerUpComponent.bombPowerUp;
+                else
+                    powerUpType = PowerUpComponent.damagePowerUp;
+                getEngine().getSystem(PowerUpSystem.class).createPowerUp(pos.x, pos.y, powerUpType);
             }
         }
 

@@ -12,8 +12,7 @@ public class TypeComponent implements Component, Pool.Poolable {
     public static final int DESTRUCTIBLE_BLOCK = 5;
     public static final int POWER_UP = 6;
     public static final int SCENERY = 7;
-    public static final int FAKE_FLAME = 8;
-    public static final int OTHER = 9;
+    public static final int OTHER = 8;
 
     public int type = OTHER;
 

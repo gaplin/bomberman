@@ -28,8 +28,8 @@ public class PowerUpSystem extends IteratingSystem {
         PowerUpComponent powerUp = Mappers.powerUpMapper.get(entity);
         powerUp.time -= deltaTime;
         if(powerUp.time <= 0) {
-            TransformComponent tranform = Mappers.transformMapper.get(entity);
-            Vector2 gridPosition = MapSystem.toGridPosition(tranform.position);
+            TransformComponent transform = Mappers.transformMapper.get(entity);
+            Vector2 gridPosition = MapSystem.toGridPosition(transform.position);
             MapSystem mapSystem = getEngine().getSystem(MapSystem.class);
 
             mapSystem.grid[(int)gridPosition.y][(int)gridPosition.x].type = TypeComponent.OTHER;

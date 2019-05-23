@@ -52,8 +52,10 @@ public class BomberMan extends Game {
 
 	public static float GAME_VOLUME = 0.2f;
 
+	public static int BOTS = 0;
 
-	public static final boolean CHEATS = true;
+
+	public static final boolean CHEATS = false;
 
 	public CustomAssetManager assMan = new CustomAssetManager();
 

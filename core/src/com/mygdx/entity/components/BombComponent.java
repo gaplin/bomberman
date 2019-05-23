@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import com.mygdx.game.BomberMan;
 
 public class BombComponent implements Component, Pool.Poolable {
+    public static final float bombTime = 3.0f;
     public Entity owner;
     public int range;
     public float detonationTime;
@@ -18,7 +19,7 @@ public class BombComponent implements Component, Pool.Poolable {
 
     @Override
     public void reset() {
-        detonationTime = 3.0f;
+        detonationTime = bombTime;
         owner = null;
         range = 0;
     }
