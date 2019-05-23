@@ -27,7 +27,6 @@ public class EnemySystem extends IteratingSystem {
     private PooledEngine engine;
     private BombNodeComparator comparator = new BombNodeComparator();
     private Random random = new Random();
-    private int counter = 0;
 
     public EnemySystem(TextureAtlas atlas , BodyFactory bodyFactory, PooledEngine engine){
         super(Family.all(EnemyComponent.class).get());
@@ -73,10 +72,6 @@ public class EnemySystem extends IteratingSystem {
                     calculateMove(entity, posX, posY, map, false, 0.0f);
                 }
             }
-            else{
-                System.out.println(++counter);
-                printMap(map, '#');
-            }
         }
         else{
             move(entity);
@@ -103,7 +98,7 @@ public class EnemySystem extends IteratingSystem {
             if(type == TypeComponent.BOMB){
                 BombComponent bomb = Mappers.bombMapper.get(entity);
                 int range = Mappers.bombMapper.get(entity).range;
-                putBomb(posX, posY, range, map, TypeComponent.FLAME, bomb.detonationTime);
+                putBomb(posX, posY, range, map, TypeComponent.FLAME, Math.max(bomb.detonationTime, 0.0f));
             }
             else{
                 FlameComponent flame = Mappers.flameMapper.get(entity);
@@ -124,7 +119,7 @@ public class EnemySystem extends IteratingSystem {
         System.out.println();
         for(int i = MapSystem.height - 1; i > 0; i--){
             for(int j = 1; j < MapSystem.width; j++){
-                System.out.print("(" + map[i][j].type + "," + map[i][j].time + ")" + " ");
+                System.out.printf("(%d,%.2f) ", map[i][j].type, map[i][j].time);
             }
             System.out.println();
         }
@@ -236,17 +231,16 @@ public class EnemySystem extends IteratingSystem {
         EnemyComponent enemy = Mappers.enemyMapper.get(entity);
         StatsComponent stats = Mappers.statsMapper.get(entity);
         float timePerUnit = 1.0f / (stats.movementSpeed / 4.0f);
-        int truePosX = posX;
-        int truePosY = posY;
 
         PriorityQueue<Node> Q = new PriorityQueue<>();
+        Array<Node> possibleMoves = new Array<>();
 
         boolean[][] visited = new boolean[MapSystem.height + 1][MapSystem.width + 1];
         Q.add(new Node(map[posY][posX], null));
         visited[posY][posX] = true;
 
 
-        Node v = new Node();
+        Node v;
 
         boolean escape = false;
         int tmp = map[posY][posX].type;
@@ -262,12 +256,12 @@ public class EnemySystem extends IteratingSystem {
             posY = (int)position.y;
             posX = (int)position.x;
             tmp = map[posY][posX].type;
-            if(escape && tmp != TypeComponent.FLAME && tmp != TypeComponent.BOMB) {
+            if(tmp != TypeComponent.FLAME && tmp != TypeComponent.BOMB) {
                 escape = false;
                 if(fakeMove){
                     return true;
                 }
-                break;
+                possibleMoves.add(v);
             }
 
             posY++;
@@ -277,12 +271,9 @@ public class EnemySystem extends IteratingSystem {
                 visited[posY][posX] = true;
                 if(up != TypeComponent.FLAME)
                     Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
-                else{
-                    float time = map[posY][posX].time - (v.distance) * timePerUnit - delay;
-                    if(time < 0 || time > FlameComponent.flameTime){
+                else if(checkRange(map[posY][posX].time, v.distance, timePerUnit, delay)){
                         Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
                     }
-                }
             }
             //
             posY = (int)position.y - 1;
@@ -292,11 +283,8 @@ public class EnemySystem extends IteratingSystem {
                 visited[posY][posX] = true;
                 if(down != TypeComponent.FLAME)
                     Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
-                else{
-                    float time = map[posY][posX].time - (v.distance) * timePerUnit - delay;
-                    if(time < 0 || time > FlameComponent.flameTime){
-                        Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
-                    }
+                else if(checkRange(map[posY][posX].time, v.distance, timePerUnit, delay)){
+                    Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
                 }
             }
             //
@@ -308,11 +296,8 @@ public class EnemySystem extends IteratingSystem {
                 visited[posY][posX] = true;
                 if(left != TypeComponent.FLAME)
                     Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
-                else{
-                    float time = map[posY][posX].time - (v.distance) * timePerUnit - delay;
-                    if(time < 0 || time > FlameComponent.flameTime){
-                        Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
-                    }
+                else if(checkRange(map[posY][posX].time, v.distance, timePerUnit, delay)){
+                    Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
                 }
             }
             //
@@ -323,26 +308,19 @@ public class EnemySystem extends IteratingSystem {
                 visited[posY][posX] = true;
                 if(right != TypeComponent.FLAME)
                     Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
-                else{
-                    float time = map[posY][posX].time - (v.distance) * timePerUnit - delay;
-                    if(time < 0 || time > FlameComponent.flameTime){
-                        Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
-                    }
+                else if(checkRange(map[posY][posX].time, v.distance, timePerUnit, delay)){
+                    Q.add(new Node(new MapSystem.MapObjs(map[posY][posX]), v));
                 }
             }
         }
-        if(counter == 1){
-            //System.exit(0);
-        }
-        if(fakeMove) {
+        if(fakeMove || escape) {
             return false;
         }
-        if(escape){
-            return false;
-        }
-        while(v.prev != null){
-            enemy.move.addFirst(v.obj);
-            v = v.prev;
+        int movesRange = Math.min(possibleMoves.size, 5);
+        Node p = possibleMoves.get(random.nextInt(movesRange));
+        while(p.prev != null){
+            enemy.move.addFirst(p.obj);
+            p = p.prev;
         }
 
         if(!enemy.move.isEmpty())
@@ -379,7 +357,7 @@ private boolean bombPlant(Entity entity, MapSystem.MapObjs[][] map){
             posY = (int)position.y;
             posX = (int)position.x;
 
-            float delay = Math.min(v.distance - 1, 0) * timePerUnit;
+            float delay = v.distance * timePerUnit;
             DetonationInfo info = safePlant(entity, posX, posY, range, copyMap(map), delay);
             BombNode next = new BombNode(new MapSystem.MapObjs(map[posY][posX]), v.prev, true, info);
             if(info != null && map[posY][posX].type != TypeComponent.BOMB && map[posY][posX].type != TypeComponent.FLAME){
@@ -435,7 +413,7 @@ private boolean bombPlant(Entity entity, MapSystem.MapObjs[][] map){
 
         possibleDestructibleMoves.sort(comparator);
         possibleNotDestructibleMoves.sort(comparator);
-        int movesRange = 0;
+        int movesRange = 10;
         Node p = null;
         if(!possibleDestructibleMoves.isEmpty()){
             p = possibleDestructibleMoves.get(Math.min(random.nextInt(possibleDestructibleMoves.size), movesRange));
@@ -453,6 +431,15 @@ private boolean bombPlant(Entity entity, MapSystem.MapObjs[][] map){
             return true;
         }
         return false;
+    }
+
+    private boolean checkRange(float flameTime, int distance, float timePerUnit, float delay){
+        float time = flameTime - distance * timePerUnit - delay;
+        float lim = 0.6f;
+        if(time >= -lim && time <= FlameComponent.flameTime + lim)
+            return false;
+        time = flameTime - (distance + 1) * timePerUnit - delay;
+        return !(time >= -lim) || !(time <= FlameComponent.flameTime + lim);
     }
 
     private DetonationInfo safePlant(Entity entity, int posX, int posY, int range, MapSystem.MapObjs[][] mapCopy, float delay){
@@ -544,7 +531,7 @@ private boolean bombPlant(Entity entity, MapSystem.MapObjs[][] map){
             return;
         }
         Vector2 newGridPosition = enemy.move.first().position;
-        Vector2 newPosition = new Vector2(newGridPosition.x * 2 + 1, newGridPosition.y * 2 + 1.0f);
+        Vector2 newPosition = new Vector2(newGridPosition.x * 2 + 1.0f, newGridPosition.y * 2 + 0.9f);
 
         if(!enemy.processingMove){
             if(newGridPosition.y > gridPosition.y){
@@ -712,12 +699,7 @@ private boolean bombPlant(Entity entity, MapSystem.MapObjs[][] map){
 
 
     private boolean scanMove(Entity entity, MapSystem.MapObjs[][] grid){
-        /*EnemyComponent enemy = Mappers.enemyMapper.get(entity);
-        Vector2 enemyPosition = MapSystem.toGridPosition(Mappers.transformMapper.get(entity).position);
-        //if(grid[(int)enemyPosition.y][(int)enemyPosition.x].type == TypeComponent.BOMB){
-          //  resetMove(entity);
-            //return false;
-        //}
+        EnemyComponent enemy = Mappers.enemyMapper.get(entity);
         for(MapSystem.MapObjs obj : enemy.move){
             int type = grid[(int)obj.position.y][(int)obj.position.x].type;
             if(type == TypeComponent.BOMB){
@@ -728,7 +710,7 @@ private boolean bombPlant(Entity entity, MapSystem.MapObjs[][] map){
                 resetMove(entity);
                 return false;
             }
-        }*/
+        }
         return true;
     }
 

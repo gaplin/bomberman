@@ -31,7 +31,7 @@ public class StatsComponent implements Component, Pool.Poolable {
         movementSpeed = BomberMan.STARTING_MOVEMENT_SPEED;
         bombPower = BomberMan.STARTING_BOMB_POWER;
         HP = 3;
-        bombs = 100;
+        bombs = 1;
         canMoveBombs = false;
         afterHit = false;
         dead = false;

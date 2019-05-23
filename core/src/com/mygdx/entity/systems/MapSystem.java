@@ -73,7 +73,7 @@ public class MapSystem extends IteratingSystem {
 
 
             float drop = generator.nextFloat();
-            if(drop <= -0.6f) {
+            if(drop <= 0.6f) {
                 float type = generator.nextFloat();
                 int powerUpType;
                 if(type <= 0.1f)
