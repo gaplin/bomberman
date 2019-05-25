@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -23,7 +22,6 @@ public class MenuScreen extends ButtonsCount implements Screen {
     private BomberMan parent;
     private Stage stage;
     private Table table;
-    private Image logo;
     private Skin skin;
     private TextureAtlas atlas;
     private TextureAtlas.AtlasRegion background, title;

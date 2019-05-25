@@ -60,6 +60,7 @@ public class GameScreen implements Screen {
         engine.addSystem(new DeathSystem());
         engine.addSystem(new PlayerControlSystem());
         engine.addSystem(new EnemySystem(atlas, bodyFactory, engine));
+        engine.addSystem(new GUISystem(parent.assMan.manager.get("flat/flat-earth-ui.json"), atlas, parent.assMan.manager.get("loading/loading.atlas")));
     }
 
     @Override

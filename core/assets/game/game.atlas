@@ -130,6 +130,18 @@ game4.png
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
+player/Bman_head
+  rotate: false
+  xy: 1, 1
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: -1
+
+game5.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
 player/front/Bman_f
   rotate: false
   xy: 1, 261
@@ -187,7 +199,7 @@ player/front/Bman_f
   offset: 0, 0
   index: 7
 
-game5.png
+game6.png
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
@@ -248,7 +260,7 @@ player/side/Bman_s
   offset: 0, 0
   index: 7
 
-game6.png
+game7.png
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none

@@ -745,6 +745,7 @@ private boolean bombPlant(Entity entity, MapSystem.MapObjs[][] map){
         body.body.setUserData(entity);
         stateCom.set(StateComponent.STATE_MOVING_DOWN);
         stateCom.isLooping = true;
+        player.ID = BomberMan.PLAYER_COUNT + BomberMan.ENEMY_COUNT + 1;
 
         animCom.animations.put(1,
                 new Animation<>(0.05f, atlas.findRegions("player/back/Bman_b")));
