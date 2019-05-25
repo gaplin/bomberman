@@ -56,7 +56,8 @@ public class EndScreen extends ButtonsCount implements Screen {
         menu.setTouchable(Touchable.disabled);
         nButtons = 2;
 
-        title = new Label("Game Over", skin, "title", "white");
+        String endText = BomberMan.PLAYER_COUNT == 0 ? "Game Over" : "You Won!";
+        title = new Label(endText, skin, "title", "white");
 
         table.add(title);
         table.row().pad(50, 0, 0, 0);

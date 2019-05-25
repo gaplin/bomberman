@@ -13,6 +13,7 @@ public class PlayerComponent implements Component, Pool.Poolable {
     public static final short cheatMaskBits = BomberMan.INDESTRUCTIBLE_BIT;
 
     public boolean cheat;
+    public int ID;
 
     public PlayerComponent(){
         reset();
@@ -20,6 +21,7 @@ public class PlayerComponent implements Component, Pool.Poolable {
 
     @Override
     public void reset() {
+        ID = 0;
         cheat = false;
     }
 }
