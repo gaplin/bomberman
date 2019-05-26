@@ -6,3 +6,4 @@
 * Space to place bomb
 * P to pause/unpause
 * M to mute/unmute
+* F to show/hide FPS counter
