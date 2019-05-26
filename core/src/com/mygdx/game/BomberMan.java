@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.mygdx.loader.CustomAssetManager;
+import com.mygdx.manager.SoundManager;
 import com.mygdx.views.*;
 
 public class BomberMan extends Game {
@@ -14,8 +15,6 @@ public class BomberMan extends Game {
 	private LoadingScreen loadingScreen;
 	private MenuScreen menuScreen;
 	private PreferencesScreen preferencesScreen;
-
-	public static Preferences prefs;
 
 	public final static int MENU = 0;
 	public final static int GAME = 1;
@@ -57,7 +56,9 @@ public class BomberMan extends Game {
 
 	public static final boolean CHEATS = false;
 
-	public CustomAssetManager assMan = new CustomAssetManager();
+	public Preferences prefs;
+	public CustomAssetManager assMan;
+	public SoundManager soundManager;
 
 	@Override
 	public void create() {
@@ -71,8 +72,10 @@ public class BomberMan extends Game {
 		if(prefs.getFloat("menuVol", MENU_VOLUME) < 0.0f)
 			prefs.putFloat("menuVol", 0.0f);
 		prefs.flush();
+		assMan = new CustomAssetManager();
 		loadingScreen = new LoadingScreen(this);
 		setScreen(loadingScreen);
+		soundManager = new SoundManager(this);
 	}
 
 	public void changeScreen(int screen){

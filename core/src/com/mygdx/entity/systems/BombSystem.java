@@ -6,7 +6,6 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
@@ -19,6 +18,7 @@ import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
 import com.mygdx.game.BomberMan;
+import com.mygdx.manager.SoundManager;
 
 
 public class BombSystem extends IteratingSystem {
@@ -28,16 +28,16 @@ public class BombSystem extends IteratingSystem {
 
     private TextureAtlas atlas;
 
-    private Sound explosionSound;
+    private SoundManager soundManager;
 
     private boolean moving = true;
 
-    public BombSystem(TextureAtlas atlas, BodyFactory bodyFactory, Sound explosionSound){
+    public BombSystem(TextureAtlas atlas, BodyFactory bodyFactory, SoundManager soundManager){
         super(Family.all(BombComponent.class, StateComponent.class).get());
 
         this.bodyFactory = bodyFactory;
         this.atlas = atlas;
-        this.explosionSound = explosionSound;
+        this.soundManager = soundManager;
     }
 
     @Override
@@ -82,7 +82,7 @@ public class BombSystem extends IteratingSystem {
             if(stats != null)
                 stats.bombs++;
 
-            explosionSound.play(BomberMan.prefs.getFloat("gameVol", BomberMan.GAME_VOLUME));
+            soundManager.playSound("bombSound.mp3", "gameVol");
 
             FlameSystem flames = getEngine().getSystem(FlameSystem.class);
 
