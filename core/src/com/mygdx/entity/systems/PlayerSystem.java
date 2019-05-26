@@ -24,7 +24,6 @@ public class PlayerSystem extends IteratingSystem {
     private BodyFactory bodyFactory;
     private PooledEngine engine;
     private boolean move = false;
-
     public PlayerSystem(BodyFactory bodyFactory, TextureAtlas atlas, PooledEngine engine){
         super(Family.all(PlayerComponent.class).get());
         this.bodyFactory = bodyFactory;
@@ -33,7 +32,7 @@ public class PlayerSystem extends IteratingSystem {
 
         BomberMan.PLAYER_COUNT = 0;
 
-        createPlayer(1.0f, 15.0f);
+        createPlayer(2.0f, 16.2f);
 
     /*    createPlayer(1.0f, 1.0f,
                 Input.Keys.W, Input.Keys.S, Input.Keys.A, Input.Keys.D, Input.Keys.F, Color.BLUE);*/
@@ -193,6 +192,28 @@ public class PlayerSystem extends IteratingSystem {
         return move;
     }
 
+    private boolean canMoveToWall(Entity player, Vector2 from, Vector2 to){
+        EnemyComponent en = Mappers.enemyMapper.get(player);
+        if(en != null)
+            return true;
+        BodyComponent bd = Mappers.bodyMapper.get(player);
+        Body body = bd.body;
+        World world = body.getWorld();
+        move = true;
+        RayCastCallback rayCastCallback = new RayCastCallback() {
+            @Override
+            public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
+                if(fixture.getFilterData().categoryBits == BomberMan.INDESTRUCTIBLE_BIT || fixture.getFilterData().categoryBits == BomberMan.DESTRUCTIBLE_BIT){
+                    move = false;
+                    return 0;
+                }
+                return 1;
+            }
+        };
+        world.rayCast(rayCastCallback, from, to);
+
+        return move;
+    }
 
     public boolean verticalHit(Entity entity, float mod){
         PlayerComponent player = Mappers.playerMapper.get(entity);
@@ -208,6 +229,7 @@ public class PlayerSystem extends IteratingSystem {
         float posY = goodPosY;
 
         Vector2 newPosition = new Vector2(posX, posY + distance + 0.2f * mod);
+        Vector2 newPositionToWall = new Vector2(posX, posY + distance + 0.15f * mod);
         Vector2 bombSpeed = new Vector2(0.0f, (playerStats.movementSpeed + 2.0f) * mod);
 
         boolean result = false;
@@ -221,20 +243,31 @@ public class PlayerSystem extends IteratingSystem {
         if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
             result = true;
 
+        if(!canMoveToWall(entity, new Vector2(posX, posY), newPositionToWall))
+            result = true;
+
         posX = transform.position.x + 0.7f * BomberMan.PLAYER_SCALE;
         posY = goodPosY - BomberMan.PLAYER_RADIUS / 3f * mod;
         newPosition.set(posX, posY + distance + 0.2f * mod);
+        newPositionToWall.set(posX, posY + distance + 0.2f * mod);
         PhysicsDebugSystem.start2.set(posX, posY);
         PhysicsDebugSystem.end2.set(newPosition);
         if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
             result = true;
 
+        if(!canMoveToWall(entity, new Vector2(posX, posY), newPositionToWall))
+            result = true;
+
         posX = transform.position.x - 0.7f * BomberMan.PLAYER_SCALE;
         posY = goodPosY - BomberMan.PLAYER_RADIUS / 3f * mod;
         newPosition.set(posX, posY + distance + 0.2f * mod);
+        newPositionToWall.set(posX, posY + distance + 0.2f * mod);
         PhysicsDebugSystem.start3.set(posX, posY);
         PhysicsDebugSystem.end3.set(newPosition);
         if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
+            result = true;
+
+        if(!canMoveToWall(entity, new Vector2(posX, posY), newPositionToWall))
             result = true;
 
         return result;
@@ -250,6 +283,7 @@ public class PlayerSystem extends IteratingSystem {
         float posX = transform.position.x + 0.5f * mod;
         float posY = transform.position.y;
         Vector2 newPosition = new Vector2(posX + distance, posY);
+        Vector2 newPositionToWall = new Vector2(posX + distance * 3f, posY);
         Vector2 bombSpeed = new Vector2((playerStats.movementSpeed + 2.0f) * mod, 0.0f);
 
         boolean result = false;
@@ -258,6 +292,9 @@ public class PlayerSystem extends IteratingSystem {
         PhysicsDebugSystem.end.set(newPosition);
         if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
             result = true;
+        if(!canMoveToWall(entity, new Vector2(posX, posY), newPositionToWall))
+            result = true;
+
          posY = transform.position.y + BomberMan.PLAYER_RADIUS;
          posX = transform.position.x + distance - (distance - 0.4f * BomberMan.PLAYER_SCALE * mod);
          newPosition.set(posX + distance, posY);
@@ -269,18 +306,24 @@ public class PlayerSystem extends IteratingSystem {
          posY = transform.position.y + BomberMan.PLAYER_RADIUS / 2f;
          posX = transform.position.x + 0.9f * BomberMan.PLAYER_SCALE * mod;
          newPosition.set(posX + distance, posY);
+         newPositionToWall.set(posX + distance * 2.4f, posY);
          PhysicsDebugSystem.start5.set(posX, posY);
          PhysicsDebugSystem.end5.set(newPosition);
          if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
              result = true;
+         if(!canMoveToWall(entity, new Vector2(posX, posY), newPositionToWall))
+            result = true;
 
          posY = transform.position.y - (BomberMan.PLAYER_RADIUS + 0.2f * BomberMan.PLAYER_SCALE) / 3f;
          posX = transform.position.x + distance - (distance - 0.4f * BomberMan.PLAYER_SCALE * mod);
          newPosition.set(posX + distance, posY);
+         newPositionToWall.set(posX + distance * 2.4f, posY);
          PhysicsDebugSystem.start3.set(posX, posY);
          PhysicsDebugSystem.end3.set(newPosition);
          if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
              result = true;
+         if(!canMoveToWall(entity, new Vector2(posX, posY), newPositionToWall))
+            result = true;
 
          posY = transform.position.y - BomberMan.PLAYER_RADIUS + 0.2f * BomberMan.PLAYER_SCALE;
          posX = transform.position.x + distance - (distance - 0.4f * BomberMan.PLAYER_SCALE * mod);
