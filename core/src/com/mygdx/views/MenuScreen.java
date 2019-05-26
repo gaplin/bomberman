@@ -28,8 +28,6 @@ public class MenuScreen extends ButtonsCount implements Screen {
         super();
         this.parent = parent;
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-        parent.assMan.queueAddSkin();
-        parent.assMan.manager.finishLoading();
         skin = parent.assMan.manager.get("flat/flat-earth-ui.json");
         atlas= parent.assMan.manager.get("loading/loading.atlas");
         background = atlas.findRegion("BackgroundTile");

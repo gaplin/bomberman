@@ -7,6 +7,8 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.loader.CustomAssetManager;
 import com.mygdx.manager.SoundManager;
@@ -34,6 +36,10 @@ public class BomberMan extends Game {
 				unMuted.setVisible(true);
 			}
 		}
+		if(Gdx.input.isKeyJustPressed(Input.Keys.F)){
+			fpsCounter.setVisible(!fpsCounter.isVisible());
+		}
+		fpsCounter.setText(Integer.toString(Gdx.graphics.getFramesPerSecond()));
 		if(getScreen() != loadingScreen){
 			stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1/30f));
 			stage.draw();
@@ -89,6 +95,7 @@ public class BomberMan extends Game {
 	private Stage stage;
 	private Image muted;
 	private Image unMuted;
+	private Label fpsCounter;
 
 	@Override
 	public void create() {
@@ -118,8 +125,12 @@ public class BomberMan extends Game {
 		muted.setScale(0.4f);
 		muted.setPosition(Gdx.graphics.getWidth() - 35.0f, Gdx.graphics.getHeight() - 35.0f);
 		muted.setVisible(false);
+		Skin skin = assMan.manager.get("flat/flat-earth-ui.json");
+		fpsCounter = new Label(Integer.toString(Gdx.graphics.getFramesPerSecond()), skin, "title", "white");
+		fpsCounter.setPosition(857.0f, Gdx.graphics.getHeight() - 42.0f);
 		stage.addActor(unMuted);
 		stage.addActor(muted);
+		stage.addActor(fpsCounter);
 	}
 
 	public void changeScreen(int screen){
