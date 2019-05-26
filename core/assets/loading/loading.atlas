@@ -10,9 +10,23 @@ logo
   orig: 1366, 768
   offset: 301, 566
   index: -1
+mute
+  rotate: false
+  xy: 512, 43
+  size: 71, 70
+  orig: 72, 72
+  offset: 1, 1
+  index: -1
+speaker
+  rotate: false
+  xy: 585, 43
+  size: 70, 70
+  orig: 72, 72
+  offset: 1, 1
+  index: -1
 BackgroundTile
   rotate: false
-  xy: 512, 49
+  xy: 657, 49
   size: 64, 64
   orig: 64, 64
   offset: 0, 0

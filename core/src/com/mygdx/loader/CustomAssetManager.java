@@ -35,6 +35,4 @@ public class CustomAssetManager {
         manager.load(buttonSound, Sound.class);
         manager.load(bombMenu, Sound.class);
     }
-
-
 }

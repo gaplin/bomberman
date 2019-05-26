@@ -44,7 +44,7 @@ public class GUISystem extends IteratingSystem {
         for(int i = 1; i <= 4; i++){
             buttons[i] = new ImageButton(new TiledDrawable(gameAtlas.findRegion("player/Bman_head")));
             labels[i] = new Label("3", skin, "title", "white");
-            table.row().pad(0.0f, 20.0f, 45.0f, 0.0f);
+            table.row().pad(30.0f, 20.0f, 0.0f, 0.0f);
             table.add(buttons[i]);
             table.add(labels[i]);
         }

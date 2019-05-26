@@ -3,11 +3,9 @@ package com.mygdx.views;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -21,9 +19,6 @@ import com.mygdx.game.BomberMan;
 
 public class PreferencesScreen extends ButtonsCount implements Screen {
     private BomberMan parent;
-
-    private Sound buttonSound1;
-    private Sound buttonSound2;
 
     private SpriteBatch sb;
 
@@ -44,8 +39,6 @@ public class PreferencesScreen extends ButtonsCount implements Screen {
     public PreferencesScreen(BomberMan parent){
         super();
         this.parent = parent;
-        this.buttonSound1 = parent.assMan.manager.get("sounds/buttonSound.wav");
-        this.buttonSound2 = parent.assMan.manager.get("sounds/bombSound.mp3");
         sb = new SpriteBatch();
         sb.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
@@ -68,9 +61,9 @@ public class PreferencesScreen extends ButtonsCount implements Screen {
         table.setBackground(new TiledDrawable(background));
         stage.addActor(table);
 
-        CustomTextButton menuVol = new CustomTextButton("MENU VOLUME", skin, 0, this, buttonSound1);
-        CustomTextButton gameVol = new CustomTextButton("GAME VOLUME", skin, 1, this, buttonSound1);
-        CustomTextButton back = new CustomTextButton("BACK", skin, "large", 2, this, buttonSound1);
+        CustomTextButton menuVol = new CustomTextButton("MENU VOLUME", skin, 0, this);
+        CustomTextButton gameVol = new CustomTextButton("GAME VOLUME", skin, 1, this);
+        CustomTextButton back = new CustomTextButton("BACK", skin, "large", 2, this);
         nButtons = 3;
         menuVol.setTouchable(Touchable.disabled);
         menuVol.setPressable(false);
@@ -102,21 +95,21 @@ public class PreferencesScreen extends ButtonsCount implements Screen {
         menuVol.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonSound2.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME));
+                parent.soundManager.playSound("bombSound.mp3", "menuVol");
             }
         });
 
         gameVol.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonSound2.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME));
+                parent.soundManager.playSound("bombSound.mp3", "menuVol");
             }
         });
 
         back.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                buttonSound2.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME));
+                parent.soundManager.playSound("bombSound.mp3", "menuVol");
                 parent.changeScreen(BomberMan.MENU);
             }
         });
@@ -130,54 +123,50 @@ public class PreferencesScreen extends ButtonsCount implements Screen {
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN) && pressed == -1) {
             pointer = (pointer + 1) % nButtons;
-            buttonSound1.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME));
+            parent.soundManager.playSound("buttonSound.wav", "menuVol");
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.UP) && pressed == -1) {
             pointer = ((pointer - 1) % nButtons + nButtons) % nButtons;
-            buttonSound1.play(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME));
+            parent.soundManager.playSound("buttonSound.wav", "menuVol");
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.LEFT)){
             if(pointer == 0){
-                float prev = BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME);
-                float current = MathUtils.round(Math.max(0.0f, prev - 0.1f) * 10.0f) / 10.0f;
-                BomberMan.prefs.putFloat("menuVol", current);
-                BomberMan.prefs.flush();
+                float prev = parent.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME);
+                parent.soundManager.decreaseVolume("menuVol");
+                float current = parent.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME);
                 if(prev != current)
-                    buttonSound2.play(current);
+                    parent.soundManager.playSound("bombSound.mp3", "menuVol");
             }
             else if(pointer == 1){
-                float prev = BomberMan.prefs.getFloat("gameVol", BomberMan.GAME_VOLUME);
-                float current = MathUtils.round(Math.max(0.0f, prev - 0.1f) * 10.0f) / 10.0f;
-                BomberMan.prefs.putFloat("gameVol", current);
-                BomberMan.prefs.flush();
+                float prev = parent.prefs.getFloat("gameVol", BomberMan.MENU_VOLUME);
+                parent.soundManager.decreaseVolume("gameVol");
+                float current = parent.prefs.getFloat("gameVol", BomberMan.MENU_VOLUME);
                 if(prev != current)
-                    buttonSound2.play(current);
+                    parent.soundManager.playSound("bombSound.mp3", "gameVol");
             }
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)){
             if(pointer == 0){
-                float prev = BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME);
-                float current = MathUtils.round(Math.min(1.0f, prev + 0.1f) * 10.0f) / 10.0f;
-                BomberMan.prefs.putFloat("menuVol", current);
-                BomberMan.prefs.flush();
+                float prev = parent.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME);
+                parent.soundManager.increaseVolume("menuVol");
+                float current = parent.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME);
                 if(prev != current)
-                    buttonSound2.play(current);
+                    parent.soundManager.playSound("bombSound.mp3", "menuVol");
             }
             else if(pointer == 1){
-                float prev = BomberMan.prefs.getFloat("gameVol", BomberMan.GAME_VOLUME);
-                float current = MathUtils.round(Math.min(1.0f, prev + 0.1f) * 10.0f) / 10.0f;
-                BomberMan.prefs.putFloat("gameVol", current);
-                BomberMan.prefs.flush();
+                float prev = parent.prefs.getFloat("gameVol", BomberMan.MENU_VOLUME);
+                parent.soundManager.increaseVolume("gameVol");
+                float current = parent.prefs.getFloat("gameVol", BomberMan.MENU_VOLUME);
                 if(prev != current)
-                    buttonSound2.play(current);
+                    parent.soundManager.playSound("bombSound.mp3", "gameVol");
             }
         }
 
 
-        int menuVol = (int)(BomberMan.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME) * 10);
-        int gameVol = (int)(BomberMan.prefs.getFloat("gameVol", BomberMan.GAME_VOLUME) * 10);
+        int menuVol = (int)(parent.prefs.getFloat("menuVol", BomberMan.MENU_VOLUME) * 10);
+        int gameVol = (int)(parent.prefs.getFloat("gameVol", BomberMan.GAME_VOLUME) * 10);
 
 
         for(int i = 0; i < menuVol; i++){
@@ -224,7 +213,5 @@ public class PreferencesScreen extends ButtonsCount implements Screen {
     public void dispose() {
         stage.dispose();
         skin.dispose();
-        buttonSound1.dispose();
-        buttonSound2.dispose();
     }
 }

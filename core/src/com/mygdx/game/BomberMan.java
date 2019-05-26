@@ -2,8 +2,14 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.loader.CustomAssetManager;
+import com.mygdx.manager.SoundManager;
 import com.mygdx.views.*;
 
 public class BomberMan extends Game {
@@ -13,9 +19,28 @@ public class BomberMan extends Game {
 	private LevelsScreen levelsScreen;
 	private LoadingScreen loadingScreen;
 	private MenuScreen menuScreen;
-	private PreferencesScreen preferencesScreen;
 
-	public static Preferences prefs;
+	@Override
+	public void render() {
+		super.render();
+		if(Gdx.input.isKeyJustPressed(Input.Keys.M)){
+			soundManager.setMuted(!soundManager.isMuted());
+			if(soundManager.isMuted()){
+				unMuted.setVisible(false);
+				muted.setVisible(true);
+			}
+			else{
+				muted.setVisible(false);
+				unMuted.setVisible(true);
+			}
+		}
+		if(getScreen() != loadingScreen){
+			stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1/30f));
+			stage.draw();
+		}
+	}
+
+	private PreferencesScreen preferencesScreen;
 
 	public final static int MENU = 0;
 	public final static int GAME = 1;
@@ -57,7 +82,13 @@ public class BomberMan extends Game {
 
 	public static final boolean CHEATS = false;
 
-	public CustomAssetManager assMan = new CustomAssetManager();
+	public Preferences prefs;
+	public CustomAssetManager assMan;
+	public SoundManager soundManager;
+
+	private Stage stage;
+	private Image muted;
+	private Image unMuted;
 
 	@Override
 	public void create() {
@@ -71,8 +102,24 @@ public class BomberMan extends Game {
 		if(prefs.getFloat("menuVol", MENU_VOLUME) < 0.0f)
 			prefs.putFloat("menuVol", 0.0f);
 		prefs.flush();
+
+		assMan = new CustomAssetManager();
 		loadingScreen = new LoadingScreen(this);
 		setScreen(loadingScreen);
+		soundManager = new SoundManager(this);
+
+		stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+		Gdx.input.setInputProcessor(stage);
+		TextureAtlas atlas = assMan.manager.get("loading/loading.atlas");
+		unMuted = new Image(atlas.findRegion("speaker"));
+		unMuted.setScale(0.4f);
+		unMuted.setPosition(Gdx.graphics.getWidth() - 35.0f, Gdx.graphics.getHeight() - 35.0f);
+		muted = new Image(atlas.findRegion("mute"));
+		muted.setScale(0.4f);
+		muted.setPosition(Gdx.graphics.getWidth() - 35.0f, Gdx.graphics.getHeight() - 35.0f);
+		muted.setVisible(false);
+		stage.addActor(unMuted);
+		stage.addActor(muted);
 	}
 
 	public void changeScreen(int screen){
@@ -103,5 +150,6 @@ public class BomberMan extends Game {
 	@Override
 	public void dispose(){
 		assMan.manager.dispose();
+		stage.dispose();
 	}
 }
