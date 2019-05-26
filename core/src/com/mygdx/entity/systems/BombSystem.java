@@ -74,7 +74,7 @@ public class BombSystem extends IteratingSystem {
                 posY++;
 
 
-            bombBody.body.getWorld().destroyBody(bombBody.body);
+
             getEngine().removeEntity(entity);
 
             Entity player = bomb.owner;

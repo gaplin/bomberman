@@ -1,5 +1,8 @@
 package com.mygdx.views;
 
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntityListener;
+import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -11,6 +14,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.mygdx.entity.Mappers;
+import com.mygdx.entity.components.BodyComponent;
 import com.mygdx.entity.systems.*;
 import com.mygdx.factory.BodyFactory;
 import com.mygdx.game.BomberMan;
@@ -40,7 +45,7 @@ public class GameScreen implements Screen {
         bodyFactory = BodyFactory.getInstance(world);
         atlas = parent.assMan.manager.get("game/game.atlas");
 
-        renderingSystem = new RenderingSystem(sb);
+        renderingSystem = new RenderingSystem(sb, parent.assMan.manager.get("map/map.tmx"));
         cam = renderingSystem.getCamera();
         viewport = renderingSystem.getViewport();
         sb.setProjectionMatrix(cam.combined);
@@ -55,12 +60,27 @@ public class GameScreen implements Screen {
         engine.addSystem(new BombSystem(atlas, bodyFactory,
                 parent.soundManager));
         engine.addSystem(new FlameSystem(atlas, bodyFactory));
-        engine.addSystem(new MapSystem(bodyFactory, engine));
+        engine.addSystem(new MapSystem(bodyFactory, engine, renderingSystem.getMap()));
         engine.addSystem(new PowerUpSystem(atlas, bodyFactory));
         engine.addSystem(new DeathSystem());
         engine.addSystem(new PlayerControlSystem());
         engine.addSystem(new EnemySystem(atlas, bodyFactory, engine));
         engine.addSystem(new GUISystem(parent.assMan.manager.get("flat/flat-earth-ui.json"), atlas, parent.assMan.manager.get("loading/loading.atlas")));
+
+        engine.addEntityListener(Family.all(BodyComponent.class).get(), new EntityListener() {
+            @Override
+            public void entityAdded(Entity entity) {
+
+            }
+
+            @Override
+            public void entityRemoved(Entity entity) {
+                BodyComponent body = Mappers.bodyMapper.get(entity);
+                body.body.getWorld().destroyBody(body.body);
+                body.body = null;
+            }
+        });
+        BomberMan.END = false;
     }
 
     @Override
@@ -77,8 +97,12 @@ public class GameScreen implements Screen {
             pause = !pause;
         }
         else if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !world.isLocked()){
+            dispose();
             parent.changeScreen(BomberMan.LEVELS);
             parent.gameScreen = null;
+        }
+        else if(BomberMan.END){
+            endGame();
         }
     }
 
@@ -115,12 +139,16 @@ public class GameScreen implements Screen {
     public void dispose() {
         world.dispose();
         sb.dispose();
-        atlas.dispose();
+        renderingSystem.getMap().dispose();
+        renderingSystem.getRenderer().dispose();
+        engine.getSystem(GUISystem.class).getStage().dispose();
+        engine.clearPools();
     }
 
 
     // Temporary solution, changed engine and parent to static for this
-    public static void endGame(){
+    public void endGame() {
+        dispose();
         parent.changeScreen(BomberMan.ENDGAME);
         parent.gameScreen = null;
     }

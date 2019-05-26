@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
@@ -23,40 +24,32 @@ import java.util.Random;
 public class MapSystem extends IteratingSystem {
 
 
-    private static TiledMap map;
+    private TiledMap map;
     private BodyFactory bodyFactory;
     private PooledEngine engine;
     private Random generator = new Random();
     public static int width;
     public static int height;
-    MapObjs[][] grid;
-    private float time = 1.0f;
+    Array<Array<MapObjs>> grid;
 
-    public MapSystem(BodyFactory bf, PooledEngine eng) {
+    public MapSystem(BodyFactory bf, PooledEngine eng, TiledMap map) {
         super(Family.all(BlockComponent.class).get());
 
 
         bodyFactory = bf;
         engine = eng;
-        map = RenderingSystem.getMap();
+        this.map = map;
         width = 12;
         height = 9;
-        grid = new MapObjs[height + 1][width + 1];
-        for(int i = 0; i <= height; i++)
-            for(int j = 0; j <= width; j++)
-                grid[i][j] = new MapObjs(new Vector2(j, i));
+        grid = new Array<>();
+        for(int i = 0; i <= height; i++) {
+            grid.add(new Array<>());
+            for (int j = 0; j <= width; j++) {
+                grid.get(i).add(new MapObjs(new Vector2(j, i)));
+            }
+        }
         createMap();
         createBlocks();
-    }
-
-    @Override
-    public void update(float deltaTime) {
-        super.update(deltaTime);
-        time -= deltaTime;
-        if(time < 0){
-            time = 1.0f;
-            //printMap();
-        }
     }
 
     @Override
@@ -64,12 +57,10 @@ public class MapSystem extends IteratingSystem {
         BlockComponent block = Mappers.blockMapper.get(entity);
         if(block.toDestroy){
             Vector3 pos = Mappers.transformMapper.get(entity).position;
-            BodyComponent body = Mappers.bodyMapper.get(entity);
-            body.body.getWorld().destroyBody(body.body);
             getEngine().removeEntity(entity);
 
             Vector2 gridPosition = toGridPosition(pos);
-            grid[(int)gridPosition.y][(int)gridPosition.x].type = TypeComponent.OTHER;
+            grid.get((int)gridPosition.y).get((int)gridPosition.x).type = TypeComponent.OTHER;
 
 
             float drop = generator.nextFloat();
@@ -89,23 +80,6 @@ public class MapSystem extends IteratingSystem {
         }
 
     }
-
-    private void printMap(){
-        for(int i = 0; i <= width + 5; i++)
-            System.out.print("-");
-        System.out.println();
-        for(int i = height; i >= 0; i--){
-            for(int j = 0; j <= width; j++){
-                System.out.print(grid[i][j].type + " ");
-            }
-            System.out.println();
-        }
-        for(int i = 0; i <= width + 5; i++)
-            System.out.print("-");
-        System.out.println();
-    }
-
-
 
     private void createMap() {
         MapObjects objs = map.getLayers().get("wall").getObjects();
@@ -155,7 +129,7 @@ public class MapSystem extends IteratingSystem {
 
             Vector2 gridPosition = toGridPosition(tranComp.position);
 
-            grid[(int)gridPosition.y][(int)gridPosition.x].type = type.type;
+            grid.get((int)gridPosition.y).get((int)gridPosition.x).type = type.type;
 
 
             ent.add(body);
@@ -222,7 +196,5 @@ public class MapSystem extends IteratingSystem {
             this.time = obj.time;
             this.position = new Vector2(obj.position);
         }
-
     }
-
 }

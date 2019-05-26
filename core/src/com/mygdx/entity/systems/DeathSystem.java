@@ -10,7 +10,6 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.game.BomberMan;
-import com.mygdx.views.GameScreen;
 
 public class DeathSystem extends IteratingSystem {
 
@@ -53,20 +52,19 @@ public class DeathSystem extends IteratingSystem {
 
                 Vector2 gridPosition = MapSystem.toGridPosition(transform.position);
                 MapSystem mapSystem = getEngine().getSystem(MapSystem.class);
-                mapSystem.grid[(int)gridPosition.y][(int)gridPosition.x].type = TypeComponent.OTHER;
+                mapSystem.grid.get((int)gridPosition.y).get((int)gridPosition.x).type = TypeComponent.OTHER;
 
-                body.getWorld().destroyBody(body);
                 getEngine().removeEntity(entity);
                 if(type == TypeComponent.PLAYER) {
                     BomberMan.PLAYER_COUNT--;
                     if (BomberMan.PLAYER_COUNT == 0) {
-                        GameScreen.endGame();
+                        BomberMan.END = true;
                     }
                 }
                 else if(type == TypeComponent.ENEMY){
                     BomberMan.ENEMY_COUNT--;
                     if(BomberMan.ENEMY_COUNT == 0) {
-                        GameScreen.endGame();
+                        BomberMan.END = true;
                     }
                 }
             }

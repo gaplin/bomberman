@@ -91,4 +91,8 @@ public class GUISystem extends IteratingSystem {
         stage.draw();
         array.clear();
     }
+
+    public Stage getStage() {
+        return stage;
+    }
 }

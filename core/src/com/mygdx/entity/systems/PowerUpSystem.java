@@ -32,10 +32,8 @@ public class PowerUpSystem extends IteratingSystem {
             Vector2 gridPosition = MapSystem.toGridPosition(transform.position);
             MapSystem mapSystem = getEngine().getSystem(MapSystem.class);
 
-            mapSystem.grid[(int)gridPosition.y][(int)gridPosition.x].type = TypeComponent.OTHER;
+            mapSystem.grid.get((int)gridPosition.y).get((int)gridPosition.x).type = TypeComponent.OTHER;
 
-            BodyComponent body = Mappers.bodyMapper.get(entity);
-            body.body.getWorld().destroyBody(body.body);
             getEngine().removeEntity(entity);
             return;
         }
