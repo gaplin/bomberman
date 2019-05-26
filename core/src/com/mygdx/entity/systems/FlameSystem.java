@@ -7,7 +7,6 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
@@ -31,10 +30,7 @@ public class FlameSystem extends IteratingSystem {
         flameCom.duration -= deltaTime;
 
         if(flameCom.duration <= 0.0f){
-            BodyComponent bodyCom = Mappers.bodyMapper.get(entity);
-            World world = bodyCom.body.getWorld();
 
-            world.destroyBody(bodyCom.body);
             getEngine().removeEntity(entity);
         }
     }

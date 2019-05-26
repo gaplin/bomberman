@@ -73,6 +73,7 @@ public class BomberMan extends Game {
 	public final static float AGONY_TIME = 2.0f;
 	public static int PLAYER_COUNT = 0;
 	public static int ENEMY_COUNT = 0;
+	public static boolean END = false;
 
 	public final static float PLAYER_RADIUS = 1.4f * PLAYER_SCALE;
 	public final static float BOMB_RADIUS = 1.5f * BOMB_SCALE;

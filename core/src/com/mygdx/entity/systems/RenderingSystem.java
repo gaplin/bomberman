@@ -7,8 +7,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -55,11 +53,11 @@ public class RenderingSystem extends SortedIteratingSystem {
     private OrthographicCamera cam;
 
 
-    private static TiledMap map;
-    private TiledMapRenderer renderer;
+    private TiledMap map;
+    private OrthogonalTiledMapRenderer renderer;
     public boolean pause = false;
 
-    public RenderingSystem(SpriteBatch batch){
+    public RenderingSystem(SpriteBatch batch, TiledMap map){
         super(Family.all(TransformComponent.class, TextureComponent.class).get(), new ZComparator());
         comparator = new ZComparator();
 
@@ -72,9 +70,8 @@ public class RenderingSystem extends SortedIteratingSystem {
         viewport = new FitViewport(FRUSTUM_WIDTH, FRUSTUM_HEIGHT, cam);
         cam.position.set(FRUSTUM_WIDTH / 2f, FRUSTUM_HEIGHT / 2f, 0);
 
-        map = new TmxMapLoader().load("map/map.tmx");
+        this.map = map;
         renderer = new OrthogonalTiledMapRenderer(map, 1f / 32f );
-
     }
 
     @Override
@@ -163,7 +160,11 @@ public class RenderingSystem extends SortedIteratingSystem {
         renderQueue.clear();
     }
 
-    public static TiledMap getMap(){
+    public TiledMap getMap(){
         return map;
+    }
+
+    public OrthogonalTiledMapRenderer getRenderer(){
+        return renderer;
     }
 }

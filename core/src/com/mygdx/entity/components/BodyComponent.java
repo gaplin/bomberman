@@ -13,6 +13,9 @@ public class BodyComponent implements Component, Pool.Poolable {
 
     @Override
     public void reset() {
+        if(body != null){
+            body.getWorld().destroyBody(body);
+        }
         body = null;
     }
 }
