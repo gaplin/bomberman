@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Preferences;
 import com.mygdx.loader.CustomAssetManager;
 import com.mygdx.manager.SoundManager;
@@ -14,6 +15,15 @@ public class BomberMan extends Game {
 	private LevelsScreen levelsScreen;
 	private LoadingScreen loadingScreen;
 	private MenuScreen menuScreen;
+
+	@Override
+	public void render() {
+		super.render();
+		if(Gdx.input.isKeyJustPressed(Input.Keys.M)){
+			soundManager.setMuted(!soundManager.isMuted());
+		}
+	}
+
 	private PreferencesScreen preferencesScreen;
 
 	public final static int MENU = 0;

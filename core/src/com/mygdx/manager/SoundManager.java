@@ -24,6 +24,13 @@ public class SoundManager {
 
     public void setMuted(boolean mute){
         muted = mute;
+        if(muted){
+            for(Sound sound : hashMap.values()){
+                if(sound != null){
+                    sound.stop();
+                }
+            }
+        }
     }
 
     public boolean isMuted(){
