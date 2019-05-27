@@ -8,6 +8,7 @@ public class PowerUpComponent implements Component, Pool.Poolable {
     public static final int speedPowerUp = 1;
     public static final int damagePowerUp = 2;
     public static final int kickPowerUp = 3;
+    public static final int hpPowerUp = 4;
 
     public PowerUpComponent(){
         reset();

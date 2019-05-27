@@ -32,8 +32,6 @@ public class PowerUpSystem extends IteratingSystem {
             Vector2 gridPosition = MapSystem.toGridPosition(transform.position);
             MapSystem mapSystem = getEngine().getSystem(MapSystem.class);
 
-            mapSystem.grid.get((int)gridPosition.y).get((int)gridPosition.x).type = TypeComponent.OTHER;
-
             getEngine().removeEntity(entity);
             return;
         }
@@ -75,6 +73,10 @@ public class PowerUpSystem extends IteratingSystem {
                 break;
             case PowerUpComponent.kickPowerUp:
                 texture.region = atlas.findRegion("powerups/KickPowerup");
+                transform.scale.set(2.0f, 2.0f);
+                break;
+            case PowerUpComponent.hpPowerUp:
+                texture.region = atlas.findRegion("powerups/HPPowerup");
                 transform.scale.set(2.0f, 2.0f);
                 break;
         }
