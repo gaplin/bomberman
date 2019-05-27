@@ -180,20 +180,56 @@ public class MapSystem extends IteratingSystem {
     }
 
     public static class MapObjs{
-        int type;
-        float time;
-        Vector2 position;
+        public int type;
+        public float time;
+        public Vector2 position;
 
-        MapObjs(){
+        public MapObjs set(int type){
+            this.type = type;
+            return this;
+        }
+
+        public MapObjs set(float time){
+            this.time = time;
+            return this;
+        }
+
+        public MapObjs set(int type, float time){
+            this.type = type;
+            this.time = time;
+            return this;
+        }
+
+        public MapObjs set(int type, float time, float posX, float posY){
+            this.type = type;
+            this.time = time;
+            position.set(posX, posY);
+            return this;
+        }
+
+        public MapObjs set(float posX, float posY){
+            position.set(posX, posY);
+            return this;
+        }
+
+        public MapObjs set(MapObjs obj){
+            this.position.set(obj.position);
+            this.type = obj.type;
+            this.time = obj.time;
+            return this;
+        }
+
+        public MapObjs(){
             type = TypeComponent.OTHER;
             time = 0;
             position = new Vector2();
         }
-        MapObjs(Vector2 position){
+        public MapObjs(Vector2 position){
             this();
             this.position = position;
         }
-        MapObjs(MapObjs obj){
+        public MapObjs(MapObjs obj){
+            this();
             this.type = obj.type;
             this.time = obj.time;
             this.position = new Vector2(obj.position);
