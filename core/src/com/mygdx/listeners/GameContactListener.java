@@ -86,6 +86,9 @@ public class GameContactListener implements ContactListener {
             case PowerUpComponent.kickPowerUp:
                 stats.canMoveBombs = true;
                 break;
+            case PowerUpComponent.hpPowerUp:
+                stats.HP++;
+                break;
         }
 
         upgrade.time = 0.0f;

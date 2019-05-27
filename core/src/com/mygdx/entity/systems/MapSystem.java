@@ -71,6 +71,8 @@ public class MapSystem extends IteratingSystem {
                     powerUpType = PowerUpComponent.speedPowerUp;
                 else if(type <= 0.3f)
                     powerUpType = PowerUpComponent.kickPowerUp;
+                else if(type <= 0.4f)
+                    powerUpType = PowerUpComponent.hpPowerUp;
                 else if(type <= 0.7f)
                     powerUpType = PowerUpComponent.bombPowerUp;
                 else
