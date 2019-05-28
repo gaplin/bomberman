@@ -41,9 +41,9 @@ public class EnemiesScreen extends ButtonsCount implements Screen {
         table.setBackground(new TiledDrawable(background));
         stage.addActor(table);
 
-        CustomTextButton enemy1 = new CustomTextButton((2 - BomberMan.PLAYERS) + (BomberMan.PLAYERS == 2 ? " ENEMIES" : " ENEMY"), skin, "large", 0, this);
-        CustomTextButton enemy2 = new CustomTextButton((3 - BomberMan.PLAYERS) + " ENEMIES", skin, "large", 1, this);
-        CustomTextButton enemy3 = new CustomTextButton((4 - BomberMan.PLAYERS) + " ENEMIES", skin, "large", 2, this);
+        CustomTextButton enemy1 = new CustomTextButton((2 - BomberMan.PLAYERS) + (2 - BomberMan.PLAYERS == 1 ? " ENEMY" : " ENEMIES"), skin, "large", 0, this);
+        CustomTextButton enemy2 = new CustomTextButton((3 - BomberMan.PLAYERS) + (3 - BomberMan.PLAYERS == 1 ? " ENEMY" : " ENEMIES"), skin, "large", 1, this);
+        CustomTextButton enemy3 = new CustomTextButton((4 - BomberMan.PLAYERS) + (4 - BomberMan.PLAYERS == 1 ? " ENEMY" : " ENEMIES"), skin, "large", 2, this);
         CustomTextButton back = new CustomTextButton("BACK", skin, "large", 3, this);
         enemy1.setTouchable(Touchable.disabled);
         enemy2.setTouchable(Touchable.disabled);
