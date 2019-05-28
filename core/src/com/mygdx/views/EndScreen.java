@@ -35,6 +35,7 @@ public class EndScreen extends ButtonsCount implements Screen {
         atlas = parent.assMan.manager.get("loading/loading.atlas");
         background = atlas.findRegion("BackgroundTile");
     }
+
     @Override
     public void show() {
         super.pointer = 0;
@@ -51,8 +52,9 @@ public class EndScreen extends ButtonsCount implements Screen {
         menu.setTouchable(Touchable.disabled);
         nButtons = 2;
 
-        String endText = BomberMan.PLAYER_COUNT == 0 ? "Game Over" : "You Won!";
+        String endText = BomberMan.ENDTEXT;
         title = new Label(endText, skin, "title", "white");
+        title.setColor(BomberMan.endColor);
 
         table.add(title);
         table.row().pad(50, 0, 0, 0);

@@ -3,6 +3,7 @@ package com.mygdx.entity.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Filter;
@@ -58,16 +59,41 @@ public class DeathSystem extends IteratingSystem {
                 if(type == TypeComponent.PLAYER) {
                     BomberMan.PLAYER_COUNT--;
                     if (BomberMan.PLAYER_COUNT == 0 || (BomberMan.PLAYER_COUNT == 1 && BomberMan.ENEMY_COUNT == 0)) {
+                        if(BomberMan.PLAYER_COUNT == 0){
+                            BomberMan.ENDTEXT = "Game Over";
+                            BomberMan.endColor = Color.WHITE;
+                        }
+                        else{
+                            setLastPlayer(entity);
+                        }
                         BomberMan.END = true;
                     }
                 }
                 else if(type == TypeComponent.ENEMY){
                     BomberMan.ENEMY_COUNT--;
                     if(BomberMan.ENEMY_COUNT == 0) {
+                        if(BomberMan.PLAYER_COUNT > 1){
+                            BomberMan.ENDTEXT = "Players Won";
+                            BomberMan.endColor = Color.WHITE;
+                        }
+                        else{
+                            setLastPlayer(entity);
+                        }
                         BomberMan.END = true;
                     }
                 }
             }
+        }
+    }
+
+    private void setLastPlayer(Entity entity){
+        for(Entity entity1 : getEngine().getEntitiesFor(Family.one(PlayerComponent.class).get())){
+            if(entity1 == entity)
+                continue;
+            BomberMan.endColor = Mappers.textureMapper.get(entity1).color;
+            BomberMan.endColor.a = 1.0f;
+            int id = Mappers.playerMapper.get(entity1).ID;
+            BomberMan.ENDTEXT = "Player " + id + " Won";
         }
     }
 }
