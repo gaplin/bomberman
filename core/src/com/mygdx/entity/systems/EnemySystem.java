@@ -36,12 +36,18 @@ public class EnemySystem extends IteratingSystem {
         this.engine = engine;
         BomberMan.ENEMY_COUNT = 0;
 
-        if(BomberMan.BOTS > 0)
-            createEnemy(23.0f,2.0f, Color.RED);
-        if(BomberMan.BOTS > 1)
+        if(BomberMan.PLAYERS < 2 && BomberMan.BOTS > 0) {
+            createEnemy(23.0f, 2.0f, Color.RED);
+            BomberMan.BOTS--;
+        }
+        if(BomberMan.PLAYERS < 3 && BomberMan.BOTS > 0) {
             createEnemy(2f, 2.0f, Color.YELLOW);
-        if(BomberMan.BOTS > 2)
+            BomberMan.BOTS--;
+        }
+        if(BomberMan.PLAYERS < 4 && BomberMan.BOTS > 0) {
             createEnemy(23.0f, 16.0f, Color.BLUE);
+            BomberMan.BOTS--;
+        }
     }
 
     @Override

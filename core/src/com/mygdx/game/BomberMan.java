@@ -18,7 +18,8 @@ public class BomberMan extends Game {
 
 	private EndScreen endScreen;
 	public GameScreen gameScreen;
-	private LevelsScreen levelsScreen;
+	private PlayersScreen playersScreen;
+	private EnemiesScreen enemiesScreen;
 	private LoadingScreen loadingScreen;
 	private MenuScreen menuScreen;
 
@@ -51,9 +52,10 @@ public class BomberMan extends Game {
 
 	public final static int MENU = 0;
 	public final static int GAME = 1;
-	public final static int LEVELS = 2;
-	public final static int ENDGAME = 3;
-	public final static int PREFERENCES = 4;
+	public final static int GAMERS = 2;
+	public final static int ENEMIES = 3;
+	public final static int ENDGAME = 4;
+	public final static int PREFERENCES = 5;
 
 	public static final short PLAYER_BIT = 1;
 	public static final short BOMB_BIT = 1 << 1;
@@ -86,6 +88,7 @@ public class BomberMan extends Game {
 	public static float GAME_VOLUME = 0.2f;
 
 	public static int BOTS = 0;
+	public static int PLAYERS = 0;
 
 
 	public static final boolean CHEATS = false;
@@ -145,16 +148,20 @@ public class BomberMan extends Game {
 				if(gameScreen == null)gameScreen = new GameScreen(this);
 				this.setScreen(gameScreen);
 				break;
-			case LEVELS:
-				if(levelsScreen == null)levelsScreen = new LevelsScreen(this);
-				this.setScreen(levelsScreen);
+			case GAMERS:
+				if(playersScreen == null)playersScreen = new PlayersScreen(this);
+				this.setScreen(playersScreen);
+				break;
+			case ENEMIES:
+				if(enemiesScreen == null)enemiesScreen = new EnemiesScreen(this);
+				this.setScreen(enemiesScreen);
 				break;
 			case ENDGAME:
 				if(endScreen == null)endScreen = new EndScreen(this);
 				this.setScreen(endScreen);
 				break;
 			case PREFERENCES:
-				if(preferencesScreen == null) preferencesScreen = new PreferencesScreen(this);
+				if(preferencesScreen == null)preferencesScreen = new PreferencesScreen(this);
 				this.setScreen(preferencesScreen);
 				break;
 		}

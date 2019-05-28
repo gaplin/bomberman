@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -16,22 +15,21 @@ import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.game.BomberMan;
 
-
-public class MenuScreen extends ButtonsCount implements Screen {
+public class PlayersScreen extends ButtonsCount implements Screen {
     private BomberMan parent;
     private Stage stage;
     private Table table;
     private Skin skin;
     private TextureAtlas atlas;
-    private TextureAtlas.AtlasRegion background, title;
-    public MenuScreen(BomberMan parent){
+    private TextureAtlas.AtlasRegion background;
+
+    public PlayersScreen(BomberMan parent){
         super();
         this.parent = parent;
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         skin = parent.assMan.manager.get("flat/flat-earth-ui.json");
-        atlas= parent.assMan.manager.get("loading/loading.atlas");
+        atlas = parent.assMan.manager.get("loading/loading.atlas");
         background = atlas.findRegion("BackgroundTile");
-        title = atlas.findRegion("logo");
     }
     @Override
     public void show() {
@@ -43,45 +41,45 @@ public class MenuScreen extends ButtonsCount implements Screen {
         table.setBackground(new TiledDrawable(background));
         stage.addActor(table);
 
-        CustomTextButton play = new CustomTextButton("PLAY", skin, "large", 0, this);
-        CustomTextButton preferences = new CustomTextButton("PREFERENCES", skin, "large", 1, this);
-        CustomTextButton exit = new CustomTextButton("EXIT", skin, "large", 2, this);
-
+        CustomTextButton player1 = new CustomTextButton("1 PLAYER", skin, "large", 0, this);
+        CustomTextButton player2 = new CustomTextButton("2 PLAYERS", skin, "large", 1, this);
+        CustomTextButton back = new CustomTextButton("BACK", skin, "large", 2, this);
+        player1.setTouchable(Touchable.disabled);
+        player2.setTouchable(Touchable.disabled);
+        back.setTouchable(Touchable.disabled);
         nButtons = 3;
-        play.setTouchable(Touchable.disabled);
-        exit.setTouchable(Touchable.disabled);
-        preferences.setTouchable(Touchable.disabled);
 
-        ImageButton logo = new ImageButton(new TiledDrawable(title));
 
-        table.add(logo);
         table.row().pad(50, 0, 0, 0);
-        table.add(play).fillX().uniformX().width(400);
+        table.add(player1).fillX().uniformX().width(300);
         table.row().pad(50, 0, 0, 0);
-        table.add(preferences).fillX().uniformX().width(400);
+        table.add(player2).fillX().uniformX().width(300);
         table.row().pad(50, 0, 0, 0);
-        table.add(exit).fillX().uniformX().width(400);
+        table.add(back).fillX().uniformX().width(300);
 
-        play.addListener(new ChangeListener() {
+        player1.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 parent.soundManager.playSound("bombSound.mp3", "menuVol");
-                parent.changeScreen(BomberMan.GAMERS);
+                BomberMan.PLAYERS = 1;
+                parent.changeScreen(BomberMan.ENEMIES);
             }
         });
 
-        preferences.addListener(new ChangeListener() {
+        player2.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 parent.soundManager.playSound("bombSound.mp3", "menuVol");
-                parent.changeScreen(BomberMan.PREFERENCES);
+                BomberMan.PLAYERS = 2;
+                parent.changeScreen(BomberMan.ENEMIES);
             }
         });
 
-        exit.addListener(new ChangeListener() {
+        back.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Gdx.app.exit();
+                parent.soundManager.playSound("bombSound.mp3", "menuVol");
+                parent.changeScreen(BomberMan.MENU);
             }
         });
 
@@ -91,7 +89,6 @@ public class MenuScreen extends ButtonsCount implements Screen {
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN) && pressed == -1) {
             pointer = (pointer + 1) % nButtons;
@@ -104,7 +101,6 @@ public class MenuScreen extends ButtonsCount implements Screen {
 
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1/30f));
         stage.draw();
-
     }
 
     @Override
@@ -131,5 +127,6 @@ public class MenuScreen extends ButtonsCount implements Screen {
     public void dispose() {
         stage.dispose();
         skin.dispose();
+        atlas.dispose();
     }
 }
