@@ -45,12 +45,14 @@ public class MenuScreen extends ButtonsCount implements Screen {
 
         CustomTextButton play = new CustomTextButton("PLAY", skin, "large", 0, this);
         CustomTextButton preferences = new CustomTextButton("PREFERENCES", skin, "large", 1, this);
-        CustomTextButton exit = new CustomTextButton("EXIT", skin, "large", 2, this);
+        CustomTextButton controls = new CustomTextButton("CONTROLS", skin, "large", 2, this);
+        CustomTextButton exit = new CustomTextButton("EXIT", skin, "large", 3, this);
 
-        nButtons = 3;
+        nButtons = 4;
         play.setTouchable(Touchable.disabled);
         exit.setTouchable(Touchable.disabled);
         preferences.setTouchable(Touchable.disabled);
+        controls.setTouchable(Touchable.disabled);
 
         ImageButton logo = new ImageButton(new TiledDrawable(title));
 
@@ -60,6 +62,8 @@ public class MenuScreen extends ButtonsCount implements Screen {
         table.row().pad(50, 0, 0, 0);
         table.add(preferences).fillX().uniformX().width(400);
         table.row().pad(50, 0, 0, 0);
+        table.add(controls).fillX().uniformX().width(400);
+        table.row().pad(50, 0 , 0, 0);
         table.add(exit).fillX().uniformX().width(400);
 
         play.addListener(new ChangeListener() {
@@ -75,6 +79,14 @@ public class MenuScreen extends ButtonsCount implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 parent.soundManager.playSound("bombSound.mp3", "menuVol");
                 parent.changeScreen(BomberMan.PREFERENCES);
+            }
+        });
+
+        controls.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                parent.soundManager.playSound("bombSound.mp3", "menuVol");
+                parent.changeScreen(BomberMan.CONTROLS);
             }
         });
 

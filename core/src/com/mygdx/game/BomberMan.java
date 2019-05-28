@@ -22,6 +22,7 @@ public class BomberMan extends Game {
 	private EnemiesScreen enemiesScreen;
 	private LoadingScreen loadingScreen;
 	private MenuScreen menuScreen;
+	private ControlsScreen controlsScreen;
 
 	@Override
 	public void render() {
@@ -56,6 +57,7 @@ public class BomberMan extends Game {
 	public final static int ENEMIES = 3;
 	public final static int ENDGAME = 4;
 	public final static int PREFERENCES = 5;
+	public final static int CONTROLS = 6;
 
 	public static final short PLAYER_BIT = 1;
 	public static final short BOMB_BIT = 1 << 1;
@@ -163,6 +165,10 @@ public class BomberMan extends Game {
 			case PREFERENCES:
 				if(preferencesScreen == null)preferencesScreen = new PreferencesScreen(this);
 				this.setScreen(preferencesScreen);
+				break;
+			case CONTROLS:
+				if(controlsScreen == null)controlsScreen = new ControlsScreen(this);
+				this.setScreen(controlsScreen);
 				break;
 		}
 	}
