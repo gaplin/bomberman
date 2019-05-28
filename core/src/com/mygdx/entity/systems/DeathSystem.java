@@ -57,7 +57,7 @@ public class DeathSystem extends IteratingSystem {
                 getEngine().removeEntity(entity);
                 if(type == TypeComponent.PLAYER) {
                     BomberMan.PLAYER_COUNT--;
-                    if (BomberMan.PLAYER_COUNT == 0) {
+                    if (BomberMan.PLAYER_COUNT == 0 || (BomberMan.PLAYER_COUNT == 1 && BomberMan.ENEMY_COUNT == 0)) {
                         BomberMan.END = true;
                     }
                 }
