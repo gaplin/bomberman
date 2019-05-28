@@ -32,10 +32,12 @@ public class PlayerSystem extends IteratingSystem {
 
         BomberMan.PLAYER_COUNT = 0;
 
-        createPlayer(2.0f, 16.2f);
+        if(BomberMan.PLAYERS > 0)
+            createPlayer(2.0f, 16.2f);
 
-    /*    createPlayer(1.0f, 1.0f,
-                Input.Keys.W, Input.Keys.S, Input.Keys.A, Input.Keys.D, Input.Keys.F, Color.BLUE);*/
+        if(BomberMan.PLAYERS > 1)
+            createPlayer(23.0f, 2.0f,
+                    Input.Keys.W, Input.Keys.S, Input.Keys.A, Input.Keys.D, Input.Keys.CONTROL_LEFT, Color.RED);
 
     }
 

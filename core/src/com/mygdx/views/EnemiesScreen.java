@@ -15,7 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.game.BomberMan;
 
-public class LevelsScreen extends ButtonsCount implements Screen {
+public class EnemiesScreen extends ButtonsCount implements Screen {
     private BomberMan parent;
     private Stage stage;
     private Table table;
@@ -23,7 +23,7 @@ public class LevelsScreen extends ButtonsCount implements Screen {
     private TextureAtlas atlas;
     private TextureAtlas.AtlasRegion background;
 
-    public LevelsScreen(BomberMan parent){
+    public EnemiesScreen(BomberMan parent){
         super();
         this.parent = parent;
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
@@ -41,9 +41,9 @@ public class LevelsScreen extends ButtonsCount implements Screen {
         table.setBackground(new TiledDrawable(background));
         stage.addActor(table);
 
-        CustomTextButton enemy1 = new CustomTextButton("1 ENEMY", skin, "large", 0, this);
-        CustomTextButton enemy2 = new CustomTextButton("2 ENEMIES", skin, "large", 1, this);
-        CustomTextButton enemy3 = new CustomTextButton("3 ENEMIES", skin, "large", 2, this);
+        CustomTextButton enemy1 = new CustomTextButton((2 - BomberMan.PLAYERS) + (BomberMan.PLAYERS == 2 ? " ENEMIES" : " ENEMY"), skin, "large", 0, this);
+        CustomTextButton enemy2 = new CustomTextButton((3 - BomberMan.PLAYERS) + " ENEMIES", skin, "large", 1, this);
+        CustomTextButton enemy3 = new CustomTextButton((4 - BomberMan.PLAYERS) + " ENEMIES", skin, "large", 2, this);
         CustomTextButton back = new CustomTextButton("BACK", skin, "large", 3, this);
         enemy1.setTouchable(Touchable.disabled);
         enemy2.setTouchable(Touchable.disabled);
@@ -65,7 +65,7 @@ public class LevelsScreen extends ButtonsCount implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 parent.soundManager.playSound("bombSound.mp3", "menuVol");
-                BomberMan.BOTS = 1;
+                BomberMan.BOTS = 2 - BomberMan.PLAYERS;
                 parent.changeScreen(BomberMan.GAME);
             }
         });
@@ -74,7 +74,7 @@ public class LevelsScreen extends ButtonsCount implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 parent.soundManager.playSound("bombSound.mp3", "menuVol");
-                BomberMan.BOTS = 2;
+                BomberMan.BOTS = 3 - BomberMan.PLAYERS;
                 parent.changeScreen(BomberMan.GAME);
             }
         });
@@ -83,7 +83,7 @@ public class LevelsScreen extends ButtonsCount implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 parent.soundManager.playSound("bombSound.mp3", "menuVol");
-                BomberMan.BOTS = 3;
+                BomberMan.BOTS = 4 - BomberMan.PLAYERS;
                 parent.changeScreen(BomberMan.GAME);
             }
         });
@@ -92,7 +92,7 @@ public class LevelsScreen extends ButtonsCount implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 parent.soundManager.playSound("bombSound.mp3", "menuVol");
-                parent.changeScreen(BomberMan.MENU);
+                parent.changeScreen(BomberMan.GAMERS);
             }
         });
 

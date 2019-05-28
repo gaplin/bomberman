@@ -98,7 +98,7 @@ public class GameScreen implements Screen {
         }
         else if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && !world.isLocked()){
             dispose();
-            parent.changeScreen(BomberMan.LEVELS);
+            parent.changeScreen(BomberMan.MENU);
             parent.gameScreen = null;
         }
         else if(BomberMan.END){
