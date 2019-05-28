@@ -50,43 +50,51 @@ public class EnemySystem extends IteratingSystem {
         Vector2 gridPosition = MapSystem.toGridPosition(Mappers.transformMapper.get(entity).position);
         int posX = (int)gridPosition.x;
         int posY = (int)gridPosition.y;
-        Array<Array<MapSystem.MapObjs>> map = copyMap(getEngine().getSystem(MapSystem.class).grid);
+        Array<Array<MapSystem.MapObjs>> map = copyMap(getEngine().getSystem(MapSystem.class).grid, entity);
         updateMap(map);
-        if(!scanMove(entity, map))
-            return;
+        try {
+            if (!scanMove(entity, map))
+                return;
 
 
-        if(enemy.correctingX){
-            correctX(entity);
-            return;
-        }
-
-        if(enemy.correctingY){
-            correctY(entity);
-            return;
-        }
-
-        if(!enemy.moving){
-            if(!bombPlant(entity, copyMap(map))) {
-                if(map.get(posY).get(posX).type == TypeComponent.BOMB || map.get(posY).get(posX).type == TypeComponent.FLAME) {
-                    calculateMove(entity, posX, posY, map, false, 0.0f);
-                }
+            if (enemy.correctingX) {
+                correctX(entity);
+                return;
             }
-        }
-        else{
-            move(entity);
+
+            if (enemy.correctingY) {
+                correctY(entity);
+                return;
+            }
+
+            if (!enemy.moving) {
+                if (!bombPlant(entity, copyMap(map, entity))) {
+                    if (map.get(posY).get(posX).type == TypeComponent.BOMB || map.get(posY).get(posX).type == TypeComponent.FLAME) {
+                        calculateMove(entity, posX, posY, map, false, 0.0f);
+                    }
+                }
+            } else {
+                move(entity);
+            }
+        }finally {
+            clearMap(map, entity);
         }
     }
 
-    private Array<Array<MapSystem.MapObjs>> copyMap(Array<Array<MapSystem.MapObjs>> map){
-        Array<Array<MapSystem.MapObjs>> result = new Array<>();
+    private Array<Array<MapSystem.MapObjs>> copyMap(Array<Array<MapSystem.MapObjs>> map, Entity entity){
+        EnemyComponent enemy = Mappers.enemyMapper.get(entity);
+        Array<Array<MapSystem.MapObjs>> result = enemy.maps.removeFirst();
         for(int i = 0; i <= MapSystem.height; i++){
-            result.add(new Array<>());
             for(int j = 0; j <= MapSystem.width; j++){
-                result.get(i).add(new MapSystem.MapObjs(map.get(i).get(j)));
+                result.get(i).get(j).set(map.get(i).get(j));
             }
         }
         return result;
+    }
+
+    private void clearMap(Array<Array<MapSystem.MapObjs>> map, Entity entity){
+        EnemyComponent enemy = Mappers.enemyMapper.get(entity);
+        enemy.maps.addLast(map);
     }
 
     private void updateMap(Array<Array<MapSystem.MapObjs>> map){
@@ -333,105 +341,107 @@ private boolean bombPlant(Entity entity, Array<Array<MapSystem.MapObjs>> map){
         EnemyComponent enemy = Mappers.enemyMapper.get(entity);
         StatsComponent stats = Mappers.statsMapper.get(entity);
         float timePerUnit = 1.0f / (stats.movementSpeed / 4.0f);
-        if(stats.bombs == 0){
+        try {
+            if (stats.bombs == 0) {
+                return false;
+            }
+            int range = stats.bombPower;
+            Vector2 gridPosition = MapSystem.toGridPosition(Mappers.transformMapper.get(entity).position);
+
+            Queue<BombNode> Q = new Queue<>();
+            Array<BombNode> possibleNotDestructibleMoves = new Array<>();
+            Array<BombNode> possibleDestructibleMoves = new Array<>();
+            int posX = (int) gridPosition.x;
+            int posY = (int) gridPosition.y;
+            Q.addLast(new BombNode(map.get(posY).get(posX), null));
+
+            boolean[][] visited = new boolean[MapSystem.height + 1][MapSystem.width + 1];
+            visited[posY][posX] = true;
+
+            BombNode v;
+
+            while (!Q.isEmpty()) {
+                v = Q.removeFirst();
+                Vector2 position = v.obj.position;
+                //
+                posY = (int) position.y;
+                posX = (int) position.x;
+
+                float delay = v.distance * timePerUnit;
+                DetonationInfo info = safePlant(entity, posX, posY, range, copyMap(map, entity), delay);
+                BombNode next = new BombNode(new MapSystem.MapObjs(map.get(posY).get(posX)), v.prev, true, info);
+                if (info != null && map.get(posY).get(posX).type != TypeComponent.BOMB && map.get(posY).get(posX).type != TypeComponent.FLAME) {
+                    if (info.destroyedBlocks > 0) {
+                        possibleDestructibleMoves.add(next);
+                    } else {
+                        possibleNotDestructibleMoves.add(next);
+                    }
+                }
+
+                posY += 1;
+                int up = map.get(posY).get(posX).type;
+                if (!visited[posY][posX] && up != TypeComponent.DESTRUCTIBLE_BLOCK &&
+                        up != TypeComponent.INDESTRUCTIBLE_BLOCK && up != TypeComponent.BOMB &&
+                        up != TypeComponent.FLAME) {
+                    visited[posY][posX] = true;
+                    next = new BombNode(map.get(posY).get(posX), v, true);
+                    Q.addLast(next);
+                }
+                //
+                posY = (int) position.y - 1;
+                int down = map.get(posY).get(posX).type;
+                if (!visited[posY][posX] && down != TypeComponent.DESTRUCTIBLE_BLOCK &&
+                        down != TypeComponent.INDESTRUCTIBLE_BLOCK && down != TypeComponent.BOMB &&
+                        down != TypeComponent.FLAME) {
+                    visited[posY][posX] = true;
+                    next = new BombNode(map.get(posY).get(posX), v, true);
+                    Q.addLast(next);
+                }
+                //
+                posY = (int) position.y;
+                posX = (int) position.x - 1;
+                int left = map.get(posY).get(posX).type;
+                if (!visited[posY][posX] && left != TypeComponent.DESTRUCTIBLE_BLOCK &&
+                        left != TypeComponent.INDESTRUCTIBLE_BLOCK && left != TypeComponent.BOMB &&
+                        left != TypeComponent.FLAME) {
+                    visited[posY][posX] = true;
+                    next = new BombNode(map.get(posY).get(posX), v, true);
+                    Q.addLast(next);
+                }
+                //
+                posX = (int) position.x + 1;
+                int right = map.get(posY).get(posX).type;
+                if (!visited[posY][posX] && right != TypeComponent.DESTRUCTIBLE_BLOCK &&
+                        right != TypeComponent.INDESTRUCTIBLE_BLOCK && right != TypeComponent.BOMB &&
+                        right != TypeComponent.FLAME) {
+                    visited[posY][posX] = true;
+                    next = new BombNode(map.get(posY).get(posX), v, true);
+                    Q.addLast(next);
+                }
+            }
+
+            possibleDestructibleMoves.sort(comparator);
+            possibleNotDestructibleMoves.sort(comparator);
+            int movesRange = 10;
+            Node p = null;
+            if (!possibleDestructibleMoves.isEmpty()) {
+                p = possibleDestructibleMoves.get(Math.min(random.nextInt(possibleDestructibleMoves.size), movesRange));
+            } else if (!possibleNotDestructibleMoves.isEmpty()) {
+                p = possibleNotDestructibleMoves.get(Math.min(random.nextInt(possibleNotDestructibleMoves.size), movesRange));
+            }
+            if (p != null) {
+                while (p.prev != null) {
+                    enemy.move.addFirst(p.obj);
+                    p = p.prev;
+                }
+                enemy.moving = true;
+                enemy.isProcessingBomb = true;
+                return true;
+            }
             return false;
+        }finally {
+            clearMap(map, entity);
         }
-        int range = stats.bombPower;
-        Vector2 gridPosition = MapSystem.toGridPosition(Mappers.transformMapper.get(entity).position);
-
-        Queue<BombNode> Q = new Queue<>();
-        Array<BombNode> possibleNotDestructibleMoves = new Array<>();
-        Array<BombNode> possibleDestructibleMoves = new Array<>();
-        int posX = (int)gridPosition.x;
-        int posY = (int)gridPosition.y;
-        Q.addLast(new BombNode(map.get(posY).get(posX), null));
-
-        boolean[][] visited = new boolean[MapSystem.height + 1][MapSystem.width + 1];
-        visited[posY][posX] = true;
-
-        BombNode v;
-
-        while(!Q.isEmpty()){
-            v = Q.removeFirst();
-            Vector2 position = v.obj.position;
-            //
-            posY = (int)position.y;
-            posX = (int)position.x;
-
-            float delay = v.distance * timePerUnit;
-            DetonationInfo info = safePlant(entity, posX, posY, range, copyMap(map), delay);
-            BombNode next = new BombNode(new MapSystem.MapObjs(map.get(posY).get(posX)), v.prev, true, info);
-            if(info != null && map.get(posY).get(posX).type != TypeComponent.BOMB && map.get(posY).get(posX).type != TypeComponent.FLAME){
-                if(info.destroyedBlocks > 0) {
-                    possibleDestructibleMoves.add(next);
-                }
-                else{
-                    possibleNotDestructibleMoves.add(next);
-                }
-            }
-
-            posY += 1;
-            int up = map.get(posY).get(posX).type;
-            if(!visited[posY][posX] && up != TypeComponent.DESTRUCTIBLE_BLOCK &&
-                    up != TypeComponent.INDESTRUCTIBLE_BLOCK && up != TypeComponent.BOMB &&
-                    up != TypeComponent.FLAME){
-                visited[posY][posX] = true;
-                next = new BombNode(map.get(posY).get(posX), v, true);
-                Q.addLast(next);
-            }
-            //
-            posY = (int)position.y - 1;
-            int down = map.get(posY).get(posX).type;
-            if(!visited[posY][posX] && down != TypeComponent.DESTRUCTIBLE_BLOCK &&
-                    down != TypeComponent.INDESTRUCTIBLE_BLOCK && down != TypeComponent.BOMB &&
-                    down != TypeComponent.FLAME){
-                visited[posY][posX] = true;
-                next = new BombNode(map.get(posY).get(posX), v, true);
-                Q.addLast(next);
-            }
-            //
-            posY = (int)position.y;
-            posX = (int)position.x - 1;
-            int left = map.get(posY).get(posX).type;
-            if(!visited[posY][posX] && left != TypeComponent.DESTRUCTIBLE_BLOCK &&
-                    left != TypeComponent.INDESTRUCTIBLE_BLOCK && left != TypeComponent.BOMB &&
-                    left != TypeComponent.FLAME){
-                visited[posY][posX] = true;
-                next = new BombNode(map.get(posY).get(posX), v, true);
-                Q.addLast(next);
-            }
-            //
-            posX = (int)position.x + 1;
-            int right = map.get(posY).get(posX).type;
-            if(!visited[posY][posX] && right != TypeComponent.DESTRUCTIBLE_BLOCK &&
-                    right != TypeComponent.INDESTRUCTIBLE_BLOCK && right != TypeComponent.BOMB &&
-                    right != TypeComponent.FLAME){
-                visited[posY][posX] = true;
-                next = new BombNode(map.get(posY).get(posX), v, true);
-                Q.addLast(next);
-            }
-        }
-
-        possibleDestructibleMoves.sort(comparator);
-        possibleNotDestructibleMoves.sort(comparator);
-        int movesRange = 10;
-        Node p = null;
-        if(!possibleDestructibleMoves.isEmpty()){
-            p = possibleDestructibleMoves.get(Math.min(random.nextInt(possibleDestructibleMoves.size), movesRange));
-        }
-        else if(!possibleNotDestructibleMoves.isEmpty()){
-            p = possibleNotDestructibleMoves.get(Math.min(random.nextInt(possibleNotDestructibleMoves.size), movesRange));
-        }
-        if(p != null){
-            while(p.prev != null){
-                enemy.move.addFirst(p.obj);
-                p = p.prev;
-            }
-            enemy.moving = true;
-            enemy.isProcessingBomb = true;
-            return true;
-        }
-        return false;
     }
 
     private boolean checkRange(float flameTime, int distance, float timePerUnit, float delay){
@@ -445,9 +455,13 @@ private boolean bombPlant(Entity entity, Array<Array<MapSystem.MapObjs>> map){
 
     private DetonationInfo safePlant(Entity entity, int posX, int posY, int range, Array<Array<MapSystem.MapObjs>> mapCopy, float delay){
         DetonationInfo result = putBomb(posX, posY, range, mapCopy, TypeComponent.FLAME, BombComponent.bombTime + delay);
-        if(calculateMove(entity, posX, posY, mapCopy, true, delay))
-            return result;
-        return null;
+        try {
+            if (calculateMove(entity, posX, posY, mapCopy, true, delay))
+                return result;
+            return null;
+        }finally {
+            clearMap(mapCopy, entity);
+        }
     }
 
     private DetonationInfo putBomb(int posX, int posY, int range, Array<Array<MapSystem.MapObjs>> mapCopy, int flameType, float time){

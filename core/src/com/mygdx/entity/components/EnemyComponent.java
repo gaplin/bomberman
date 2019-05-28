@@ -1,9 +1,11 @@
 package com.mygdx.entity.components;
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.Queue;
 import com.mygdx.entity.systems.MapSystem;
+
 
 public class EnemyComponent implements Component, Pool.Poolable {
 
@@ -23,6 +25,8 @@ public class EnemyComponent implements Component, Pool.Poolable {
     public boolean right;
     public boolean processingMove;
     public boolean isProcessingBomb;
+    private int mapCounter;
+    public Queue<Array<Array<MapSystem.MapObjs>>> maps;
 
     public Queue<MapSystem.MapObjs> move;
     public MapSystem.MapObjs lastMove;
@@ -45,6 +49,7 @@ public class EnemyComponent implements Component, Pool.Poolable {
 
     @Override
     public void reset() {
+        mapCounter = 3;
         time = 0.0f;
         resetNewBombTimer();
         resetDamageUpTimer();
@@ -54,5 +59,18 @@ public class EnemyComponent implements Component, Pool.Poolable {
         correctingX = false;
         correctingY = false;
         isProcessingBomb = false;
+        if(maps == null){
+            maps = new Queue<>();
+            for(int i = 0; i < mapCounter; i++){
+                Array<Array<MapSystem.MapObjs>> map = new Array<>();
+                for(int j = 0; j <= MapSystem.height; j++){
+                    map.add(new Array<>());
+                    for(int k = 0; k <= MapSystem.width; k++){
+                        map.get(j).add(new MapSystem.MapObjs());
+                    }
+                }
+                maps.addLast(map);
+            }
+        }
     }
 }

@@ -44,6 +44,7 @@ public class BomberMan extends Game {
 			stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1/30f));
 			stage.draw();
 		}
+		//System.out.println(Gdx.app.getNativeHeap() / (1024 * 1024) + " " + Gdx.app.getJavaHeap() / (1024 * 1024));
 	}
 
 	private PreferencesScreen preferencesScreen;
