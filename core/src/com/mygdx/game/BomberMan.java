@@ -17,6 +17,16 @@ import com.mygdx.views.*;
 
 public class BomberMan extends Game {
 
+	public static FitViewport gameViewPort;
+	public static final int defaultWidth = 1000;
+	public static final int defaultHeight = 640;
+
+	@Override
+	public void resize(int width, int height) {
+		super.resize(width, height);
+		gameViewPort.update(width, height, true);
+	}
+
 	private EndScreen endScreen;
 	public GameScreen gameScreen;
 	private PlayersScreen playersScreen;
@@ -120,24 +130,25 @@ public class BomberMan extends Game {
 			prefs.putFloat("menuVol", 0.0f);
 		prefs.flush();
 
+		gameViewPort = new FitViewport(defaultWidth, defaultHeight);
 		assMan = new CustomAssetManager();
 		loadingScreen = new LoadingScreen(this);
 		setScreen(loadingScreen);
 		soundManager = new SoundManager(this);
 
-		stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+		stage = new Stage(BomberMan.gameViewPort);
 		Gdx.input.setInputProcessor(stage);
 		TextureAtlas atlas = assMan.manager.get("loading/loading.atlas");
 		unMuted = new Image(atlas.findRegion("speaker"));
 		unMuted.setScale(0.4f);
-		unMuted.setPosition(Gdx.graphics.getWidth() - 35.0f, Gdx.graphics.getHeight() - 35.0f);
+		unMuted.setPosition(defaultWidth - 35.0f, defaultHeight - 35.0f);
 		muted = new Image(atlas.findRegion("mute"));
 		muted.setScale(0.4f);
-		muted.setPosition(Gdx.graphics.getWidth() - 35.0f, Gdx.graphics.getHeight() - 35.0f);
+		muted.setPosition(defaultWidth - 35.0f, defaultHeight - 35.0f);
 		muted.setVisible(false);
 		Skin skin = assMan.manager.get("flat/flat-earth-ui.json");
 		fpsCounter = new Label(Integer.toString(Gdx.graphics.getFramesPerSecond()), skin, "title", "white");
-		fpsCounter.setPosition(857.0f, Gdx.graphics.getHeight() - 42.0f);
+		fpsCounter.setPosition(defaultWidth - 143.0f, defaultHeight - 42.0f);
 		stage.addActor(unMuted);
 		stage.addActor(muted);
 		stage.addActor(fpsCounter);

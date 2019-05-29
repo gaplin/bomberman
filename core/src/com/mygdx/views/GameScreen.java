@@ -13,7 +13,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.BodyComponent;
 import com.mygdx.entity.systems.*;
@@ -32,7 +31,6 @@ public class GameScreen implements Screen {
     private static PooledEngine engine;
     BodyFactory bodyFactory;
     TextureAtlas atlas;
-    FitViewport viewport;
     private boolean pause = false;
     RenderingSystem renderingSystem;
 
@@ -47,7 +45,6 @@ public class GameScreen implements Screen {
 
         renderingSystem = new RenderingSystem(sb, parent.assMan.manager.get("map/map.tmx"));
         cam = renderingSystem.getCamera();
-        viewport = renderingSystem.getViewport();
         sb.setProjectionMatrix(cam.combined);
 
         engine = new PooledEngine();
@@ -119,7 +116,6 @@ public class GameScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height);
     }
 
     @Override

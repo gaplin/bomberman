@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.game.BomberMan;
 
 public class LoadingScreen implements Screen {
@@ -27,7 +26,7 @@ public class LoadingScreen implements Screen {
     public LoadingScreen(BomberMan parent){
         super();
         this.parent = parent;
-        stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+        stage = new Stage(BomberMan.gameViewPort);
         loadAssets();
     }
     @Override
@@ -99,7 +98,6 @@ public class LoadingScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        stage.getViewport().update(width, height);
     }
 
     @Override

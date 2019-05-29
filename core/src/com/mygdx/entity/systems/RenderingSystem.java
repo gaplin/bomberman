@@ -22,8 +22,8 @@ import java.util.Comparator;
 public class RenderingSystem extends SortedIteratingSystem {
     public static final  float PPM = 32.0f; // pixels per meter
 
-    static final float FRUSTUM_WIDTH = Gdx.graphics.getWidth() / PPM;
-    static final float FRUSTUM_HEIGHT = Gdx.graphics.getHeight() / PPM;
+    static final float FRUSTUM_WIDTH = BomberMan.defaultWidth / PPM;
+    static final float FRUSTUM_HEIGHT = BomberMan.defaultHeight / PPM;
 
 
     private static Vector2 meterDimensions = new Vector2();

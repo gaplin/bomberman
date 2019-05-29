@@ -13,7 +13,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.game.BomberMan;
 
 
@@ -30,7 +29,7 @@ public class EndScreen extends ButtonsCount implements Screen {
     public EndScreen(BomberMan parent){
         super();
         this.parent = parent;
-        stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+        stage = new Stage(BomberMan.gameViewPort);
         skin = parent.assMan.manager.get("flat/flat-earth-ui.json");
         atlas = parent.assMan.manager.get("loading/loading.atlas");
         background = atlas.findRegion("BackgroundTile");
@@ -100,7 +99,6 @@ public class EndScreen extends ButtonsCount implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        stage.getViewport().update(width, height);
     }
 
     @Override

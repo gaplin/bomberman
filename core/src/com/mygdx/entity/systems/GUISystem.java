@@ -12,16 +12,17 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.PlayerComponent;
 import com.mygdx.entity.components.StatsComponent;
 import com.mygdx.entity.components.TextureComponent;
+import com.mygdx.game.BomberMan;
 
 import java.util.Comparator;
 
 public class GUISystem extends IteratingSystem {
     private Stage stage;
+    private Table table;
     private Array<Entity> array;
     private ImageButton[] buttons = new ImageButton[5];
     private Label[] labels = new Label[5];
@@ -32,14 +33,13 @@ public class GUISystem extends IteratingSystem {
         array = new Array<>();
         playerComparator = new PlayerComparator();
 
-        stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-        Table table = new Table();
+        stage = new Stage(BomberMan.gameViewPort);
+        table = new Table();
         stage.addActor(table);
-        table.setPosition(Gdx.graphics.getWidth() - 100f, Gdx.graphics.getHeight() / 2f);
         table.setBackground(new TiledDrawable(background));
-        table.setWidth(170f);
-        table.setHeight(Gdx.graphics.getHeight());
-        table.setPosition(Gdx.graphics.getWidth() - 170f, 0.0f);
+        table.setWidth(170.0f);
+        table.setHeight(640.0f);
+        table.setPosition(832.0f, 0.0f);
         table.left().top();
         for(int i = 1; i <= 4; i++){
             buttons[i] = new ImageButton(new TiledDrawable(gameAtlas.findRegion("player/Bman_head")));

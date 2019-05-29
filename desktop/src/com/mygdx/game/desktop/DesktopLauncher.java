@@ -9,8 +9,8 @@ public class DesktopLauncher {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 		cfg.title = "BomberMan";
 		cfg.useGL30 = false;
-		cfg.height = 640;
-		cfg.width = 1000;
+		cfg.height = BomberMan.defaultHeight;
+		cfg.width = BomberMan.defaultWidth;
 		new LwjglApplication(new BomberMan(), cfg);
 	}
 }
