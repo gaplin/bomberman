@@ -65,7 +65,7 @@ public class EndScreen extends ButtonsCount implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 parent.soundManager.playSound("bombSound.mp3", "menuVol");
-                parent.changeScreen(BomberMan.GAME);
+                parent.changeScreen(BomberMan.GAMERS);
             }
         });
 
