@@ -1,4 +1,5 @@
 # BOMBERMAN
+To run game java 8 is required.
 ## Menu controls
 * Arrow keys + Enter
 ## Game Controls
