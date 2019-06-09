@@ -237,12 +237,6 @@ public class PlayerSystem extends IteratingSystem {
 
         boolean result = false;
 
-        PhysicsDebugSystem.start4.setZero();
-        PhysicsDebugSystem.end4.setZero();
-        PhysicsDebugSystem.start5.setZero();
-        PhysicsDebugSystem.end5.setZero();
-        PhysicsDebugSystem.start.set(posX, posY);
-        PhysicsDebugSystem.end.set(newPosition);
         if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
             result = true;
 
@@ -253,8 +247,6 @@ public class PlayerSystem extends IteratingSystem {
         posY = goodPosY - BomberMan.PLAYER_RADIUS / 3f * mod;
         newPosition.set(posX, posY + distance + 0.2f * mod);
         newPositionToWall.set(posX, posY + distance + 0.2f * mod);
-        PhysicsDebugSystem.start2.set(posX, posY);
-        PhysicsDebugSystem.end2.set(newPosition);
         if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
             result = true;
 
@@ -265,8 +257,6 @@ public class PlayerSystem extends IteratingSystem {
         posY = goodPosY - BomberMan.PLAYER_RADIUS / 3f * mod;
         newPosition.set(posX, posY + distance + 0.2f * mod);
         newPositionToWall.set(posX, posY + distance + 0.2f * mod);
-        PhysicsDebugSystem.start3.set(posX, posY);
-        PhysicsDebugSystem.end3.set(newPosition);
         if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
             result = true;
 
@@ -291,8 +281,6 @@ public class PlayerSystem extends IteratingSystem {
 
         boolean result = false;
 
-        PhysicsDebugSystem.start.set(posX, posY);
-        PhysicsDebugSystem.end.set(newPosition);
         if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
             result = true;
         if(!canMoveToWall(entity, new Vector2(posX, posY), newPositionToWall))
@@ -301,8 +289,6 @@ public class PlayerSystem extends IteratingSystem {
          posY = transform.position.y + BomberMan.PLAYER_RADIUS;
          posX = transform.position.x + distance - (distance - 0.4f * BomberMan.PLAYER_SCALE * mod);
          newPosition.set(posX + distance, posY);
-         PhysicsDebugSystem.start2.set(posX, posY);
-         PhysicsDebugSystem.end2.set(newPosition);
          if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
              result = true;
 
@@ -310,8 +296,6 @@ public class PlayerSystem extends IteratingSystem {
          posX = transform.position.x + 0.9f * BomberMan.PLAYER_SCALE * mod;
          newPosition.set(posX + distance, posY);
          newPositionToWall.set(posX + distance * 2.4f, posY);
-         PhysicsDebugSystem.start5.set(posX, posY);
-         PhysicsDebugSystem.end5.set(newPosition);
          if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
              result = true;
          if(!canMoveToWall(entity, new Vector2(posX, posY), newPositionToWall))
@@ -321,8 +305,6 @@ public class PlayerSystem extends IteratingSystem {
          posX = transform.position.x + distance - (distance - 0.4f * BomberMan.PLAYER_SCALE * mod);
          newPosition.set(posX + distance, posY);
          newPositionToWall.set(posX + distance * 2.4f, posY);
-         PhysicsDebugSystem.start3.set(posX, posY);
-         PhysicsDebugSystem.end3.set(newPosition);
          if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
              result = true;
          if(!canMoveToWall(entity, new Vector2(posX, posY), newPositionToWall))
@@ -331,8 +313,6 @@ public class PlayerSystem extends IteratingSystem {
          posY = transform.position.y - BomberMan.PLAYER_RADIUS + 0.2f * BomberMan.PLAYER_SCALE;
          posX = transform.position.x + distance - (distance - 0.4f * BomberMan.PLAYER_SCALE * mod);
          newPosition.set(posX + distance, posY);
-         PhysicsDebugSystem.start4.set(posX, posY);
-         PhysicsDebugSystem.end4.set(newPosition);
          if(!canMove(entity, new Vector2(posX, posY), newPosition, bombSpeed))
              result = true;
 
