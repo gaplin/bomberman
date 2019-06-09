@@ -40,14 +40,8 @@ public class BomberMan extends Game {
 		super.render();
 		if(Gdx.input.isKeyJustPressed(Input.Keys.M)){
 			soundManager.setMuted(!soundManager.isMuted());
-			if(soundManager.isMuted()){
-				unMuted.setVisible(false);
-				muted.setVisible(true);
-			}
-			else{
-				muted.setVisible(false);
-				unMuted.setVisible(true);
-			}
+			unMuted.setVisible(!soundManager.isMuted());
+			muted.setVisible(soundManager.isMuted());
 		}
 		if(Gdx.input.isKeyJustPressed(Input.Keys.F)){
 			fpsCounter.setVisible(!fpsCounter.isVisible());
@@ -149,6 +143,7 @@ public class BomberMan extends Game {
 		Skin skin = assMan.manager.get("flat/flat-earth-ui.json");
 		fpsCounter = new Label(Integer.toString(Gdx.graphics.getFramesPerSecond()), skin, "title", "white");
 		fpsCounter.setPosition(defaultWidth - 143.0f, defaultHeight - 42.0f);
+		fpsCounter.setVisible(false);
 		stage.addActor(unMuted);
 		stage.addActor(muted);
 		stage.addActor(fpsCounter);

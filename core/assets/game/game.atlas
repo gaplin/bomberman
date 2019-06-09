@@ -278,9 +278,16 @@ powerups/FlamePowerup
   orig: 32, 32
   offset: 0, 0
   index: -1
-powerups/SpeedPowerup
+powerups/godModePowerup
   rotate: false
   xy: 69, 19
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+powerups/SpeedPowerup
+  rotate: false
+  xy: 103, 19
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -294,7 +301,7 @@ powerups/HPPowerup
   index: -1
 powerups/KickPowerup
   rotate: false
-  xy: 103, 35
+  xy: 137, 35
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

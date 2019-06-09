@@ -66,8 +66,9 @@ public class PlayerSystem extends IteratingSystem {
 
         if(playerStats.gotHit){
             playerStats.gotHit = false;
+            if(!playerStats.afterHit)
+                playerStats.HP--;
             playerStats.afterHit = true;
-            playerStats.HP--;
             if(playerStats.HP == 0){
                 playerStats.markedToDeath = true;
                 return;

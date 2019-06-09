@@ -6,7 +6,6 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.mygdx.entity.Mappers;
 import com.mygdx.entity.components.*;
 import com.mygdx.factory.BodyFactory;
@@ -28,10 +27,6 @@ public class PowerUpSystem extends IteratingSystem {
         PowerUpComponent powerUp = Mappers.powerUpMapper.get(entity);
         powerUp.time -= deltaTime;
         if(powerUp.time <= 0) {
-            TransformComponent transform = Mappers.transformMapper.get(entity);
-            Vector2 gridPosition = MapSystem.toGridPosition(transform.position);
-            MapSystem mapSystem = getEngine().getSystem(MapSystem.class);
-
             getEngine().removeEntity(entity);
             return;
         }
@@ -78,6 +73,9 @@ public class PowerUpSystem extends IteratingSystem {
             case PowerUpComponent.hpPowerUp:
                 texture.region = atlas.findRegion("powerups/HPPowerup");
                 transform.scale.set(2.0f, 2.0f);
+                break;
+            case PowerUpComponent.godModePowerUp:
+                texture.region = atlas.findRegion("powerups/godModePowerup");
                 break;
         }
 

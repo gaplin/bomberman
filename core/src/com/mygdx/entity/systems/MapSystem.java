@@ -64,16 +64,18 @@ public class MapSystem extends IteratingSystem {
 
 
             float drop = generator.nextFloat();
-            if(drop <= 0.6f) {
+            if(drop <= 0.65f) {
                 float type = generator.nextFloat();
                 int powerUpType;
-                if(type <= 0.1f)
+                if(type <= 0.05f)
                     powerUpType = PowerUpComponent.speedPowerUp;
+                else if(type <= 0.1f)
+                    powerUpType = PowerUpComponent.godModePowerUp;
                 else if(type <= 0.3f)
                     powerUpType = PowerUpComponent.kickPowerUp;
-                else if(type <= 0.4f)
+                else if(type <= 0.35f)
                     powerUpType = PowerUpComponent.hpPowerUp;
-                else if(type <= 0.7f)
+                else if(type <= 0.65f)
                     powerUpType = PowerUpComponent.bombPowerUp;
                 else
                     powerUpType = PowerUpComponent.damagePowerUp;
