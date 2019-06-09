@@ -128,21 +128,6 @@ public class EnemySystem extends IteratingSystem {
         }
     }
 
-    private void printMap(Array<Array<MapSystem.MapObjs>> map, char symbol){
-        for(int i = 0; i < 15; i++)
-            System.out.print(symbol);
-        System.out.println();
-        for(int i = MapSystem.height - 1; i > 0; i--){
-            for(int j = 1; j < MapSystem.width; j++){
-                System.out.printf("(%d,%.2f) ", map.get(i).get(j).type, map.get(i).get(j).time);
-            }
-            System.out.println();
-        }
-        for(int i = 0; i < 15; i++)
-            System.out.print(symbol);
-        System.out.println();
-    }
-
     private static class Node implements Comparable<Node>{
         MapSystem.MapObjs obj;
         Node prev;
@@ -264,7 +249,7 @@ public class EnemySystem extends IteratingSystem {
         }
 
 
-        while(!(Q.size() == 0)){
+        while(Q.size() > 0){
             v = Q.poll();
             Vector2 position = v.obj.position;
             //
@@ -286,7 +271,7 @@ public class EnemySystem extends IteratingSystem {
                 visited[posY][posX] = true;
                 if(up != TypeComponent.FLAME)
                     Q.add(new Node(new MapSystem.MapObjs(map.get(posY).get(posX)), v));
-                else if(checkRange(map.get(posY).get(posX).time, v.distance, timePerUnit, delay)){
+                else if(checkRange(entity, map.get(posY).get(posX).time, v.distance, timePerUnit, delay)){
                         Q.add(new Node(new MapSystem.MapObjs(map.get(posY).get(posX)), v));
                     }
             }
@@ -298,7 +283,7 @@ public class EnemySystem extends IteratingSystem {
                 visited[posY][posX] = true;
                 if(down != TypeComponent.FLAME)
                     Q.add(new Node(new MapSystem.MapObjs(map.get(posY).get(posX)), v));
-                else if(checkRange(map.get(posY).get(posX).time, v.distance, timePerUnit, delay)){
+                else if(checkRange(entity, map.get(posY).get(posX).time, v.distance, timePerUnit, delay)){
                     Q.add(new Node(new MapSystem.MapObjs(map.get(posY).get(posX)), v));
                 }
             }
@@ -311,7 +296,7 @@ public class EnemySystem extends IteratingSystem {
                 visited[posY][posX] = true;
                 if(left != TypeComponent.FLAME)
                     Q.add(new Node(new MapSystem.MapObjs(map.get(posY).get(posX)), v));
-                else if(checkRange(map.get(posY).get(posX).time, v.distance, timePerUnit, delay)){
+                else if(checkRange(entity, map.get(posY).get(posX).time, v.distance, timePerUnit, delay)){
                     Q.add(new Node(new MapSystem.MapObjs(map.get(posY).get(posX)), v));
                 }
             }
@@ -323,7 +308,7 @@ public class EnemySystem extends IteratingSystem {
                 visited[posY][posX] = true;
                 if(right != TypeComponent.FLAME)
                     Q.add(new Node(new MapSystem.MapObjs(map.get(posY).get(posX)), v));
-                else if(checkRange(map.get(posY).get(posX).time, v.distance, timePerUnit, delay)){
+                else if(checkRange(entity, map.get(posY).get(posX).time, v.distance, timePerUnit, delay)){
                     Q.add(new Node(new MapSystem.MapObjs(map.get(posY).get(posX)), v));
                 }
             }
@@ -450,13 +435,14 @@ private boolean bombPlant(Entity entity, Array<Array<MapSystem.MapObjs>> map){
         }
     }
 
-    private boolean checkRange(float flameTime, int distance, float timePerUnit, float delay){
+    private boolean checkRange(Entity entity, float flameTime, int distance, float timePerUnit, float delay){
+        StatsComponent stats = Mappers.statsMapper.get(entity);
         float time = flameTime - distance * timePerUnit - delay;
-        float lim = 0.6f;
-        if(time >= -lim && time <= FlameComponent.flameTime + lim)
+        float lim = 0.7f;
+        if((time >= -lim && time <= FlameComponent.flameTime + lim) && (stats.hitCountDown - time <= lim))
             return false;
         time = flameTime - (distance + 1) * timePerUnit - delay;
-        return !(time >= -lim) || !(time <= FlameComponent.flameTime + lim);
+        return (!(time >= -lim) || !(time <= FlameComponent.flameTime + lim)) || (!(stats.hitCountDown - time <= lim));
     }
 
     private DetonationInfo safePlant(Entity entity, int posX, int posY, int range, Array<Array<MapSystem.MapObjs>> mapCopy, float delay){
