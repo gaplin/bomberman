@@ -438,7 +438,7 @@ private boolean bombPlant(Entity entity, Array<Array<MapSystem.MapObjs>> map){
     private boolean checkRange(Entity entity, float flameTime, int distance, float timePerUnit, float delay){
         StatsComponent stats = Mappers.statsMapper.get(entity);
         float time = flameTime - distance * timePerUnit - delay;
-        float lim = 0.7f;
+        float lim = 0.6f;
         if((time >= -lim && time <= FlameComponent.flameTime + lim) && (stats.hitCountDown - time <= lim))
             return false;
         time = flameTime - (distance + 1) * timePerUnit - delay;
