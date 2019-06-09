@@ -89,6 +89,11 @@ public class GameContactListener implements ContactListener {
             case PowerUpComponent.hpPowerUp:
                 stats.HP++;
                 break;
+            case PowerUpComponent.godModePowerUp:
+                stats.resetGodModeCountDown();
+                stats.afterHit = true;
+                stats.gotHit = true;
+                break;
         }
 
         upgrade.time = 0.0f;

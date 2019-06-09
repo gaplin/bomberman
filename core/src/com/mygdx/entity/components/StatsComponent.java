@@ -25,6 +25,9 @@ public class StatsComponent implements Component, Pool.Poolable {
     public void resetCountDown(){
         hitCountDown = 3.0f;
     }
+    public void resetGodModeCountDown(){
+        hitCountDown = 5.0f;
+    }
 
     @Override
     public void reset() {
