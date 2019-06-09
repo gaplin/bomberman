@@ -30,6 +30,6 @@ public class ControlsComponent implements Component, Pool.Poolable {
         DOWN = Input.Keys.DOWN;
         LEFT = Input.Keys.LEFT;
         RIGHT = Input.Keys.RIGHT;
-        PLACE_BOMB = Input.Keys.SPACE;
+        PLACE_BOMB = Input.Keys.ALT_RIGHT;
     }
 }

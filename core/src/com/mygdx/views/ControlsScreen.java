@@ -54,7 +54,7 @@ public class ControlsScreen extends ButtonsCount implements Screen {
         controls[2] = new Label(Input.Keys.toString(Input.Keys.DOWN), skin, "title", "white");
         controls[3] = new Label(Input.Keys.toString(Input.Keys.LEFT), skin, "title", "white");
         controls[4] = new Label(Input.Keys.toString(Input.Keys.RIGHT), skin, "title", "white");
-        controls[5] = new Label(Input.Keys.toString(Input.Keys.SPACE), skin, "title", "white");
+        controls[5] = new Label(Input.Keys.toString(Input.Keys.ALT_RIGHT), skin, "title", "white");
         controls[6] = new Label(Input.Keys.toString(Input.Keys.W), skin, "title", "white");
         controls[7] = new Label(Input.Keys.toString(Input.Keys.S), skin, "title", "white");
         controls[8] = new Label(Input.Keys.toString(Input.Keys.A), skin, "title", "white");
