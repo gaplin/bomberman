@@ -6,10 +6,10 @@ To run game java 8 is required.
 * P to pause/unpause
 * Player 1
     * Arrow keys to move
-    * R-Alt to place bomb
+    * K to place bomb
 * Player 2
     * W/S/A/D to move
-    * L-Ctrl to place Bomb
+    * T to place Bomb
 ## Other Controls
 * M to mute/unmute
 * F to show/hide FPS counter
