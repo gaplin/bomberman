@@ -1,13 +1,11 @@
 package com.mygdx.entity.components;
 
 import com.badlogic.ashley.core.Component;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.Pool;
 
 public class ControlsComponent implements Component, Pool.Poolable {
 
     public ControlsComponent(){
-        reset();
     }
 
     public int UP;
@@ -26,10 +24,5 @@ public class ControlsComponent implements Component, Pool.Poolable {
 
     @Override
     public void reset() {
-        UP = Input.Keys.UP;
-        DOWN = Input.Keys.DOWN;
-        LEFT = Input.Keys.LEFT;
-        RIGHT = Input.Keys.RIGHT;
-        PLACE_BOMB = Input.Keys.ALT_RIGHT;
     }
 }

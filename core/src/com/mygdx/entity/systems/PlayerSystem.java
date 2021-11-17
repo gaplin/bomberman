@@ -33,11 +33,12 @@ public class PlayerSystem extends IteratingSystem {
         BomberMan.PLAYER_COUNT = 0;
 
         if(BomberMan.PLAYERS > 0)
-            createPlayer(2.0f, 16.2f);
+            createPlayer(2.0f, 16.2f,
+                    Input.Keys.UP, Input.Keys.DOWN, Input.Keys.LEFT, Input.Keys.RIGHT, Input.Keys.K, Color.WHITE);
 
         if(BomberMan.PLAYERS > 1)
             createPlayer(23.0f, 2.0f,
-                    Input.Keys.W, Input.Keys.S, Input.Keys.A, Input.Keys.D, Input.Keys.CONTROL_LEFT, Color.RED);
+                    Input.Keys.W, Input.Keys.S, Input.Keys.A, Input.Keys.D, Input.Keys.T, Color.RED);
 
     }
 
@@ -50,7 +51,6 @@ public class PlayerSystem extends IteratingSystem {
         PlayerComponent player = Mappers.playerMapper.get(entity);
         TransformComponent transform = Mappers.transformMapper.get(entity);
         StatsComponent playerStats = Mappers.statsMapper.get(entity);
-        TypeComponent typeComp = Mappers.typeMapper.get(entity);
 
         float posX = MathUtils.floor(transform.position.x);
         float posY = MathUtils.floor(transform.position.y);
@@ -154,7 +154,6 @@ public class PlayerSystem extends IteratingSystem {
     private boolean canMove(Entity player, Vector2 from, Vector2 to, Vector2 bombSpeed){
         StatsComponent playerStats = Mappers.statsMapper.get(player);
         BodyComponent bd = Mappers.bodyMapper.get(player);
-        int type = Mappers.typeMapper.get(player).type;
         Body body = bd.body;
         World world = body.getWorld();
         move = true;
