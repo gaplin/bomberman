@@ -1,5 +1,8 @@
 # BOMBERMAN
-To run game java 8 is required.
+![bombermanGif](https://user-images.githubusercontent.com/50521366/218258786-b8fec21e-0369-4730-89dc-839ab546279b.gif)
+
+## Requirements 
+* java 8 or higher
 ## Menu controls
 * Arrow keys + Enter
 ## Game Controls
